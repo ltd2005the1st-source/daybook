@@ -73,8 +73,8 @@ export default function TeachingPage() {
         .
       </p>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div>
+      <div className="grid gap-8 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0">
           <Register month={month} students={students} onPickStudent={(s) => setPicked(s.id)} />
           <div className="mt-3">
             <Legend />

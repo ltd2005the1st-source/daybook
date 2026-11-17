@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Moon,
@@ -40,6 +40,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { theme, toggle } = useTheme();
   const [chatOpen, setChatOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  // Publish the mobile top bar's height so sticky headers inside pages can sit just below it.
+  const topbarObserver = useRef<ResizeObserver | null>(null);
+  const topbarRef = (el: HTMLElement | null) => {
+    topbarObserver.current?.disconnect();
+    if (!el) return;
+    const set = () => document.documentElement.style.setProperty("--topbar", `${el.offsetHeight}px`);
+    set();
+    topbarObserver.current = new ResizeObserver(set);
+    topbarObserver.current.observe(el);
+  };
   const [chatSeed, setChatSeed] = useState<string | null>(null);
 
   useEffect(() => {
@@ -134,7 +144,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Mobile top bar */}
-      <header className="no-print md:hidden sticky top-0 z-30 flex items-center justify-between border-b border-line bg-bg/85 backdrop-blur px-4 pt-[max(env(safe-area-inset-top),10px)] pb-2.5">
+      <header ref={topbarRef} className="no-print md:hidden sticky top-0 z-30 flex items-center justify-between border-b border-line bg-bg/85 backdrop-blur px-4 pt-[max(env(safe-area-inset-top),10px)] pb-2.5">
         <Link href="/" className="flex items-center gap-2">
           <img src="/icon.svg" alt="" className="h-6 w-6 rounded-[6px]" />
           <span className="display text-[17px] font-semibold">Daybook</span>

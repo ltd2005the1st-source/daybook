@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 import { cx } from "@/lib/format";
@@ -144,10 +144,18 @@ export function Tick({
   label?: string;
   round?: boolean;
 }) {
+  // Only bounce when it changes to checked, not when a checked box first appears.
+  const was = useRef(checked);
+  const [pop, setPop] = useState(false);
+  useEffect(() => {
+    if (checked && !was.current) setPop(true);
+    was.current = checked;
+  }, [checked]);
   return (
     <button
       type="button"
       role="checkbox"
+      onAnimationEnd={() => setPop(false)}
       aria-checked={checked}
       aria-label={label}
       onClick={(e) => {
@@ -155,8 +163,9 @@ export function Tick({
         onChange();
       }}
       className={cx(
-        "relative shrink-0 inline-flex items-center justify-center border-[1.5px] transition-colors",
+        "relative shrink-0 inline-flex items-center justify-center border-[1.5px] transition-colors duration-200",
         round ? "rounded-full" : "rounded-[5px]",
+        pop && "tick-pop",
       )}
       style={{
         width: size,

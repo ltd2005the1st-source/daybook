@@ -1,4 +1,5 @@
 "use client";
+import { useRef } from "react";
 import { motion } from "motion/react";
 import { useData } from "./data";
 import { daysInMonth, parseDate, today, WD_SHORT } from "@/lib/dates";
@@ -78,15 +79,21 @@ export function Register({ month, students, onPickStudent }: { month: string; st
   const mark = useMarkLesson();
   const days = daysInMonth(month);
   const t = today();
-  const cols = `minmax(64px,88px) repeat(${students.length}, minmax(46px, 1fr))`;
+  const cols = `minmax(72px,88px) repeat(${students.length}, minmax(80px, 1fr))`;
+  const minWidth = 72 + students.length * 80;
+  const head = useRef<HTMLDivElement>(null);
 
+  // The names stay pinned to the top of the screen while you scroll down the month.
+  // The header lives outside the sideways-scrolling body, so it follows that scroll by hand.
   return (
-    <div className="card overflow-hidden">
-      <div className="overflow-x-auto">
-        <div className="min-w-fit">
-          {/* Header */}
-          <div className="grid sticky top-0 z-10 bg-surface border-b border-line-strong" style={{ gridTemplateColumns: cols }}>
-            <div className="px-3 py-2.5 label self-end">Date</div>
+    <div className="card min-w-0 max-w-full" style={{ overflow: "clip" }}>
+      <div
+        ref={head}
+        className="sticky z-20 overflow-hidden rounded-t-[10px] bg-surface border-b border-line-strong shadow-[0_6px_12px_-10px_rgb(0_0_0/0.25)]"
+        style={{ top: "var(--topbar, 0px)" }}
+      >
+          <div className="grid" style={{ gridTemplateColumns: cols, minWidth }}>
+            <div className="sticky left-0 z-[1] self-stretch flex items-end bg-surface px-3 py-2.5 label">Date</div>
             {students.map((s) => (
               <button
                 key={s.id}
@@ -94,7 +101,7 @@ export function Register({ month, students, onPickStudent }: { month: string; st
                 className="group flex flex-col items-center justify-end gap-1 px-1 py-2.5 text-center hover:bg-hover"
               >
                 <span className="h-[3px] w-6 rounded-full" style={{ background: s.color }} />
-                <span className="text-[12.5px] font-semibold leading-tight group-hover:underline underline-offset-2">{s.name}</span>
+                <span className="max-w-full truncate text-[12.5px] font-semibold leading-tight group-hover:underline underline-offset-2">{s.name}</span>
                 {makeupsOwed(store, s) > 0 ? (
                   <span className="num text-[10.5px] text-pen leading-none">{makeupsOwed(store, s)} makeup{makeupsOwed(store, s) === 1 ? "" : "s"}</span>
                 ) : (
@@ -103,6 +110,14 @@ export function Register({ month, students, onPickStudent }: { month: string; st
               </button>
             ))}
           </div>
+      </div>
+      <div
+        className="overflow-x-auto"
+        onScroll={(e) => {
+          if (head.current) head.current.scrollLeft = e.currentTarget.scrollLeft;
+        }}
+      >
+        <div style={{ minWidth }}>
           {/* Rows */}
           {days.map((d) => {
             const wd = parseDate(d).getDay();
@@ -119,9 +134,12 @@ export function Register({ month, students, onPickStudent }: { month: string; st
                 )}
                 style={{ gridTemplateColumns: cols }}
               >
-                <div className="flex items-baseline gap-1.5 px-3 py-[5px]">
+                {/* The date column stays put when you swipe sideways on a phone. */}
+                <div className="sticky left-0 z-[1] bg-surface">
+                  <div className={cx("flex h-full items-baseline gap-1.5 px-3 py-[5px]", weekend && "bg-sunken/60", isToday && "!bg-accent-soft")}>
                   <span className={cx("num text-[13px]", isToday ? "font-semibold text-accent" : "text-ink")}>{parseDate(d).getDate()}</span>
                   <span className={cx("text-[11.5px]", weekend ? "text-ink-2" : "text-muted")}>{WD_SHORT[wd]}</span>
+                  </div>
                 </div>
                 {students.map((s) => {
                   const m = markFor(store, s.id, d);
@@ -142,7 +160,7 @@ export function Register({ month, students, onPickStudent }: { month: string; st
           })}
           {/* Footer totals, like the bottom of your sheet */}
           <div className="grid border-t border-line-strong bg-sunken" style={{ gridTemplateColumns: cols }}>
-            <div className="px-3 py-2 label self-center">Earned</div>
+            <div className="sticky left-0 z-[1] flex items-center bg-sunken px-3 py-2 label">Earned</div>
             {students.map((s) => {
               const n = taughtIn(store, s.id, month).length;
               return (

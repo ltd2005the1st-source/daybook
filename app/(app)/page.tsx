@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
+import { Strike, useCompleteTask } from "@/components/complete";
 import { useData } from "@/components/data";
 import { MilestoneBar } from "@/components/milestone-bar";
 import { QuickAdd } from "@/components/money";
@@ -11,6 +12,35 @@ import { Dot, Page, Section, Tick } from "@/components/ui";
 import { addDays, fmtDay, minutes, MONTHS, monthOf, parseDate, startOfWeek, today, WD_LONG } from "@/lib/dates";
 import { cx, vnd } from "@/lib/format";
 import { agendaOn, makeupsOwed, taughtIn, type Occurrence } from "@/lib/teaching";
+import type { Task } from "@/lib/types";
+
+function DueTask({ task, today: t }: { task: Task; today: string }) {
+  const { store } = useData();
+  const c = useCompleteTask(task);
+  const ms = store.milestones.filter((m) => m.task_id === task.id).sort((a, b) => a.sort - b.sort);
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0, x: 12, transition: { duration: 0.28, ease: [0.4, 0, 0.2, 1] } }}
+      className="flex items-start gap-2.5 py-1.5"
+    >
+      <Tick round checked={c.checked} color="var(--accent)" label="Complete" onChange={c.toggle} />
+      <div className="min-w-0 flex-1">
+        <div className="text-[14px] leading-snug">
+          <Strike on={c.checked} animate={c.completing}>{task.title}</Strike>
+          {task.due_on && task.due_on < t && <span className="ml-2 text-[12px] text-pen">since {fmtDay(task.due_on)}</span>}
+        </div>
+        {ms.length > 0 && (
+          <div className="mt-1 max-w-[260px]">
+            <MilestoneBar items={ms} color="var(--accent)" />
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
 
 function greeting(h: number) {
   if (h < 5) return "Still up";
@@ -143,25 +173,11 @@ export default function TodayPage() {
           <Section title="Due today" action={<Link href="/tasks" className="text-[12.5px] text-muted hover:text-ink">All tasks →</Link>}>
             {tasks.length === 0 && <p className="text-[13.5px] text-muted">Nothing due. Nice.</p>}
             <div className="flex flex-col">
-              {tasks.slice(0, 8).map((x) => {
-                const ms = store.milestones.filter((m) => m.task_id === x.id).sort((a, b) => a.sort - b.sort);
-                return (
-                  <div key={x.id} className="flex items-start gap-2.5 py-1.5">
-                    <Tick round checked={false} label="Complete" onChange={() => update("tasks", x.id, { done: true, done_at: new Date().toISOString() })} />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[14px] leading-snug">
-                        {x.title}
-                        {x.due_on && x.due_on < t && <span className="ml-2 text-[12px] text-pen">since {fmtDay(x.due_on)}</span>}
-                      </div>
-                      {ms.length > 0 && (
-                        <div className="mt-1 max-w-[260px]">
-                          <MilestoneBar items={ms} color="var(--accent)" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              <AnimatePresence initial={false}>
+                {tasks.slice(0, 8).map((x) => (
+                  <DueTask key={x.id} task={x} today={t} />
+                ))}
+              </AnimatePresence>
               {tasks.length > 8 && <Link href="/tasks" className="text-[12.5px] text-muted">+{tasks.length - 8} more</Link>}
             </div>
           </Section>

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Flag, Plus, Trash2 } from "lucide-react";
 import { useData } from "@/components/data";
 import { MilestoneBar } from "@/components/milestone-bar";
+import { Strike, useCompleteTask } from "@/components/complete";
 import { Field, Page, PageHeader, Section, Segmented, Sheet, Tick } from "@/components/ui";
 import { addDays, relDay, today, weekday } from "@/lib/dates";
 import { cx } from "@/lib/format";
@@ -130,7 +131,13 @@ export default function TasksPage() {
           <button onClick={() => setShowDone(!showDone)} className="mb-2 flex items-center gap-1 text-[13px] font-semibold text-muted hover:text-ink">
             <ChevronDown size={15} className={cx("transition-transform", !showDone && "-rotate-90")} /> Done · {done.length}
           </button>
-          {showDone && done.slice(0, 50).map((task) => <TaskRow key={task.id} task={task} onOpen={() => setOpenId(task.id)} />)}
+          {showDone && (
+            <AnimatePresence initial={false}>
+              {done.slice(0, 50).map((task) => (
+                <TaskRow key={task.id} task={task} onOpen={() => setOpenId(task.id)} />
+              ))}
+            </AnimatePresence>
+          )}
         </div>
       )}
 
@@ -140,36 +147,28 @@ export default function TasksPage() {
 }
 
 function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
-  const { store, update, toast } = useData();
+  const { store } = useData();
   const ms = store.milestones.filter((m) => m.task_id === task.id).sort((a, b) => a.sort - b.sort);
   const done = ms.filter((m) => m.done).length;
   const t = today();
+  const c = useCompleteTask(task);
   return (
     <motion.div
       layout
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: "auto" }}
-      exit={{ opacity: 0, height: 0, transition: { duration: 0.2 } }}
+      exit={{ opacity: 0, height: 0, x: 12, transition: { duration: 0.28, ease: [0.4, 0, 0.2, 1] } }}
       className="group -mx-2 cursor-pointer rounded-md px-2 hover:bg-hover"
       onClick={onOpen}
     >
       <div className="flex items-start gap-3 py-2.5">
         <div className="pt-[1px]">
-          <Tick
-            checked={task.done}
-            round
-            label="Complete"
-            onChange={() => {
-              const now = !task.done;
-              update("tasks", task.id, { done: now, done_at: now ? new Date().toISOString() : null });
-              if (now) toast(`Done: ${task.title}`, () => update("tasks", task.id, { done: false, done_at: null }));
-            }}
-          />
+          <Tick checked={c.checked} round label="Complete" color="var(--accent)" onChange={c.toggle} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className={cx("text-[14.5px] leading-snug", task.done && "text-muted line-through")}>
+          <div className="text-[14.5px] leading-snug">
             {task.priority && <Flag size={13} className="mr-1.5 inline -mt-0.5 text-pen" fill="currentColor" />}
-            {task.title}
+            <Strike on={c.checked} animate={c.completing}>{task.title}</Strike>
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-muted">
             {task.due_on && <span className={cx(task.due_on < t && !task.done && "text-pen")}>{relDay(task.due_on)}</span>}

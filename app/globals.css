@@ -253,3 +253,49 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: white;
   }
 }
+
+/* Crossing out a finished task: the line is drawn left to right, then the text fades. */
+.strike {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 55%;
+  background-size: 0% 1.5px;
+  transition:
+    background-size 0.32s cubic-bezier(0.6, 0, 0.2, 1),
+    color 0.25s ease 0.2s;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.strike-on {
+  background-size: 100% 1.5px;
+  color: var(--muted);
+}
+.strike-static {
+  transition: none;
+}
+
+/* The tick gives a small press-and-bounce when it is checked. */
+.tick-pop {
+  animation: tick-pop 0.38s cubic-bezier(0.3, 0, 0.2, 1.4);
+}
+@keyframes tick-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(0.82);
+  }
+  70% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .strike,
+  .tick-pop {
+    transition: none;
+    animation: none;
+  }
+}
