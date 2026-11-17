@@ -7,7 +7,7 @@ select cron.schedule(
   '*/5 * * * *',
   $$
   select net.http_get(
-    url := 'https://YOUR-APP.vercel.app/api/cron/reminders',
+    url := 'https://YOUR-SITE.netlify.app/api/cron/reminders',
     headers := jsonb_build_object('Authorization', 'Bearer YOUR-CRON-SECRET')
   );
   $$

@@ -4,7 +4,8 @@ import { NextResponse } from "next/server";
 import { nowLine, SYSTEM, TOOLS } from "@/lib/tools-def";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+// Netlify stops a function after 10 seconds, so keep each Claude turn short.
+export const maxDuration = 10;
 
 const MODEL = "claude-haiku-5-5";
 
@@ -34,11 +35,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bad conversation." }, { status: 400 });
   }
 
-  const client = new Anthropic();
+  const client = new Anthropic({ timeout: 9_000, maxRetries: 0 });
   try {
     const res = await client.messages.create({
       model: MODEL,
-      max_tokens: 4096,
+      max_tokens: 1200,
       system: [
         { type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } },
         { type: "text", text: nowLine(body.now) },
@@ -49,6 +50,9 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ content: res.content, stop_reason: res.stop_reason });
   } catch (err) {
+    if (err instanceof Anthropic.APIConnectionTimeoutError) {
+      return NextResponse.json({ error: "Claude took too long to answer. Try a shorter question." }, { status: 504 });
+    }
     if (err instanceof Anthropic.RateLimitError) {
       return NextResponse.json({ error: "Claude is busy right now. Try again in a moment." }, { status: 429 });
     }
