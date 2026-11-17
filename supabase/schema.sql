@@ -51,7 +51,7 @@ create table if not exists public.students (
   check_time text not null default '22:30',
   check_days int[] not null default '{}',
   check_minutes int not null default 60,
-  remind_before int not null default 30,
+  remind_before int[] not null default '{40,20}',
   availability jsonb,
   note text,
   sort int not null default 0
@@ -74,7 +74,7 @@ create table if not exists public.lessons (
   created_at timestamptz not null default now(),
   student_id uuid not null references public.students on delete cascade,
   date date not null,
-  status text not null check (status in ('taught','missed_owe','cancelled')),
+  status text not null check (status in ('taught','missed_owe','cancelled','planned')),
   start_time text,
   end_time text,
   note text,
@@ -121,7 +121,7 @@ create table if not exists public.events (
   until date,
   color text not null default '#4A51AC',
   kind text not null default 'personal',
-  remind_before int[] not null default '{}',
+  remind_before int[] not null default '{40,20}',
   notes text,
   skip_dates text[] not null default '{}'
 );
@@ -134,6 +134,7 @@ create table if not exists public.tasks (
   notes text,
   list text not null default 'Personal',
   due_on date,
+  due_time text,
   priority boolean not null default false,
   horizon text not null default 'now' check (horizon in ('now','soon','long')),
   done boolean not null default false,
@@ -177,15 +178,6 @@ create table if not exists public.habit_logs (
   note text
 );
 
-create table if not exists public.chat_messages (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null default auth.uid() references auth.users on delete cascade,
-  created_at timestamptz not null default now(),
-  role text not null check (role in ('user','assistant')),
-  text text not null,
-  actions text[] not null default '{}'
-);
-
 create table if not exists public.push_subscriptions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null default auth.uid() references auth.users on delete cascade,
@@ -205,7 +197,7 @@ do $$
 declare t text;
 begin
   foreach t in array array['transactions','debts','students','slots','lessons','homework','receipts',
-    'events','tasks','milestones','habits','habit_logs','chat_messages','push_subscriptions']
+    'events','tasks','milestones','habits','habit_logs','push_subscriptions']
   loop
     execute format('alter table public.%I enable row level security', t);
     execute format('drop policy if exists own_rows on public.%I', t);
@@ -221,7 +213,7 @@ do $$
 declare t text;
 begin
   foreach t in array array['transactions','debts','students','slots','lessons','homework','receipts',
-    'events','tasks','milestones','habits','habit_logs','chat_messages']
+    'events','tasks','milestones','habits','habit_logs']
   loop
     begin
       execute format('alter publication supabase_realtime add table public.%I', t);

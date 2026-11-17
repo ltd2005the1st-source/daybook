@@ -1,9 +1,13 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { needsScope, useCalendarEdits, type Scope, type Target } from "@/components/calendar-edit";
+import { ColorPicker } from "@/components/color-picker";
 import { useData } from "@/components/data";
 import { EventSheet, LessonSheet } from "@/components/event-sheet";
 import { Page } from "@/components/ui";
+import { textOn } from "@/lib/colors";
 import { addDays, fmtDay, fromMinutes, minutes, MONTHS, parseDate, startOfWeek, today, WD_SHORT } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import { agendaOn, type Occurrence } from "@/lib/teaching";
@@ -11,6 +15,9 @@ import { agendaOn, type Occurrence } from "@/lib/teaching";
 const START_H = 6;
 const END_H = 24;
 const HOUR = 52;
+const SNAP = 15; // minutes
+const snap = (m: number) => Math.round(m / SNAP) * SNAP;
+const endLabel = (t: string | null) => (t === "00:00" ? "24:00" : t);
 
 function useIsMobile() {
   const [m, setM] = useState(false);
@@ -53,14 +60,39 @@ function layout(items: Occurrence[]): Placed[] {
   return placed;
 }
 
+type Drag = {
+  mode: "move" | "resize" | "create";
+  o: Occurrence | null; // null while creating
+  pointer: string; // "mouse" | "touch" | "pen"
+  x0: number;
+  y0: number;
+  origin: number; // minute where the pointer went down
+  grab: number; // minutes between the pointer and the block's start
+  origDate: string;
+  date: string;
+  start: number;
+  end: number;
+  active: boolean;
+};
+
+type Pending = { o: Occurrence; to: Target };
+
 export default function CalendarPage() {
-  const { store } = useData();
+  const { store, update } = useData();
+  const apply = useCalendarEdits();
   const mobile = useIsMobile();
   const [anchor, setAnchor] = useState(today());
-  const [newAt, setNewAt] = useState<{ date: string; start: string } | null>(null);
+  const [newAt, setNewAt] = useState<{ date: string; start: string; end?: string } | null>(null);
   const [openEvent, setOpenEvent] = useState<{ id: string; date: string } | null>(null);
   const [openLesson, setOpenLesson] = useState<Occurrence | null>(null);
+  const [drag, setDrag] = useState<Drag | null>(null);
+  const [pending, setPending] = useState<Pending | null>(null);
+  const [colorMenu, setColorMenu] = useState<{ o: Occurrence; x: number; y: number } | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
+  const cols = useRef(new Map<string, HTMLDivElement>());
+  const dragRef = useRef<Drag | null>(null);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suppressClick = useRef(false);
   const t = today();
 
   const days = useMemo(() => {
@@ -88,6 +120,187 @@ export default function CalendarPage() {
   const onOcc = (o: Occurrence) => {
     if (o.kind === "event" && o.event) setOpenEvent({ id: o.event.id, date: o.date });
     else setOpenLesson(o);
+  };
+
+  /* ---------- Dragging ---------- */
+
+  const minuteAt = (clientY: number, date: string) => {
+    const col = cols.current.get(date);
+    if (!col) return START_H * 60;
+    const y = clientY - col.getBoundingClientRect().top;
+    return (y / HOUR) * 60 + START_H * 60;
+  };
+  const dateAt = (clientX: number, fallback: string) => {
+    let best = fallback;
+    let bestDist = Infinity;
+    for (const [d, el] of cols.current) {
+      const r = el.getBoundingClientRect();
+      if (clientX >= r.left && clientX < r.right) return d;
+      const dist = Math.min(Math.abs(clientX - r.left), Math.abs(clientX - r.right));
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = d;
+      }
+    }
+    return best;
+  };
+
+  const blockTouchScroll = useCallback((e: TouchEvent) => {
+    if (dragRef.current?.active) e.preventDefault();
+  }, []);
+
+  // The listeners attached for the current drag, so they can be removed exactly.
+  const listeners = useRef<{ move: (e: PointerEvent) => void; up: () => void; cancel: () => void } | null>(null);
+  const cleanup = useCallback(() => {
+    if (holdTimer.current) clearTimeout(holdTimer.current);
+    holdTimer.current = null;
+    const l = listeners.current;
+    if (l) {
+      window.removeEventListener("pointermove", l.move);
+      window.removeEventListener("pointerup", l.up);
+      window.removeEventListener("pointercancel", l.cancel);
+      listeners.current = null;
+    }
+    document.body.classList.remove("cal-dragging");
+  }, [blockTouchScroll]);
+
+  function activate() {
+    const d = dragRef.current;
+    if (!d) return;
+    d.active = true;
+    document.body.classList.add("cal-dragging");
+    if (d.pointer === "touch") navigator.vibrate?.(8);
+    setDrag({ ...d });
+  }
+
+  function onMove(e: PointerEvent) {
+    const d = dragRef.current;
+    if (!d) return;
+    const dist = Math.hypot(e.clientX - d.x0, e.clientY - d.y0);
+    if (!d.active) {
+      if (d.pointer === "touch") {
+        // Moving before the long-press finishes means you are scrolling, not dragging.
+        if (dist > 8) {
+          cleanup();
+          dragRef.current = null;
+        }
+        return;
+      }
+      if (dist < 4) return;
+      activate();
+    }
+    // Scroll the grid when dragging near its top or bottom edge.
+    const sc = scroller.current;
+    if (sc) {
+      const r = sc.getBoundingClientRect();
+      if (e.clientY < r.top + 28) sc.scrollBy({ top: -14 });
+      else if (e.clientY > r.bottom - 28) sc.scrollBy({ top: 14 });
+    }
+    const len = d.end - d.start;
+    if (d.mode === "move") {
+      d.date = mobile ? d.origDate : dateAt(e.clientX, d.date);
+      const m = minuteAt(e.clientY, d.date);
+      d.start = Math.min(Math.max(snap(m - d.grab), START_H * 60), 24 * 60 - len);
+      d.end = d.start + len;
+    } else if (d.mode === "resize") {
+      const m = minuteAt(e.clientY, d.date);
+      d.end = Math.min(Math.max(snap(m), d.start + SNAP), 24 * 60);
+    } else {
+      const m = Math.min(Math.max(minuteAt(e.clientY, d.date), START_H * 60), 24 * 60);
+      const a = Math.floor(d.origin / SNAP) * SNAP;
+      const b = snap(m);
+      d.start = Math.min(a, b);
+      d.end = Math.max(Math.max(a, b), d.start + SNAP);
+    }
+    setDrag({ ...d });
+  }
+
+  function onUp() {
+    const d = dragRef.current;
+    cleanup();
+    dragRef.current = null;
+    if (!d || !d.active) {
+      setDrag(null);
+      return;
+    }
+    suppressClick.current = true;
+    setTimeout(() => (suppressClick.current = false), 0);
+    if (d.mode === "create") {
+      setDrag(null);
+      setNewAt({ date: d.date, start: fromMinutes(d.start), end: fromMinutes(d.end) });
+      return;
+    }
+    const o = d.o!;
+    const to: Target = { date: d.date, start: fromMinutes(d.start), end: fromMinutes(d.end) };
+    if (to.date === o.date && to.start === o.start && to.end === o.end) {
+      setDrag(null);
+      return;
+    }
+    if (needsScope(o)) {
+      setPending({ o, to }); // keep the block where it was dropped while you choose
+      return;
+    }
+    apply(o, to, "one");
+    setDrag(null);
+  }
+
+  function onCancel() {
+    cleanup();
+    dragRef.current = null;
+    setDrag(null);
+  }
+
+  function begin(e: React.PointerEvent, o: Occurrence | null, mode: Drag["mode"], date: string) {
+    if (e.button !== 0 || pending) return;
+    if (mode === "create" && e.pointerType !== "mouse") return; // on phones, tap empty space to add instead
+    e.stopPropagation();
+    const origin = minuteAt(e.clientY, date);
+    const s = o?.start ? minutes(o.start) : origin;
+    let en = o?.end ? minutes(o.end) : origin + SNAP;
+    if (o && en <= s) en = 24 * 60;
+    dragRef.current = {
+      mode,
+      o,
+      pointer: e.pointerType,
+      x0: e.clientX,
+      y0: e.clientY,
+      origin,
+      grab: origin - s,
+      origDate: date,
+      date,
+      start: s,
+      end: en,
+      active: false,
+    };
+    cleanup();
+    listeners.current = { move: onMove, up: onUp, cancel: onCancel };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onCancel);
+    if (e.pointerType === "touch") {
+      holdTimer.current = setTimeout(activate, 380);
+    }
+  }
+
+  useEffect(() => cleanup, [cleanup]);
+  // Phones decide whether a touch scrolls before the drag starts, so this listener has to be
+  // in place from the start. It only blocks scrolling while a block is being dragged.
+  useEffect(() => {
+    document.addEventListener("touchmove", blockTouchScroll, { passive: false });
+    return () => document.removeEventListener("touchmove", blockTouchScroll);
+  }, [blockTouchScroll]);
+
+  const choose = (scope: Scope | null) => {
+    if (pending && scope) apply(pending.o, pending.to, scope);
+    setPending(null);
+    setDrag(null);
+  };
+
+  /* ---------- Rendering ---------- */
+
+  const ghostFor = (d: string) => {
+    if (!drag?.active || drag.date !== d) return null;
+    return drag;
   };
 
   return (
@@ -155,62 +368,43 @@ export default function CalendarPage() {
               ))}
             </div>
             {days.map((d) => {
+              const draggingKey = drag?.active && drag.o ? drag.o.key : null;
+              // The dragged block stays in place (faded) so a phone keeps sending its touch events to it.
               const items = agendaOn(store, d);
               const placed = layout(items);
+              const ghost = ghostFor(d);
               return (
                 <div
                   key={d}
+                  ref={(el) => {
+                    if (el) cols.current.set(d, el);
+                    else cols.current.delete(d);
+                  }}
                   className="relative border-l border-line"
                   style={{
                     height: (END_H - START_H) * HOUR,
                     backgroundImage: `repeating-linear-gradient(to bottom, var(--line) 0, var(--line) 1px, transparent 1px, transparent ${HOUR}px)`,
                   }}
+                  onPointerDown={(e) => begin(e, null, "create", d)}
                   onClick={(e) => {
+                    if (suppressClick.current || pending) return;
                     const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
                     const y = e.clientY - rect.top;
                     const m = Math.floor(((y / HOUR) * 60 + START_H * 60) / 30) * 30;
                     setNewAt({ date: d, start: fromMinutes(m) });
                   }}
                 >
-                  {placed.map((o) => {
-                    const struck = o.status === "cancelled" || o.status === "missed_owe";
-                    const isCheck = o.kind === "check";
-                    return (
-                      <button
-                        key={o.key}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onOcc(o);
-                        }}
-                        className={cx(
-                          "absolute flex flex-col justify-start overflow-hidden rounded-[6px] px-1.5 py-1 text-left text-[11.5px] leading-tight transition-[filter,transform] hover:brightness-110 active:scale-[0.99]",
-                          struck && "opacity-45",
-                        )}
-                        style={{
-                          top: o.top,
-                          height: o.height,
-                          left: `calc(${(o.lane / o.lanes) * 100}% + 2px)`,
-                          width: `calc(${100 / o.lanes}% - 4px)`,
-                          background: isCheck ? `color-mix(in oklab, ${o.color} 14%, var(--surface))` : o.color,
-                          color: isCheck ? "var(--ink)" : "white",
-                          borderLeft: isCheck ? `3px solid ${o.color}` : undefined,
-                          outline: isCheck ? `1px dashed color-mix(in oklab, ${o.color} 50%, transparent)` : undefined,
-                          outlineOffset: -1,
-                        }}
-                      >
-                        <div className={cx("font-semibold truncate", struck && "line-through")}>
-                          {o.title}
-                          {o.tentative && " (pending)"}
-                        </div>
-                        {o.height > 30 && (
-                          <div className="num opacity-80">
-                            {o.start}–{o.end}
-                          </div>
-                        )}
-                        {o.status === "taught" && o.height > 44 && <div className="opacity-90">✓ taught</div>}
-                      </button>
-                    );
-                  })}
+                  {placed.map((o) => (
+                    <Block
+                      key={o.key}
+                      o={o}
+                      dragging={o.key === draggingKey}
+                      onPointerDown={(e, mode) => begin(e, o, mode, d)}
+                      onOpen={() => !suppressClick.current && !pending && onOcc(o)}
+                      onMenu={(x, y) => !dragRef.current && setColorMenu({ o, x, y })}
+                    />
+                  ))}
+                  {ghost && <Ghost drag={ghost} />}
                   {d === t && nowMin >= START_H * 60 && (
                     <div className="pointer-events-none absolute inset-x-0 z-[2] flex items-center" style={{ top: ((nowMin - START_H * 60) / 60) * HOUR }}>
                       <span className="-ml-1 h-2 w-2 rounded-full bg-pen" />
@@ -224,15 +418,80 @@ export default function CalendarPage() {
         </div>
       </div>
       <p className="mt-2 text-[12px] text-muted">
-        Classes come from each student’s weekly schedule. Dashed blocks are homework checks. Tap empty space to add an event. Showing {fmtDay(days[0])}
-        {days.length > 1 && ` – ${fmtDay(days[days.length - 1])}`}.
+        {mobile
+          ? "Press and hold a block to move it, or hold its bottom edge to change the length. Tap empty space to add an event."
+          : "Drag a block to move it, drag its bottom edge to change the length, and right-click it to change the colour. Drag across empty space to add an event."}{" "}
+        Dashed blocks are homework checks.
       </p>
+
+      {/* "This one or all?" after moving something that repeats */}
+      <AnimatePresence>
+        {pending && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center p-4 md:items-center">
+            <motion.div className="absolute inset-0 bg-black/20" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => choose(null)} />
+            <motion.div
+              role="dialog"
+              aria-label="Apply the change to"
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ type: "spring", stiffness: 520, damping: 38 }}
+              className="relative w-full max-w-[340px] rounded-xl border border-line bg-surface p-4 shadow-pop"
+            >
+              <div className="display mb-1 text-[17px] font-semibold">{pending.o.kind === "lesson" ? "Move this class" : "Change repeating event"}</div>
+              <p className="mb-3 text-[13px] text-ink-2">
+                {pending.o.title} → {fmtDay(pending.to.date, { weekday: true })}, <span className="num">{pending.to.start}–{endLabel(pending.to.end)}</span>
+              </p>
+              <div className="flex flex-col gap-1.5">
+                <button className="btn btn-primary justify-center" onClick={() => choose("one")}>
+                  {pending.o.kind === "lesson" ? "This class only" : "This event only"}
+                </button>
+                <button className="btn btn-line justify-center" onClick={() => choose("all")}>
+                  {pending.o.kind === "lesson" ? "Every week from now on" : "All events in the series"}
+                </button>
+                <button className="btn btn-ghost justify-center" onClick={() => choose(null)}>
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Right-click colour menu */}
+      {colorMenu && (
+        <div className="fixed inset-0 z-50" onClick={() => setColorMenu(null)} onContextMenu={(e) => (e.preventDefault(), setColorMenu(null))}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.12 }}
+            className="absolute w-[236px] rounded-xl border border-line bg-surface p-3 shadow-pop"
+            style={{ left: Math.min(colorMenu.x, window.innerWidth - 248), top: Math.min(colorMenu.y, window.innerHeight - 150) }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="label mb-2 truncate">
+              {colorMenu.o.kind === "event" ? colorMenu.o.title : `${store.students.find((s) => s.id === colorMenu.o.studentId)?.name ?? ""} (all their blocks)`}
+            </div>
+            <ColorPicker
+              size={22}
+              value={colorMenu.o.color}
+              onChange={(c) => {
+                const o = colorMenu.o;
+                if (o.kind === "event" && o.event) update("events", o.event.id, { color: c });
+                else if (o.studentId) update("students", o.studentId, { color: c });
+                setColorMenu(null);
+              }}
+            />
+          </motion.div>
+        </div>
+      )}
 
       <EventSheet
         open={!!newAt || !!openEvent}
         eventId={openEvent?.id ?? null}
         occurrenceDate={openEvent?.date ?? newAt?.date ?? t}
         defaultStart={newAt?.start}
+        defaultEnd={newAt?.end}
         onClose={() => {
           setNewAt(null);
           setOpenEvent(null);
@@ -240,5 +499,99 @@ export default function CalendarPage() {
       />
       <LessonSheet occ={openLesson} onClose={() => setOpenLesson(null)} />
     </Page>
+  );
+}
+
+function blockStyle(o: Pick<Occurrence, "kind" | "color">) {
+  const isCheck = o.kind === "check";
+  return {
+    background: isCheck ? `color-mix(in oklab, ${o.color} 14%, var(--surface))` : o.color,
+    color: isCheck ? "var(--ink)" : textOn(o.color),
+    borderLeft: isCheck ? `3px solid ${o.color}` : undefined,
+    outline: isCheck ? `1px dashed color-mix(in oklab, ${o.color} 50%, transparent)` : undefined,
+    outlineOffset: -1,
+  } as React.CSSProperties;
+}
+
+function Block({
+  o,
+  dragging,
+  onPointerDown,
+  onOpen,
+  onMenu,
+}: {
+  o: Placed;
+  dragging?: boolean;
+  onPointerDown: (e: React.PointerEvent, mode: "move" | "resize") => void;
+  onOpen: () => void;
+  onMenu: (x: number, y: number) => void;
+}) {
+  const struck = o.status === "cancelled" || o.status === "missed_owe";
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onPointerDown={(e) => onPointerDown(e, "move")}
+      onClick={(e) => {
+        e.stopPropagation();
+        onOpen();
+      }}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onOpen())}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onMenu(e.clientX, e.clientY);
+      }}
+      className={cx(
+        "cal-block group absolute flex cursor-grab flex-col justify-start overflow-hidden rounded-[6px] px-1.5 py-1 text-left text-[11.5px] leading-tight transition-[filter,box-shadow] hover:brightness-110",
+        struck && "opacity-45",
+        dragging && "!opacity-30",
+      )}
+      style={{
+        top: o.top,
+        height: o.height,
+        left: `calc(${(o.lane / o.lanes) * 100}% + 2px)`,
+        width: `calc(${100 / o.lanes}% - 4px)`,
+        ...blockStyle(o),
+      }}
+    >
+      <div className={cx("font-semibold truncate", struck && "line-through")}>
+        {o.title}
+        {o.tentative && " (pending)"}
+      </div>
+      {o.height > 30 && (
+        <div className="num opacity-80">
+          {o.start}–{endLabel(o.end)}
+        </div>
+      )}
+      {o.status === "taught" && o.height > 44 && <div className="opacity-90">✓ taught</div>}
+      {/* Bottom edge: drag to change the length */}
+      <div
+        aria-hidden
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          onPointerDown(e, "resize");
+        }}
+        className="absolute inset-x-0 bottom-0 h-2 cursor-ns-resize"
+      >
+        <span className="mx-auto mt-[3px] block h-[3px] w-5 rounded-full bg-current opacity-0 transition-opacity group-hover:opacity-50" />
+      </div>
+    </div>
+  );
+}
+
+function Ghost({ drag }: { drag: Drag }) {
+  const top = ((drag.start - START_H * 60) / 60) * HOUR;
+  const height = Math.max(20, ((drag.end - drag.start) / 60) * HOUR - 2);
+  const o = drag.o;
+  const label = `${fromMinutes(drag.start)}–${drag.end >= 1440 ? "24:00" : fromMinutes(drag.end)}`;
+  return (
+    <div
+      className="pointer-events-none absolute inset-x-[2px] z-[3] flex flex-col overflow-hidden rounded-[6px] px-1.5 py-1 text-[11.5px] leading-tight shadow-pop ring-2 ring-white/70"
+      style={{ top, height, ...(o ? blockStyle(o) : { background: "var(--accent)", color: "white", opacity: 0.9 }) }}
+    >
+      <div className="font-semibold truncate">{o ? o.title : "New event"}</div>
+      <div className="num opacity-90">{label}</div>
+    </div>
   );
 }

@@ -10,15 +10,32 @@ import { addDays, relDay, today, weekday } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import type { Task } from "@/lib/types";
 
-/** "Read chapter 2 tomorrow !" → due tomorrow, flagged. */
-function parseQuick(input: string): { title: string; due: string | null; priority: boolean } {
+/** A time at the end of the text: "3pm", "9:30am", "15:00", "15h", "15h30", optionally after "at". */
+function takeTime(s: string): [string, string | null] {
+  const m = s.match(/\s+(?:at\s+|lúc\s+)?(\d{1,2})(?:[:h.](\d{2}))?\s*(am|pm|h)?$/i);
+  if (!m) return [s, null];
+  const hasMarker = m[2] !== undefined || m[3] !== undefined || /\s(at|lúc)\s/i.test(m[0]);
+  if (!hasMarker) return [s, null]; // a bare number is part of the title ("Read chapter 2")
+  let h = +m[1];
+  const min = m[2] ? +m[2] : 0;
+  const ap = m[3]?.toLowerCase();
+  if (ap === "pm" && h < 12) h += 12;
+  if (ap === "am" && h === 12) h = 0;
+  if (h > 23 || min > 59) return [s, null];
+  return [s.slice(0, m.index), `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`];
+}
+
+/** "Read chapter 2 tomorrow 3pm !" → due tomorrow at 15:00, flagged. */
+function parseQuick(input: string): { title: string; due: string | null; time: string | null; priority: boolean } {
   let s = input.trim();
   let priority = false;
   let due: string | null = null;
+  let time: string | null = null;
   if (/\s!$/.test(s) || s.endsWith("!")) {
     priority = true;
     s = s.replace(/\s*!$/, "");
   }
+  [s, time] = takeTime(s);
   const t = today();
   const words: [RegExp, () => string][] = [
     [/\s+(today|tod)$/i, () => t],
@@ -39,7 +56,8 @@ function parseQuick(input: string): { title: string; due: string | null; priorit
     due = d;
     s = s.replace(wd[0], "");
   }
-  return { title: s.trim(), due, priority };
+  if (!time) [s, time] = takeTime(s);
+  return { title: s.trim(), due: due ?? (time ? t : null), time, priority };
 }
 
 export default function TasksPage() {
@@ -82,6 +100,7 @@ export default function TasksPage() {
             notes: null,
             list: list === "All" ? "Personal" : list,
             due_on: p.due ?? t,
+            due_time: p.time,
             priority: p.priority,
             horizon: "now",
             done: false,
@@ -102,6 +121,7 @@ export default function TasksPage() {
           {preview && preview.title && (
             <span className="hidden md:inline text-[12px] text-muted">
               {relDay(preview.due ?? t)}
+              {preview.time && ` at ${preview.time}`}
               {preview.priority && " · flagged"}
             </span>
           )}
@@ -171,7 +191,7 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
             <Strike on={c.checked} animate={c.completing}>{task.title}</Strike>
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-muted">
-            {task.due_on && <span className={cx(task.due_on < t && !task.done && "text-pen")}>{relDay(task.due_on)}</span>}
+            {task.due_on && <span className={cx(task.due_on < t && !task.done && "text-pen")}>{relDay(task.due_on)}{task.due_time && ` · ${task.due_time}`}</span>}
             <span>{task.list}</span>
             {ms.length > 0 && (
               <span className="num">
@@ -206,6 +226,14 @@ function TaskSheet({ task, onClose }: { task: Task | null; onClose: () => void }
           <div className="grid grid-cols-2 gap-3">
             <Field label="Due">
               <input type="date" className="field num" value={task.due_on ?? ""} onChange={(e) => update("tasks", task.id, { due_on: e.target.value || null })} />
+            </Field>
+            <Field label="At (reminds 40 and 20 min before)">
+              <input
+                type="time"
+                className="field num"
+                value={task.due_time ?? ""}
+                onChange={(e) => update("tasks", task.id, { due_time: e.target.value || null, due_on: task.due_on ?? today() })}
+              />
             </Field>
             <Field label="List">
               <input className="field" list="lists" defaultValue={task.list} onBlur={(e) => update("tasks", task.id, { list: e.target.value || "Personal" })} />

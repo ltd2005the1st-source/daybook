@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useData } from "./data";
 import { useMarkLesson } from "./register";
-import { Dot, Field, Sheet, Tick } from "./ui";
+import { ColorPicker } from "./color-picker";
+import { EVENT_COLORS } from "@/lib/colors";
+import { Dot, Field, MinutesInput, Sheet, Tick } from "./ui";
 import { fmtDay, fromMinutes, minutes, WD_SHORT, weekday } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import type { Occurrence } from "@/lib/teaching";
-import type { CalEvent } from "@/lib/types";
+import { DEFAULT_REMIND, type CalEvent } from "@/lib/types";
 
-const COLORS = ["#4A51AC", "#A2645F", "#6B6B6B", "#3F8250", "#C0703A", "#8E4A63", "#2B8A8A", "#5B86E5"];
 const KINDS: CalEvent["kind"][] = ["focus", "routine", "personal", "work", "other"];
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
 
@@ -18,12 +19,14 @@ export function EventSheet({
   eventId,
   occurrenceDate,
   defaultStart,
+  defaultEnd,
   onClose,
 }: {
   open: boolean;
   eventId: string | null;
   occurrenceDate: string;
   defaultStart?: string;
+  defaultEnd?: string;
   onClose: () => void;
 }) {
   const { store, insert, update, remove } = useData();
@@ -32,19 +35,19 @@ export function EventSheet({
     title: "",
     date: occurrenceDate,
     start_time: defaultStart ?? "09:00",
-    end_time: fromMinutes(minutes(defaultStart ?? "09:00") + 60),
+    end_time: defaultEnd ?? fromMinutes(minutes(defaultStart ?? "09:00") + 60),
     days: [],
     until: null,
-    color: COLORS[0],
+    color: EVENT_COLORS[7].hex,
     kind: "personal",
-    remind_before: [10],
+    remind_before: [...DEFAULT_REMIND],
     notes: null,
     skip_dates: [],
   });
   const [draft, setDraft] = useState<Omit<CalEvent, "id">>(blank);
   useEffect(() => {
     if (open) setDraft(existing ? { ...existing } : blank());
-  }, [open, eventId, occurrenceDate, defaultStart]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, eventId, occurrenceDate, defaultStart, defaultEnd]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = (p: Partial<CalEvent>) => setDraft((d) => ({ ...d, ...p }));
   const allDay = draft.start_time === null;
@@ -125,34 +128,11 @@ export function EventSheet({
             </select>
           </Field>
           <Field label="Remind me (min before)">
-            <input
-              className="field num"
-              placeholder="10, 40"
-              value={draft.remind_before.join(", ")}
-              onChange={(e) =>
-                set({
-                  remind_before: e.target.value
-                    .split(",")
-                    .map((x) => parseInt(x.trim(), 10))
-                    .filter((n) => !Number.isNaN(n) && n >= 0),
-                })
-              }
-            />
+            <MinutesInput value={draft.remind_before} onChange={(v) => set({ remind_before: v })} />
           </Field>
         </div>
         <Field label="Color">
-          <div className="flex gap-2">
-            {COLORS.map((c) => (
-              <button
-                type="button"
-                key={c}
-                aria-label={c}
-                onClick={() => set({ color: c })}
-                className={cx("h-7 w-7 rounded-full ring-offset-2 ring-offset-surface", draft.color === c && "ring-2 ring-ink")}
-                style={{ background: c }}
-              />
-            ))}
-          </div>
+          <ColorPicker value={draft.color} onChange={(c) => set({ color: c })} />
         </Field>
         <Field label="Notes">
           <textarea className="field min-h-[70px]" value={draft.notes ?? ""} onChange={(e) => set({ notes: e.target.value || null })} />
@@ -255,8 +235,10 @@ export function LessonSheet({ occ, onClose }: { occ: Occurrence | null; onClose:
               <span className="text-[14px]">{h.title}</span>
             </div>
           ))}
+          <div className="label mb-1.5 mt-5">Colour for {s.name}</div>
+          <ColorPicker value={s.color} onChange={(c) => update("students", s.id, { color: c })} size={24} />
           <p className="mt-4 text-[12px] text-muted">
-            Weekday {WD_SHORT[weekday(occ.date)]}. Edit the weekly time or homework rules from the Teaching page.
+            Drag the block on the calendar to move it, or drag its bottom edge to change the length. Homework rules live on the Teaching page.
           </p>
         </div>
       )}

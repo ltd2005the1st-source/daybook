@@ -260,3 +260,25 @@ export function ConfirmButton({
     </button>
   );
 }
+
+/** A list of minutes typed as "40, 20". Saves when you leave the field so typing a comma doesn't fight you. */
+export function MinutesInput({ value, onChange, placeholder = "40, 20" }: { value: number[]; onChange: (v: number[]) => void; placeholder?: string }) {
+  const [text, setText] = useState(value.join(", "));
+  useEffect(() => setText(value.join(", ")), [value.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+  const commit = () => {
+    const v = [...new Set(text.split(/[,\s]+/).map((x) => parseInt(x, 10)).filter((n) => !Number.isNaN(n) && n >= 0))].sort((a, b) => b - a);
+    onChange(v);
+    setText(v.join(", "));
+  };
+  return (
+    <input
+      className="field num"
+      inputMode="numeric"
+      placeholder={placeholder}
+      value={text}
+      onChange={(e) => setText(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
+    />
+  );
+}

@@ -182,7 +182,7 @@ function AddStudent({ open, onClose, onCreated, count }: { open: boolean; onClos
             check_time: "22:30",
             check_days: [],
             check_minutes: 60,
-            remind_before: 30,
+            remind_before: [40, 20],
             availability: null,
             note: null,
             sort: count,

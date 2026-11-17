@@ -110,7 +110,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           .from(t)
           .select("*")
           .order("created_at", { ascending: true })
-          .limit(t === "chat_messages" ? 200 : 5000),
+          .limit(5000),
       ),
     );
     const next = empty();

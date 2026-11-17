@@ -38,7 +38,7 @@ export type Student = Base & {
   check_time: string; // when the homework check block starts
   check_days: number[]; // weekdays for fixed mode (0 = Sunday)
   check_minutes: number; // how long the check block is
-  remind_before: number; // push reminder this many minutes before the check
+  remind_before: number[]; // push reminders this many minutes before the check
   availability: Record<string, number[]> | null; // slot label -> weekdays free
   note: string | null;
   sort: number;
@@ -52,7 +52,11 @@ export type Slot = Base & {
   tentative: boolean;
 };
 
-export type LessonStatus = "taught" | "missed_owe" | "cancelled";
+/** "planned" is only stored for a single class moved to a new time or day. */
+export type LessonStatus = "taught" | "missed_owe" | "cancelled" | "planned";
+
+/** Every event, class, homework check and timed task reminds you this many minutes before. */
+export const DEFAULT_REMIND = [40, 20];
 export type Lesson = Base & {
   student_id: string;
   date: string;
@@ -103,6 +107,7 @@ export type Task = Base & {
   notes: string | null;
   list: string;
   due_on: string | null;
+  due_time: string | null; // "HH:MM"; tasks with a time get reminders
   priority: boolean;
   horizon: "now" | "soon" | "long";
   done: boolean;
@@ -137,12 +142,6 @@ export type HabitLog = Base & {
   note: string | null;
 };
 
-export type ChatRow = Base & {
-  role: "user" | "assistant";
-  text: string;
-  actions: string[]; // short descriptions of what the assistant changed
-};
-
 export type Tables = {
   transactions: Transaction;
   debts: Debt;
@@ -156,7 +155,6 @@ export type Tables = {
   milestones: Milestone;
   habits: Habit;
   habit_logs: HabitLog;
-  chat_messages: ChatRow;
 };
 
 export type TableName = keyof Tables;
@@ -173,7 +171,6 @@ export const TABLES: TableName[] = [
   "milestones",
   "habits",
   "habit_logs",
-  "chat_messages",
 ];
 
 export type Store = { [K in TableName]: Tables[K][] };

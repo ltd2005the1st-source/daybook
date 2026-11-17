@@ -19,7 +19,7 @@ export function buildSeed(): Store {
     check_time: "22:30",
     check_days: [],
     check_minutes: 60,
-    remind_before: 30,
+    remind_before: [40, 20],
     availability: null,
     note: null,
     sort,
@@ -222,7 +222,7 @@ export function buildSeed(): Store {
     until: null,
     color,
     kind,
-    remind_before: [],
+    remind_before: [40, 20],
     notes: null,
     skip_dates: [],
   });
@@ -245,6 +245,7 @@ export function buildSeed(): Store {
     due_on: "2026-11-17",
     priority: false,
     horizon: "now" as const,
+    due_time: null,
     done: false,
     done_at: null,
     sort,
@@ -299,6 +300,5 @@ export function buildSeed(): Store {
     milestones: [],
     habits,
     habit_logs: [],
-    chat_messages: [],
   };
 }

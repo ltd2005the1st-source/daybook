@@ -52,6 +52,7 @@ export type Occurrence = {
   end: string | null;
   color: string;
   studentId?: string;
+  slotId?: string;
   event?: CalEvent;
   status?: DayMark;
   tentative?: boolean;
@@ -64,6 +65,7 @@ export function lessonsOn(store: Store, date: string): Occurrence[] {
     if (!st.active) continue;
     const row = lessonRow(store, st.id, date);
     const slots = store.slots.filter((s) => s.student_id === st.id && s.weekday === weekday(date));
+    if (row?.status === "cancelled" && row.note?.startsWith("Moved to")) continue;
     for (const sl of slots) {
       out.push({
         key: `lesson:${st.id}:${date}:${sl.start_time}`,
@@ -74,6 +76,7 @@ export function lessonsOn(store: Store, date: string): Occurrence[] {
         end: row?.end_time ?? sl.end_time,
         color: st.color,
         studentId: st.id,
+        slotId: sl.id,
         status: row?.status ?? "planned",
         tentative: sl.tentative,
       });

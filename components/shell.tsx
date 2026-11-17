@@ -6,13 +6,11 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   Moon,
   PanelRightOpen,
-  Sparkles,
   Sun,
   X,
 } from "lucide-react";
 import { useData } from "./data";
 import { Login } from "./login";
-import { ChatPanel } from "./chat";
 import { Palette } from "./palette";
 import { cx } from "@/lib/format";
 import { NAV } from "./nav";
@@ -38,7 +36,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { ready, needsLogin, online, toasts, dismissToast, signOut, session } = useData();
   const path = usePathname();
   const { theme, toggle } = useTheme();
-  const [chatOpen, setChatOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   // Publish the mobile top bar's height so sticky headers inside pages can sit just below it.
   const topbarObserver = useRef<ResizeObserver | null>(null);
@@ -50,7 +47,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
     topbarObserver.current = new ResizeObserver(set);
     topbarObserver.current.observe(el);
   };
-  const [chatSeed, setChatSeed] = useState<string | null>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -58,10 +54,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
       if (mod && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setPaletteOpen((v) => !v);
-      }
-      if (mod && e.key.toLowerCase() === "j") {
-        e.preventDefault();
-        setChatOpen((v) => !v);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -115,12 +107,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
         <div className="mt-auto flex flex-col gap-px">
-          <button onClick={() => setChatOpen(true)} className="btn btn-ghost justify-between">
-            <span className="flex items-center gap-2.5">
-              <Sparkles size={16} strokeWidth={1.8} /> Ask Claude
-            </span>
-            <kbd className="num text-[11px] text-muted">⌘J</kbd>
-          </button>
           <button onClick={toggle} className="btn btn-ghost">
             {theme === "dark" ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}
             {theme === "dark" ? "Light mode" : "Dark mode"}
@@ -185,20 +171,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      {/* Floating chat button (mobile) */}
-      <button
-        onClick={() => setChatOpen(true)}
-        aria-label="Ask Claude"
-        className="no-print md:hidden fixed right-4 bottom-[calc(env(safe-area-inset-bottom)+72px)] z-30 flex h-12 w-12 items-center justify-center rounded-full bg-ink text-bg shadow-pop"
-      >
-        <Sparkles size={20} />
-      </button>
-
-      <ChatPanel open={chatOpen} seed={chatSeed} onSeedUsed={() => setChatSeed(null)} onClose={() => setChatOpen(false)} />
-      <Palette open={paletteOpen} onClose={() => setPaletteOpen(false)} onAsk={(q) => {
-          setChatSeed(q);
-          setChatOpen(true);
-        }} />
+      <Palette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
 
       {/* Toasts */}
       <div className="no-print fixed bottom-[calc(env(safe-area-inset-bottom)+80px)] md:bottom-6 left-1/2 z-50 -translate-x-1/2 flex flex-col gap-2 items-center">

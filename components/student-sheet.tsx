@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useData } from "./data";
-import { ConfirmButton, Field, Sheet, Tick, Segmented, Dot } from "./ui";
+import { ConfirmButton, Field, MinutesInput, Sheet, Tick, Segmented, Dot } from "./ui";
 import { WD_SHORT, fmtDay, minutes, today } from "@/lib/dates";
 import { cx, parseAmount, vnd } from "@/lib/format";
 import { nextLesson, slotsOf } from "@/lib/teaching";
@@ -285,7 +285,7 @@ function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
           <input type="number" min={15} step={15} className="field num" value={s.check_minutes} onChange={(e) => update("students", s.id, { check_minutes: +e.target.value })} />
         </Field>
         <Field label="Remind me (min before)">
-          <input type="number" min={0} step={5} className="field num" value={s.remind_before} onChange={(e) => update("students", s.id, { remind_before: +e.target.value })} />
+          <MinutesInput value={Array.isArray(s.remind_before) ? s.remind_before : [s.remind_before]} onChange={(v) => update("students", s.id, { remind_before: v })} />
         </Field>
       </div>
       {s.check_mode === "fixed" && (

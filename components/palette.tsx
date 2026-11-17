@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { CheckSquare, CornerDownLeft, Sparkles } from "lucide-react";
+import { CheckSquare, CornerDownLeft } from "lucide-react";
 import { useData } from "./data";
 import { NAV } from "./nav";
 import { today } from "@/lib/dates";
@@ -10,7 +10,7 @@ import { cx, fold } from "@/lib/format";
 
 type Item = { id: string; label: string; hint?: string; icon: React.ComponentType<{ size?: number }>; run: () => void };
 
-export function Palette({ open, onClose, onAsk }: { open: boolean; onClose: () => void; onAsk: (q: string) => void }) {
+export function Palette({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
   const { insert, store, toast } = useData();
   const [q, setQ] = useState("");
@@ -40,20 +40,11 @@ export function Palette({ open, onClose, onAsk }: { open: boolean; onClose: () =
     ? [
         ...filtered,
         {
-          id: "ask",
-          label: `Ask Claude: “${q}”`,
-          icon: Sparkles,
-          run: () => {
-            onAsk(q);
-            onClose();
-          },
-        },
-        {
           id: "task",
           label: `Add task: “${q}”`,
           icon: CheckSquare,
           run: () => {
-            insert("tasks", { title: q, notes: null, list: "Personal", due_on: today(), priority: false, horizon: "now", done: false, done_at: null, sort: store.tasks.length });
+            insert("tasks", { title: q, notes: null, list: "Personal", due_on: today(), due_time: null, priority: false, horizon: "now", done: false, done_at: null, sort: store.tasks.length });
             toast(`Task added: ${q}`);
             onClose();
           },
@@ -92,7 +83,7 @@ export function Palette({ open, onClose, onAsk }: { open: boolean; onClose: () =
                 }
                 if (e.key === "Enter") items[i]?.run();
               }}
-              placeholder="Go somewhere, add a task, or ask Claude"
+              placeholder="Go somewhere or add a task"
               className="w-full border-b border-line bg-transparent px-4 py-3.5 text-[16px] outline-none focus-visible:outline-none placeholder:text-muted"
             />
             <ul className="max-h-[50vh] overflow-y-auto p-1.5">
