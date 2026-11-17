@@ -23,12 +23,9 @@ export function isSlotDay(store: Pick<Store, "slots">, studentId: string, date: 
   return store.slots.some((s) => s.student_id === studentId && s.weekday === weekday(date));
 }
 
-/** Makeup sessions still owed ("cần bù"): baseline + missed sessions − extra sessions taught off-schedule. */
-export function makeupsOwed(store: Pick<Store, "lessons" | "slots">, s: Student): number {
-  const rows = store.lessons.filter((l) => l.student_id === s.id);
-  const missed = rows.filter((l) => l.status === "missed_owe").length;
-  const extra = rows.filter((l) => l.status === "taught" && !isSlotDay(store, s.id, l.date)).length;
-  return Math.max(0, s.makeup_baseline + missed - extra);
+/** Makeup sessions left ("cần bù"). You keep this number yourself; the app never changes it. */
+export function makeupsOwed(_store: unknown, s: Student): number {
+  return Math.max(0, s.makeup_baseline ?? 0);
 }
 
 export function taughtIn(store: Pick<Store, "lessons">, studentId: string, month: string): Lesson[] {

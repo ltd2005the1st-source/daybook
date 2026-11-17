@@ -87,6 +87,13 @@ export function ChatPanel({ open, onClose, seed, onSeedUsed }: { open: boolean; 
     convo.current.push({ role: "user", content: q });
 
     const actions: string[] = [];
+    if (process.env.NEXT_PUBLIC_PREVIEW === "1") {
+      finish(
+        "This is the preview, so I can’t reach Claude here. Once Daybook is deployed with your Anthropic key, I can log things like this and answer questions about your data.",
+        [],
+      );
+      return;
+    }
     const now = new Date();
     const nowInfo = {
       date: today(),

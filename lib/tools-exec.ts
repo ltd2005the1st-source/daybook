@@ -39,7 +39,7 @@ function overview(store: Store, month: string) {
       sessions_taught: taught.length,
       dates: taught.map((l) => l.date),
       earned: taught.length * st.rate,
-      makeups_owed: makeupsOwed(store, st),
+      makeups_left_noted_by_user: makeupsOwed(store, st),
       open_homework: store.homework.filter((h) => h.student_id === st.id && h.status === "open").map((h) => h.title),
       active: st.active,
     };
@@ -159,9 +159,9 @@ export function runTool(name: string, input: Input, ctx: ToolCtx): ToolOutcome {
       const patch = { status, start_time: s(input.start_time) ?? row?.start_time ?? null, end_time: s(input.end_time) ?? row?.end_time ?? null };
       if (row) ctx.update("lessons", row.id, patch);
       else ctx.insert("lessons", { student_id: f.student.id, date, note: null, ...patch });
-      const label = { taught: "taught", missed_owe: "missed (makeup owed)", cancelled: "cancelled" }[status];
+      const label = { taught: "taught", missed_owe: "missed", cancelled: "cancelled" }[status];
       return {
-        result: { ok: true, makeups_owed_now: makeupsOwed(ctx.get(), f.student) },
+        result: { ok: true },
         action: `${f.student.name} on ${date}: ${label}`,
       };
     }

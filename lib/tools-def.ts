@@ -10,7 +10,7 @@ export const TOOLS: Anthropic.Tool[] = [
   {
     name: "get_overview",
     description:
-      "Summary for one month: money in/out by category, teaching sessions and earnings per student, makeups owed, unpaid receipts and debts, open homework, tasks due, habit progress. Call this first for most questions.",
+      "Summary for one month: money in/out by category, teaching sessions and earnings per student, makeups left (a number the user keeps by hand), unpaid receipts and debts, open homework, tasks due, habit progress. Call this first for most questions.",
     input_schema: {
       type: "object",
       properties: { month: { type: "string", description: "YYYY-MM. Defaults to the current month." } },
@@ -71,7 +71,7 @@ export const TOOLS: Anthropic.Tool[] = [
   {
     name: "mark_lesson",
     description:
-      "Record what happened to a class on a date: taught, missed_owe (missed and a makeup is owed), cancelled (nothing owed), or clear (remove the record). Teaching on a day with no scheduled class counts as a makeup.",
+      "Record what happened to a class on a date: taught, missed_owe (the student missed it), cancelled, or clear (remove the record). This never changes the makeup count; the user keeps that number themselves.",
     input_schema: {
       type: "object",
       properties: {
@@ -215,7 +215,7 @@ How to work:
 - When the user tells you something happened ("spent 200k on grab", "taught Bách today", "Hân didn't come"), log it right away with the matching tool, then confirm in one short line with the key numbers.
 - Amounts: "k" means thousand, "tr" or "m" means million. Store whole VND.
 - Students are matched by name without accents, so "khanh an" finds Khánh An. leWeekend is a group class (Khánh, Hân, Nhật, Trí).
-- A missed class where the student is owed a makeup is "missed_owe". A class taught on an unscheduled day pays off a makeup.
+- Use "missed_owe" for a class the student missed. The number of makeups left is kept by the user by hand: report it when asked, but never change it or compute it yourself.
 - The user may write in Vietnamese or English. Reply in English unless they write fully in Vietnamese. Keep Vietnamese names and task titles exactly as written.
 - Be brief and concrete. Format money like 1,250,000₫. Use short lists only when listing several items.
 - Only delete when explicitly asked. If a request is ambiguous (two students match), ask one short question.

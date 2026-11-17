@@ -170,7 +170,7 @@ export default function TodayPage() {
             <Section title="Teaching">
               {owed.length > 0 && (
                 <p className="text-[13.5px] text-ink-2">
-                  Makeups owed:{" "}
+                  Makeups left:{" "}
                   {owed.map(({ s, n }, i) => (
                     <span key={s.id}>
                       <Dot color={s.color} className="mx-1" />

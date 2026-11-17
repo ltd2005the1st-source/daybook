@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, ReceiptText } from "lucide-react";
 import { useData } from "@/components/data";
 import { Legend, Register } from "@/components/register";
-import { StudentSheet, STUDENT_COLORS } from "@/components/student-sheet";
+import { MakeupStepper, StudentSheet, STUDENT_COLORS } from "@/components/student-sheet";
 import { Dot, Field, Page, PageHeader, Section, Segmented, Sheet, Tick } from "@/components/ui";
 import { fmtMonth, monthOf, relDay, shiftMonth, today } from "@/lib/dates";
 import { parseAmount, vnd } from "@/lib/format";
@@ -60,10 +60,10 @@ export default function TeachingPage() {
         <span className="num font-semibold text-ink">{vnd(earned)}</span>.{" "}
         {owed > 0 ? (
           <>
-            You owe <span className="num font-semibold text-pen">{owed}</span> makeup {owed === 1 ? "session" : "sessions"}
+            You have noted <span className="num font-semibold text-pen">{owed}</span> makeup {owed === 1 ? "session" : "sessions"} left
           </>
         ) : (
-          "No makeups owed"
+          "No makeups left"
         )}
         {toCollect > 0 && (
           <>
@@ -115,7 +115,7 @@ export default function TeachingPage() {
                 const nl = nextLesson(store, s.id, t);
                 const o = makeupsOwed(store, s);
                 return (
-                  <button key={s.id} onClick={() => setPicked(s.id)} className="flex items-center gap-3 rounded-md px-2 py-2 -mx-2 text-left hover:bg-hover">
+                  <div key={s.id} role="button" tabIndex={0} onClick={() => setPicked(s.id)} onKeyDown={(e) => e.key === "Enter" && setPicked(s.id)} className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 -mx-2 text-left hover:bg-hover">
                     <Dot color={s.color} size={10} />
                     <div className="min-w-0 flex-1">
                       <div className="text-[14px] font-medium">
@@ -124,11 +124,16 @@ export default function TeachingPage() {
                       </div>
                       <div className="text-[12px] text-muted">
                         {nl ? `Next ${relDay(nl.date).toLowerCase()} ${nl.start}` : "No upcoming class"}
-                        {o > 0 && <span className="text-pen"> · owes {o}</span>}
+
                       </div>
                     </div>
-                    <span className="num text-[12.5px] text-ink-2">{vnd(s.rate, { compact: true })}</span>
-                  </button>
+                    <span className="flex flex-col items-end gap-1">
+                      <span className="num text-[12.5px] text-ink-2">{vnd(s.rate, { compact: true })}</span>
+                      <span className="flex items-center gap-1 text-[11px] text-muted">
+                        makeups <MakeupStepper s={s} compact />
+                      </span>
+                    </span>
+                  </div>
                 );
               })}
               {store.students.some((s) => !s.active) && (

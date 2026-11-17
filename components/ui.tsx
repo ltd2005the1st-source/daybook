@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 import { cx } from "@/lib/format";
@@ -221,4 +221,33 @@ export function Segmented<T extends string>({
 
 export function Empty({ children }: { children: React.ReactNode }) {
   return <div className="rounded-lg border border-dashed border-line-strong px-4 py-5 text-center text-[13.5px] text-muted">{children}</div>;
+}
+
+/** A destructive button that asks for a second tap instead of a browser dialog. */
+export function ConfirmButton({
+  onConfirm,
+  children,
+  confirmLabel = "Tap again to confirm",
+  className,
+}: {
+  onConfirm: () => void;
+  children: React.ReactNode;
+  confirmLabel?: string;
+  className?: string;
+}) {
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!armed) return;
+    const t = setTimeout(() => setArmed(false), 3500);
+    return () => clearTimeout(t);
+  }, [armed]);
+  return (
+    <button
+      type="button"
+      className={cx(className, armed && "!bg-pen !text-white")}
+      onClick={() => (armed ? (setArmed(false), onConfirm()) : setArmed(true))}
+    >
+      {armed ? confirmLabel : children}
+    </button>
+  );
 }

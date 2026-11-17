@@ -53,8 +53,7 @@ export function buildSeed(): Store {
       name: "Khánh An",
       color: "#525A80",
       rate: 400_000,
-      // Your sheet says 1 owed; the Sunday 1 Nov session counts as a makeup here, so start from 2.
-      makeup_baseline: 2,
+      makeup_baseline: 1,
       availability: avail([[6, 0], [], [2, 3, 5, 6, 0], [3, 5], [3, 5, 6]]),
     },
     2,

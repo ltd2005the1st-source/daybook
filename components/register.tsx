@@ -27,7 +27,7 @@ export function useMarkLesson() {
   };
 }
 
-/** One register cell. The mark is drawn in the student's color; owed makeups use the red marking pen. */
+/** One register cell. The mark is drawn in the student's color; missed classes use the red marking pen. */
 export function Mark({ mark, color, past, size = 22 }: { mark: DayMark; color: string; past: boolean; size?: number }) {
   const r = size / 2 - 2;
   const c = size / 2;
@@ -63,9 +63,7 @@ export function Mark({ mark, color, past, size = 22 }: { mark: DayMark; color: s
       {mark === "missed_owe" && (
         <g>
           <circle cx={c} cy={c} r={r - 0.5} fill="var(--pen-soft)" stroke="var(--pen)" strokeWidth={1.6} />
-          <text x={c} y={c + 3.6} textAnchor="middle" fontSize={10} fontWeight={700} fill="var(--pen)" fontFamily="var(--font-jbm)">
-            +1
-          </text>
+          <path d={`M${c - r * 0.38} ${c - r * 0.38} L${c + r * 0.38} ${c + r * 0.38} M${c + r * 0.38} ${c - r * 0.38} L${c - r * 0.38} ${c + r * 0.38}`} stroke="var(--pen)" strokeWidth={1.7} strokeLinecap="round" />
         </g>
       )}
       {mark === "cancelled" && (
@@ -98,7 +96,7 @@ export function Register({ month, students, onPickStudent }: { month: string; st
                 <span className="h-[3px] w-6 rounded-full" style={{ background: s.color }} />
                 <span className="text-[12.5px] font-semibold leading-tight group-hover:underline underline-offset-2">{s.name}</span>
                 {makeupsOwed(store, s) > 0 ? (
-                  <span className="num text-[10.5px] text-pen leading-none">owes {makeupsOwed(store, s)}</span>
+                  <span className="num text-[10.5px] text-pen leading-none">{makeupsOwed(store, s)} makeup{makeupsOwed(store, s) === 1 ? "" : "s"}</span>
                 ) : (
                   <span className="num text-[10.5px] text-muted leading-none">{vnd(s.rate, { compact: true })}</span>
                 )}
@@ -164,8 +162,8 @@ export function Register({ month, students, onPickStudent }: { month: string; st
 export const LABEL: Record<DayMark, string> = {
   taught: "taught",
   planned: "scheduled",
-  missed_owe: "missed, makeup owed",
-  cancelled: "cancelled, nothing owed",
+  missed_owe: "missed",
+  cancelled: "cancelled",
   none: "no class",
 };
 
@@ -173,7 +171,7 @@ export function Legend() {
   const items: [DayMark, string][] = [
     ["taught", "Taught"],
     ["planned", "Scheduled"],
-    ["missed_owe", "Missed, makeup owed"],
+    ["missed_owe", "Missed"],
     ["cancelled", "Cancelled"],
   ];
   return (
@@ -184,7 +182,7 @@ export function Legend() {
           {l}
         </span>
       ))}
-      <span className="text-muted">Tap a cell to cycle. A class taught on an unscheduled day pays off a makeup.</span>
+      <span className="text-muted">Tap a cell to cycle. Makeups left are counted by you: set them on each student.</span>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Bell, Download, Upload } from "lucide-react";
 import { useData } from "@/components/data";
-import { Field, Page, PageHeader, Section } from "@/components/ui";
+import { ConfirmButton, Field, Page, PageHeader, Section } from "@/components/ui";
 import { remindersFor, fmtAt } from "@/lib/reminders";
 import { today } from "@/lib/dates";
 import type { Store } from "@/lib/types";
@@ -167,14 +167,9 @@ export default function SettingsPage() {
             </label>
           )}
           {!online && (
-            <button
-              className="btn btn-ghost text-pen"
-              onClick={() => {
-                if (confirm("Replace everything in this browser with the starter data?")) resetLocal();
-              }}
-            >
+            <ConfirmButton className="btn btn-ghost text-pen" confirmLabel="Replace all data?" onConfirm={resetLocal}>
               Reset to starter data
-            </button>
+            </ConfirmButton>
           )}
           {online && store.students.length === 0 && (
             <button className="btn btn-primary" onClick={loadSeed}>

@@ -2,10 +2,10 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useData } from "./data";
-import { Field, Sheet, Tick, Segmented, Dot } from "./ui";
+import { ConfirmButton, Field, Sheet, Tick, Segmented, Dot } from "./ui";
 import { WD_SHORT, fmtDay, minutes, today } from "@/lib/dates";
 import { cx, parseAmount, vnd } from "@/lib/format";
-import { makeupsOwed, nextLesson, slotsOf } from "@/lib/teaching";
+import { nextLesson, slotsOf } from "@/lib/teaching";
 import type { Student } from "@/lib/types";
 
 export const STUDENT_COLORS = ["#5B86E5", "#3F8250", "#525A80", "#9A6FB0", "#8A3FB0", "#C0703A", "#2B8A8A", "#B04A6A", "#7A7A2E"];
@@ -220,7 +220,6 @@ function ScheduleTab({ s }: { s: Student }) {
 function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
   const { store, update, remove } = useData();
   const [rate, setRate] = useState(String(s.rate));
-  const owed = makeupsOwed(store, s);
   return (
     <div>
       <div className="grid grid-cols-2 gap-x-3">
@@ -241,15 +240,9 @@ function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
           />
           <span className="text-[12px] text-muted">{vnd(s.rate)} per session</span>
         </Field>
-        <Field label="Makeups owed before tracking">
-          <input
-            className="field num"
-            type="number"
-            min={0}
-            value={s.makeup_baseline}
-            onChange={(e) => update("students", s.id, { makeup_baseline: Math.max(0, +e.target.value) })}
-          />
-          <span className="text-[12px] text-muted">Currently owes {owed}</span>
+        <Field label="Makeups left (cần bù)">
+          <MakeupStepper s={s} />
+          <span className="text-[12px] text-muted">You keep this count. The app never changes it.</span>
         </Field>
       </div>
       {s.kind === "class" && (
@@ -316,18 +309,34 @@ function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
         <label className="flex items-center gap-2 text-[13.5px]">
           <Tick checked={s.active} onChange={() => update("students", s.id, { active: !s.active })} /> Active (shows on calendar and reminders)
         </label>
-        <button
+        <ConfirmButton
           className="btn btn-ghost text-pen"
-          onClick={() => {
-            if (confirm(`Delete ${s.name} and all their lessons, homework and receipts?`)) {
-              remove("students", s.id);
-              onDeleted();
-            }
+          confirmLabel={`Delete ${s.name} for good?`}
+          onConfirm={() => {
+            remove("students", s.id);
+            onDeleted();
           }}
         >
           <Trash2 size={15} /> Delete
-        </button>
+        </ConfirmButton>
       </div>
+    </div>
+  );
+}
+
+export function MakeupStepper({ s, compact }: { s: Student; compact?: boolean }) {
+  const { update } = useData();
+  const n = Math.max(0, s.makeup_baseline ?? 0);
+  const set = (v: number) => update("students", s.id, { makeup_baseline: Math.max(0, v) });
+  return (
+    <div className={cx("inline-flex items-center rounded-md border border-line", compact && "text-[12px]")} onClick={(e) => e.stopPropagation()}>
+      <button type="button" aria-label="One fewer makeup" className={cx("text-ink-2 hover:bg-hover", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => set(n - 1)}>
+        −
+      </button>
+      <span className={cx("num text-center font-semibold", compact ? "w-5" : "w-8", n > 0 && "text-pen")}>{n}</span>
+      <button type="button" aria-label="One more makeup" className={cx("text-ink-2 hover:bg-hover", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => set(n + 1)}>
+        +
+      </button>
     </div>
   );
 }

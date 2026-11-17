@@ -225,7 +225,7 @@ export function LessonSheet({ occ, onClose }: { occ: Occurrence | null; onClose:
               {(
                 [
                   ["taught", "Taught"],
-                  ["missed_owe", "Missed, owe makeup"],
+                  ["missed_owe", "Missed"],
                   ["cancelled", "Cancelled"],
                   [null, "Clear"],
                 ] as const
