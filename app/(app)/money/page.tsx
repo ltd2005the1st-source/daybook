@@ -10,6 +10,7 @@ import { cx, parseAmount, vnd } from "@/lib/format";
 import { taughtIn } from "@/lib/teaching";
 import { EXPENSE_CATEGORIES, type Debt, type Transaction } from "@/lib/types";
 import { CAT_COLORS, QuickAdd } from "@/components/money";
+import { FoodSection, isFood } from "@/components/food";
 
 
 export default function MoneyPage() {
@@ -37,15 +38,17 @@ export default function MoneyPage() {
   // Recurring items logged in an earlier month but not yet this month.
   const recurringDue = useMemo(() => {
     const seen = new Map<string, Transaction>();
-    for (const t of store.transactions) if (t.recurring && t.date < `${month}-01`) seen.set(t.title.toLowerCase(), t);
+    for (const t of store.transactions) if (t.recurring && !isFood(t) && t.date < `${month}-01`) seen.set(t.title.toLowerCase(), t);
     return [...seen.values()].filter((t) => !store.transactions.some((x) => x.date.startsWith(month) && x.title.toLowerCase() === t.title.toLowerCase()));
   }, [store.transactions, month]);
 
+  // Daily food & drinks live in their own section, so the entry list stays readable.
+  const listed = useMemo(() => txs.filter((t) => !isFood(t)), [txs]);
   const groups = useMemo(() => {
     const m = new Map<string, Transaction[]>();
-    for (const t of txs) m.set(t.date, [...(m.get(t.date) ?? []), t]);
+    for (const t of listed) m.set(t.date, [...(m.get(t.date) ?? []), t]);
     return [...m.entries()];
-  }, [txs]);
+  }, [listed]);
 
   const receivables = store.debts.filter((d) => d.direction === "receivable" && !d.settled);
   const payables = store.debts.filter((d) => d.direction === "payable" && !d.settled);
@@ -87,6 +90,7 @@ export default function MoneyPage() {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div>
           <QuickAdd />
+          <FoodSection month={month} />
 
           <Section title="Where it went">
             <div className="flex flex-col gap-2">
@@ -108,7 +112,7 @@ export default function MoneyPage() {
             </div>
           </Section>
 
-          <Section title={`Entries · ${txs.length}`}>
+          <Section title={`Entries · ${listed.length}`}>
             {groups.length === 0 && <p className="text-[13.5px] text-muted">Nothing logged in {fmtMonth(month)} yet.</p>}
             {groups.map(([date, items]) => (
               <div key={date} className="mb-3">
