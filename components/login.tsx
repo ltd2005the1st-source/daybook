@@ -18,7 +18,7 @@ async function call(body: Record<string, unknown>, token?: string) {
   return { ok: res.ok, ...data };
 }
 
-/** Four boxes over one numeric input, so the phone shows its number pad and paste still works. */
+/** Four boxes over one numeric input, so the phone shows its number pad and paste still works. Digits are shown as typed. */
 export function PinInput({
   value,
   onChange,
@@ -74,12 +74,17 @@ export function PinInput({
                 current ? "border-accent ring-2 ring-accent/20" : "border-line-strong",
               )}
             >
-              <motion.span
-                initial={false}
-                animate={{ scale: filled ? 1 : 0, opacity: filled ? 1 : 0 }}
-                transition={{ duration: 0.18, ease: [0.65, 0, 0.35, 1] }}
-                className="block h-3 w-3 rounded-full bg-ink"
-              />
+              {filled && (
+                <motion.span
+                  key={value[i]}
+                  initial={{ y: 6, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.18, ease: [0.65, 0, 0.35, 1] }}
+                  className="num text-[24px] font-semibold text-ink"
+                >
+                  {value[i]}
+                </motion.span>
+              )}
             </div>
           );
         })}
