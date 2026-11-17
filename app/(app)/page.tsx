@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
-import { Strike, useCompleteTask } from "@/components/complete";
+import { Strike, TASK_EXIT, useCompleteTask } from "@/components/complete";
 import { useData } from "@/components/data";
 import { MilestoneBar } from "@/components/milestone-bar";
 import { QuickAdd } from "@/components/money";
@@ -23,7 +23,7 @@ function DueTask({ task, today: t }: { task: Task; today: string }) {
       layout
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: "auto" }}
-      exit={{ opacity: 0, height: 0, x: 12, transition: { duration: 0.28, ease: [0.4, 0, 0.2, 1] } }}
+      exit={TASK_EXIT}
       className="flex items-start gap-2.5 py-1.5"
     >
       <Tick round checked={c.checked} color="var(--accent)" label="Complete" onChange={c.toggle} />
@@ -172,7 +172,7 @@ export default function TodayPage() {
         <div>
           <Section title="Due today" action={<Link href="/tasks" className="text-[12.5px] text-muted hover:text-ink">All tasks →</Link>}>
             {tasks.length === 0 && <p className="text-[13.5px] text-muted">Nothing due. Nice.</p>}
-            <div className="flex flex-col">
+            <div className="flex flex-col overflow-x-clip">
               <AnimatePresence initial={false}>
                 {tasks.slice(0, 8).map((x) => (
                   <DueTask key={x.id} task={x} today={t} />

@@ -4,10 +4,11 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Flag, Plus, Trash2 } from "lucide-react";
 import { useData } from "@/components/data";
 import { MilestoneBar } from "@/components/milestone-bar";
-import { Strike, useCompleteTask } from "@/components/complete";
+import { Strike, TASK_EXIT, useCompleteTask } from "@/components/complete";
 import { Field, Page, PageHeader, Section, Segmented, Sheet, Tick } from "@/components/ui";
 import { addDays, relDay, today, weekday } from "@/lib/dates";
 import { cx } from "@/lib/format";
+import { describeTask, duplicateTask } from "@/lib/dupes";
 import type { Task } from "@/lib/types";
 
 /** A time at the end of the text: "3pm", "9:30am", "15:00", "15h", "15h30", optionally after "at". */
@@ -61,7 +62,7 @@ function parseQuick(input: string): { title: string; due: string | null; time: s
 }
 
 export default function TasksPage() {
-  const { store, insert } = useData();
+  const { store, insert, toast } = useData();
   const [list, setList] = useState("All");
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -95,6 +96,11 @@ export default function TasksPage() {
           e.preventDefault();
           const p = parseQuick(q);
           if (!p.title) return;
+          const dup = duplicateTask(store, p.title);
+          if (dup) {
+            toast(describeTask(dup) + " Not added again.");
+            return;
+          }
           insert("tasks", {
             title: p.title,
             notes: null,
@@ -132,7 +138,7 @@ export default function TasksPage() {
         (g) =>
           g.items.length > 0 && (
             <Section key={g.title} title={<span className={g.tone}>{g.title} · {g.items.length}</span>}>
-              <div className="flex flex-col">
+              <div className="-mx-2 flex flex-col overflow-x-clip px-2">
                 <AnimatePresence initial={false}>
                   {g.items
                     .sort((a, b) => Number(b.priority) - Number(a.priority) || a.sort - b.sort)
@@ -177,7 +183,7 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
       layout
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: "auto" }}
-      exit={{ opacity: 0, height: 0, x: 12, transition: { duration: 0.28, ease: [0.4, 0, 0.2, 1] } }}
+      exit={TASK_EXIT}
       className="group -mx-2 cursor-pointer rounded-md px-2 hover:bg-hover"
       onClick={onOpen}
     >
@@ -211,7 +217,7 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
 }
 
 function TaskSheet({ task, onClose }: { task: Task | null; onClose: () => void }) {
-  const { store, update, remove, insert } = useData();
+  const { store, update, remove, insert, toast } = useData();
   const [ms, setMs] = useState("");
   const items = task ? store.milestones.filter((m) => m.task_id === task.id).sort((a, b) => a.sort - b.sort) : [];
   return (
@@ -221,7 +227,17 @@ function TaskSheet({ task, onClose }: { task: Task | null; onClose: () => void }
           <input
             className="field !text-[18px] !font-semibold !border-transparent !px-0 mb-2"
             defaultValue={task.title}
-            onBlur={(e) => e.target.value.trim() && update("tasks", task.id, { title: e.target.value.trim() })}
+            onBlur={(e) => {
+              const v = e.target.value.trim();
+              if (!v || v === task.title) return;
+              const dup = duplicateTask(store, v, task.id);
+              if (dup) {
+                toast(describeTask(dup) + " Name not changed.");
+                e.target.value = task.title;
+                return;
+              }
+              update("tasks", task.id, { title: v });
+            }}
           />
           <div className="grid grid-cols-2 gap-3">
             <Field label="Due">

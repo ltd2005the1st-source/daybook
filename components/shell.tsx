@@ -179,9 +179,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
           {toasts.map((t) => (
             <motion.div
               key={t.id}
-              initial={{ opacity: 0, y: 12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8 }}
+              layout
+              // Eases up into place, then eases back down as it leaves.
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } }}
+              exit={{ opacity: 0, y: 28, transition: { duration: 0.26, ease: [0.7, 0, 0.84, 0] } }}
               className="flex items-center gap-3 rounded-lg bg-ink px-3.5 py-2 text-[13.5px] text-bg shadow-pop"
             >
               {t.text}

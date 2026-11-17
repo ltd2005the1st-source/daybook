@@ -7,6 +7,7 @@ import { useData } from "./data";
 import { NAV } from "./nav";
 import { today } from "@/lib/dates";
 import { cx, fold } from "@/lib/format";
+import { describeTask, duplicateTask } from "@/lib/dupes";
 
 type Item = { id: string; label: string; hint?: string; icon: React.ComponentType<{ size?: number }>; run: () => void };
 
@@ -44,6 +45,12 @@ export function Palette({ open, onClose }: { open: boolean; onClose: () => void 
           label: `Add task: “${q}”`,
           icon: CheckSquare,
           run: () => {
+            const dup = duplicateTask(store, q);
+            if (dup) {
+              toast(describeTask(dup) + " Not added again.");
+              onClose();
+              return;
+            }
             insert("tasks", { title: q, notes: null, list: "Personal", due_on: today(), due_time: null, priority: false, horizon: "now", done: false, done_at: null, sort: store.tasks.length });
             toast(`Task added: ${q}`);
             onClose();

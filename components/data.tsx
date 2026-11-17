@@ -76,11 +76,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const dismissToast = useCallback((id: string) => setToasts((t) => t.filter((x) => x.id !== id)), []);
+  // Pop-ups stay up for three seconds.
+  const TOAST_MS = 3000;
   const toast = useCallback(
     (text: string, undo?: () => void) => {
       const id = uid();
       setToasts((t) => [...t.slice(-2), { id, text, undo }]);
-      setTimeout(() => dismissToast(id), 5000);
+      setTimeout(() => dismissToast(id), TOAST_MS);
     },
     [dismissToast],
   );

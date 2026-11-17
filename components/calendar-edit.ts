@@ -1,6 +1,7 @@
 "use client";
 import { useData } from "./data";
 import { fmtDay, minutes, weekday } from "@/lib/dates";
+import { describeEvent, duplicateEvent } from "@/lib/dupes";
 import { lessonRow, lessonsOn, type Occurrence } from "@/lib/teaching";
 import type { Store, TableName, Tables } from "@/lib/types";
 
@@ -44,10 +45,20 @@ export function useCalendarEdits() {
     if (o.kind === "event" && o.event) {
       const e = store.events.find((x) => x.id === o.event!.id) ?? o.event;
       const repeating = e.days.length > 0;
+      // Don't let a move land the event on top of a copy of itself.
+      const delta = weekday(to.date) - weekday(o.date);
+      const after =
+        !repeating || scope === "one"
+          ? { ...e, date: to.date, days: [], until: null, skip_dates: [], start_time: to.start, end_time: to.end }
+          : { ...e, start_time: to.start, end_time: to.end, days: e.days.map((d) => (d + delta + 7) % 7) };
+      const clash = duplicateEvent(store, after, e.id);
+      if (clash) {
+        toast(`${describeEvent(clash)} Not moved.`);
+        return false;
+      }
       if (!repeating) {
         upd("events", e.id, { date: to.date, start_time: to.start, end_time: to.end });
       } else if (scope === "all") {
-        const delta = weekday(to.date) - weekday(o.date);
         upd("events", e.id, {
           start_time: to.start,
           end_time: to.end,

@@ -5,6 +5,7 @@ import { useData } from "./data";
 import { useMarkLesson } from "./register";
 import { ColorPicker } from "./color-picker";
 import { EVENT_COLORS } from "@/lib/colors";
+import { describeEvent, duplicateEvent } from "@/lib/dupes";
 import { Dot, Field, MinutesInput, Sheet, Tick } from "./ui";
 import { fmtDay, fromMinutes, minutes, WD_SHORT, weekday } from "@/lib/dates";
 import { cx } from "@/lib/format";
@@ -53,8 +54,10 @@ export function EventSheet({
   const allDay = draft.start_time === null;
   const repeats = draft.days.length > 0;
 
+  const clash = draft.title.trim() ? duplicateEvent(store, { ...draft, title: draft.title.trim() }, existing?.id) : undefined;
+
   function save() {
-    if (!draft.title.trim()) return;
+    if (!draft.title.trim() || clash) return;
     const row = { ...draft, title: draft.title.trim() };
     if (existing) update("events", existing.id, row);
     else insert("events", row);
@@ -76,6 +79,11 @@ export function EventSheet({
           value={draft.title}
           onChange={(e) => set({ title: e.target.value })}
         />
+        {clash && (
+          <p role="alert" className="mb-3 -mt-1 rounded-md bg-pen-soft px-2.5 py-1.5 text-[13px] text-pen">
+            {describeEvent(clash)} Change the name or the time to add it.
+          </p>
+        )}
         <div className="grid grid-cols-3 gap-2">
           <Field label="Date">
             <input type="date" className="field num" value={draft.date} onChange={(e) => set({ date: e.target.value })} />
@@ -167,7 +175,9 @@ export function EventSheet({
           ) : (
             <span />
           )}
-          <button className="btn btn-primary">{existing ? "Save" : "Add to calendar"}</button>
+          <button className="btn btn-primary disabled:opacity-40 disabled:cursor-not-allowed" disabled={!!clash}>
+            {existing ? "Save" : "Add to calendar"}
+          </button>
         </div>
       </form>
     </Sheet>

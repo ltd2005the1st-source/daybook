@@ -4,6 +4,21 @@ import { useData } from "./data";
 import { cx } from "@/lib/format";
 import type { Task } from "@/lib/types";
 
+/**
+ * How a finished task leaves the list: it slides off to the right while fading,
+ * then the gap closes up behind it.
+ */
+export const TASK_EXIT = {
+  x: "110%",
+  opacity: 0,
+  height: 0,
+  transition: {
+    x: { duration: 0.42, ease: [0.55, 0, 0.25, 1] },
+    opacity: { duration: 0.36, delay: 0.06, ease: "easeIn" },
+    height: { duration: 0.26, delay: 0.34, ease: [0.4, 0, 0.2, 1] },
+  },
+} as const;
+
 /** How long a finished task stays on screen (ticked and crossed out) before it leaves the list. */
 export const COMPLETE_HOLD_MS = 750;
 
