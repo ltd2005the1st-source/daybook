@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Flag, Plus, Trash2 } from "lucide-react";
 import { useData } from "@/components/data";
 import { MilestoneBar } from "@/components/milestone-bar";
-import { Strike, TASK_EXIT, useCompleteTask } from "@/components/complete";
+import { Strike, TASK_ENTER, TASK_EXIT, useCompleteTask } from "@/components/complete";
 import { Field, Page, PageHeader, Section, Segmented, Sheet, Tick } from "@/components/ui";
 import { addDays, relDay, today, weekday } from "@/lib/dates";
 import { cx } from "@/lib/format";
@@ -180,11 +180,9 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
   const c = useCompleteTask(task);
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: "auto" }}
+      {...TASK_ENTER}
       exit={TASK_EXIT}
-      className="group -mx-2 cursor-pointer rounded-md px-2 hover:bg-hover"
+      className="group -mx-2 cursor-pointer overflow-hidden rounded-md px-2 hover:bg-hover"
       onClick={onOpen}
     >
       <div className="flex items-start gap-3 py-2.5">

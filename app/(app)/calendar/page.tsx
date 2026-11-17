@@ -435,7 +435,7 @@ export default function CalendarPage() {
               initial={{ opacity: 0, y: 12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8 }}
-              transition={{ type: "spring", stiffness: 520, damping: 38 }}
+              transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
               className="relative w-full max-w-[340px] rounded-xl border border-line bg-surface p-4 shadow-pop"
             >
               <div className="display mb-1 text-[17px] font-semibold">{pending.o.kind === "lesson" ? "Move this class" : "Change repeating event"}</div>

@@ -86,7 +86,7 @@ export function Sheet({
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
-            transition={{ type: "spring", stiffness: 420, damping: 36 }}
+            transition={{ duration: 0.32, ease: [0.65, 0, 0.35, 1] }}
             style={{ maxWidth: width }}
             className="relative w-full max-h-[88dvh] overflow-y-auto rounded-t-2xl md:rounded-xl bg-surface border border-line shadow-pop pb-[env(safe-area-inset-bottom)]"
           >
@@ -122,7 +122,7 @@ export function Progress({ value, color, className, height = 6 }: { value: numbe
         style={{ background: color ?? "var(--ink)" }}
         initial={false}
         animate={{ width: `${pct}%` }}
-        transition={{ type: "spring", stiffness: 160, damping: 26 }}
+        transition={{ duration: 0.6, ease: [0.65, 0, 0.35, 1] }}
       />
     </div>
   );
@@ -219,7 +219,7 @@ export function Segmented<T extends string>({
           )}
         >
           {value === o.value && (
-            <motion.span layoutId={`seg-${options.map((x) => x.value).join("")}`} className="absolute inset-0 rounded-md bg-surface shadow-card" transition={{ type: "spring", stiffness: 500, damping: 40 }} />
+            <motion.span layoutId={`seg-${options.map((x) => x.value).join("")}`} className="absolute inset-0 rounded-md bg-surface shadow-card" transition={{ duration: 0.32, ease: [0.65, 0, 0.35, 1] }} />
           )}
           <span className="relative">{o.label}</span>
         </button>

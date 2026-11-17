@@ -122,7 +122,7 @@ function Sleep({ h }: { h: Habit }) {
                         style={{ background: good ? h.color : "var(--pen)", top: `${(top / AXIS_LEN) * 100}%` }}
                         initial={{ height: 0 }}
                         animate={{ height: `${(Math.max(8, bottom - top) / AXIS_LEN) * 100}%` }}
-                        transition={{ type: "spring", stiffness: 120, damping: 20, delay: i * 0.02 }}
+                        transition={{ duration: 0.6, ease: [0.65, 0, 0.35, 1], delay: i * 0.02 }}
                       />
                     )}
                   </div>

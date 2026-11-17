@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
-import { Strike, TASK_EXIT, useCompleteTask } from "@/components/complete";
+import { Strike, TASK_ENTER, TASK_EXIT, useCompleteTask } from "@/components/complete";
 import { useData } from "@/components/data";
 import { MilestoneBar } from "@/components/milestone-bar";
 import { QuickAdd } from "@/components/money";
@@ -19,13 +19,8 @@ function DueTask({ task, today: t }: { task: Task; today: string }) {
   const c = useCompleteTask(task);
   const ms = store.milestones.filter((m) => m.task_id === task.id).sort((a, b) => a.sort - b.sort);
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: "auto" }}
-      exit={TASK_EXIT}
-      className="flex items-start gap-2.5 py-1.5"
-    >
+    <motion.div {...TASK_ENTER} exit={TASK_EXIT} className="overflow-hidden">
+      <div className="flex items-start gap-2.5 py-1.5">
       <Tick round checked={c.checked} color="var(--accent)" label="Complete" onChange={c.toggle} />
       <div className="min-w-0 flex-1">
         <div className="text-[14px] leading-snug">
@@ -37,6 +32,7 @@ function DueTask({ task, today: t }: { task: Task; today: string }) {
             <MilestoneBar items={ms} color="var(--accent)" />
           </div>
         )}
+      </div>
       </div>
     </motion.div>
   );

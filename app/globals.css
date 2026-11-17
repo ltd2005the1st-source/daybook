@@ -204,7 +204,7 @@ body {
 }
 .pen-stroke {
   stroke-dasharray: var(--len, 30);
-  animation: draw 0.35s cubic-bezier(0.6, 0, 0.2, 1) both;
+  animation: draw 0.35s cubic-bezier(0.65, 0, 0.35, 1) both;
 }
 
 @keyframes rise {
@@ -218,7 +218,7 @@ body {
   }
 }
 .rise {
-  animation: rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: rise 0.4s cubic-bezier(0.65, 0, 0.35, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -261,8 +261,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background-position: 0 55%;
   background-size: 0% 1.5px;
   transition:
-    background-size 0.32s cubic-bezier(0.6, 0, 0.2, 1),
-    color 0.25s ease 0.2s;
+    background-size 0.32s cubic-bezier(0.65, 0, 0.35, 1),
+    color 0.25s cubic-bezier(0.65, 0, 0.35, 1) 0.2s;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
@@ -276,17 +276,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* The tick gives a small press-and-bounce when it is checked. */
 .tick-pop {
-  animation: tick-pop 0.38s cubic-bezier(0.3, 0, 0.2, 1.4);
+  animation: tick-pop 0.38s cubic-bezier(0.65, 0, 0.35, 1);
 }
 @keyframes tick-pop {
   0% {
     transform: scale(1);
   }
-  35% {
-    transform: scale(0.82);
-  }
-  70% {
-    transform: scale(1.12);
+  45% {
+    transform: scale(0.84);
   }
   100% {
     transform: scale(1);

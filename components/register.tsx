@@ -35,7 +35,7 @@ export function Mark({ mark, color, past, size = 22 }: { mark: DayMark; color: s
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
       {mark === "taught" && (
-        <motion.g initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 600, damping: 22 }} style={{ originX: "50%", originY: "50%" }}>
+        <motion.g initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.24, ease: [0.65, 0, 0.35, 1] }} style={{ originX: "50%", originY: "50%" }}>
           <circle cx={c} cy={c} r={r} fill={color} />
           <path
             d={`M${c - r * 0.45} ${c + r * 0.02} l${r * 0.32} ${r * 0.34} l${r * 0.6} ${-r * 0.7}`}

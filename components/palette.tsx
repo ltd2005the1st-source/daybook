@@ -68,7 +68,7 @@ export function Palette({ open, onClose }: { open: boolean; onClose: () => void 
             initial={{ opacity: 0, scale: 0.97, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 500, damping: 36 }}
+            transition={{ duration: 0.26, ease: [0.65, 0, 0.35, 1] }}
             className="relative w-full max-w-[540px] overflow-hidden rounded-xl border border-line bg-surface shadow-pop"
           >
             <input

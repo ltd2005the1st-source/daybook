@@ -16,7 +16,7 @@ export function MilestoneBar({ items, color = "var(--ink)" }: { items: Milestone
         style={{ background: color }}
         initial={false}
         animate={{ width: `calc((100% - 14px) * ${pct})` }}
-        transition={{ type: "spring", stiffness: 140, damping: 24 }}
+        transition={{ duration: 0.6, ease: [0.65, 0, 0.35, 1] }}
       />
       {items.map((m, i) => {
         const left = `calc(7px + (100% - 14px) * ${(i + 1) / n} - 5px)`;

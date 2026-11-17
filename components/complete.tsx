@@ -4,18 +4,33 @@ import { useData } from "./data";
 import { cx } from "@/lib/format";
 import type { Task } from "@/lib/types";
 
+/** One ease-in-out curve for all motion in the app. */
+export const EASE = [0.65, 0, 0.35, 1] as const;
+
 /**
- * How a finished task leaves the list: it slides off to the right while fading,
- * then the gap closes up behind it.
+ * A new task opens a gap smoothly, then fades in.
+ */
+export const TASK_ENTER = {
+  initial: { opacity: 0, height: 0 },
+  animate: {
+    opacity: 1,
+    height: "auto",
+    transition: { height: { duration: 0.34, ease: EASE }, opacity: { duration: 0.26, delay: 0.1, ease: EASE } },
+  },
+} as const;
+
+/**
+ * A finished task fades as soon as it starts sliding right, and is gone well before the
+ * edge of the screen. Then the gap closes smoothly.
  */
 export const TASK_EXIT = {
-  x: "110%",
+  x: 120,
   opacity: 0,
   height: 0,
   transition: {
-    x: { duration: 0.42, ease: [0.55, 0, 0.25, 1] },
-    opacity: { duration: 0.36, delay: 0.06, ease: "easeIn" },
-    height: { duration: 0.26, delay: 0.34, ease: [0.4, 0, 0.2, 1] },
+    x: { duration: 0.42, ease: EASE },
+    opacity: { duration: 0.28, ease: EASE },
+    height: { duration: 0.34, delay: 0.32, ease: EASE },
   },
 } as const;
 

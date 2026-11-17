@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import {
   Moon,
   PanelRightOpen,
@@ -67,6 +67,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
   if (online && needsLogin) return <Login />;
 
   return (
+    // Anything that animates without its own timing eases in and out the same way.
+    <MotionConfig transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }} reducedMotion="user">
     <div className="min-h-dvh md:flex">
       {/* Sidebar (desktop) */}
       <aside className="no-print hidden md:flex w-[232px] shrink-0 flex-col border-r border-line bg-sunken sticky top-0 h-dvh px-2.5 py-3">
@@ -97,7 +99,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   <motion.span
                     layoutId="nav-active"
                     className="absolute inset-0 rounded-md bg-hover"
-                    transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                    transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
                   />
                 )}
                 <n.icon size={16} strokeWidth={1.8} className="relative" />
@@ -182,8 +184,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
               layout
               // Eases up into place, then eases back down as it leaves.
               initial={{ opacity: 0, y: 28 }}
-              animate={{ opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } }}
-              exit={{ opacity: 0, y: 28, transition: { duration: 0.26, ease: [0.7, 0, 0.84, 0] } }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.34, ease: [0.65, 0, 0.35, 1] } }}
+              exit={{ opacity: 0, y: 28, transition: { duration: 0.3, ease: [0.65, 0, 0.35, 1] } }}
+              transition={{ layout: { duration: 0.3, ease: [0.65, 0, 0.35, 1] } }}
               className="flex items-center gap-3 rounded-lg bg-ink px-3.5 py-2 text-[13.5px] text-bg shadow-pop"
             >
               {t.text}
@@ -206,6 +209,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </div>
     </div>
+    </MotionConfig>
   );
 }
 

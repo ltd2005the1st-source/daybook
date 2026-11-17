@@ -99,7 +99,7 @@ export default function MoneyPage() {
                       style={{ background: CAT_COLORS[c] }}
                       initial={{ width: 0 }}
                       animate={{ width: `${(v / maxCat) * 100}%` }}
-                      transition={{ type: "spring", stiffness: 120, damping: 22 }}
+                      transition={{ duration: 0.6, ease: [0.65, 0, 0.35, 1] }}
                     />
                   </div>
                   <span className="num w-[92px] text-right">{vnd(v)}</span>
