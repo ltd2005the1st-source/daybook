@@ -125,22 +125,21 @@ export function CheckSheet({ at, onClose }: { at: { studentId: string; date: str
   const { setDone, setContents } = useCheckActions();
   const c = at ? checkTasksOn(store, at.date).find((x) => x.student.id === at.studentId) : undefined;
   const [text, setText] = useState("");
-  const [asking, setAsking] = useState(false);
+  const ownText = !!c?.row && c.row.notes != null;
+  const [sync, setSync] = useState(true);
   const key = at ? `${at.studentId}:${at.date}` : "";
   useEffect(() => {
     setText(c?.contents ?? "");
-    setAsking(false);
+    // On unless this night already has its own text.
+    setSync(!ownText);
     // Only reset when a different check opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  const changed = !!c && text.trim() !== (c.contents ?? "").trim();
-  const close = () => {
-    setAsking(false);
-    onClose();
-  };
-  const save = (scope: "one" | "all") => {
-    if (c) setContents(c, text, scope);
+  const changed = !!c && (text.trim() !== (c.contents ?? "").trim() || sync === ownText);
+  const close = () => onClose();
+  const save = () => {
+    if (c) setContents(c, text, sync ? "all" : "one");
     close();
   };
 
@@ -175,41 +174,35 @@ export function CheckSheet({ at, onClose }: { at: { studentId: string; date: str
             className="field mb-1 min-h-[96px] text-[14.5px] leading-relaxed"
             placeholder={`e.g. Unit 5 workbook, vocabulary notebook`}
             value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              setAsking(false);
-            }}
+            onChange={(e) => setText(e.target.value)}
           />
+          <label className="mb-1 mt-2 flex cursor-pointer items-center justify-between gap-3 text-[13.5px]">
+            <span>Sync across all of {c.student.name}’s checks</span>
+            <Switch on={sync} onChange={setSync} label="Sync across all checks" />
+          </label>
           <p className="mb-4 text-[12px] text-muted">
-            {c.row && c.row.notes != null ? "This night has its own text." : `Same text every night for ${c.student.name}.`} This is what the 22:30 reminder says.
+            {sync
+              ? `What you type here shows on every check for ${c.student.name}.`
+              : `Only the check on ${fmtDay(c.date, { weekday: true })} changes. The others keep their text.`}{" "}
+            It’s also what the 22:30 reminder says.
           </p>
 
-          {changed &&
-            (asking ? (
-              <div className="mb-5 rounded-lg border border-line p-3">
-                <div className="mb-2 text-[13.5px] font-semibold">Change which checks?</div>
-                <div className="flex flex-col gap-1.5">
-                  <button className="btn btn-primary justify-center" onClick={() => save("one")}>
-                    Just this one ({fmtDay(c.date)})
-                  </button>
-                  <button className="btn btn-line justify-center" onClick={() => save("all")}>
-                    All of {c.student.name}’s checks
-                  </button>
-                  <button className="btn btn-ghost justify-center" onClick={() => setAsking(false)}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="mb-5 flex justify-end gap-2">
-                <button className="btn btn-ghost" onClick={() => setText(c.contents ?? "")}>
-                  Undo changes
-                </button>
-                <button className="btn btn-primary" onClick={() => setAsking(true)}>
-                  Save
-                </button>
-              </div>
-            ))}
+          {changed && (
+            <div className="mb-5 flex justify-end gap-2">
+              <button
+                className="btn btn-ghost"
+                onClick={() => {
+                  setText(c.contents ?? "");
+                  setSync(!ownText);
+                }}
+              >
+                Undo changes
+              </button>
+              <button className="btn btn-primary" onClick={save}>
+                {sync ? "Save for all checks" : "Save for this one"}
+              </button>
+            </div>
+          )}
 
           <HomeworkEditor studentId={c.student.id} name={c.student.name} />
         </div>
@@ -281,5 +274,25 @@ export function HomeworkEditor({ studentId, name }: { studentId: string; name: s
         {draft.trim() && <button className="btn btn-line">Add</button>}
       </form>
     </div>
+  );
+}
+
+function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={() => onChange(!on)}
+      className={cx("relative h-[22px] w-[38px] shrink-0 rounded-full transition-colors duration-300", on ? "bg-accent" : "bg-line-strong")}
+    >
+      <motion.span
+        className="absolute left-[3px] top-[3px] h-4 w-4 rounded-full bg-white shadow-sm"
+        initial={false}
+        animate={{ x: on ? 16 : 0 }}
+        transition={{ duration: 0.25, ease: [0.65, 0, 0.35, 1] }}
+      />
+    </button>
   );
 }

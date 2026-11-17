@@ -1,9 +1,9 @@
 "use client";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Check, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { needsScope, useCalendarEdits, type Scope, type Target } from "@/components/calendar-edit";
-import { CheckSheet, useCheckActions } from "@/components/checks";
+import { CheckSheet } from "@/components/checks";
 import { ColorPicker } from "@/components/color-picker";
 import { useData } from "@/components/data";
 import { EventSheet, LessonSheet } from "@/components/event-sheet";
@@ -461,7 +461,7 @@ export default function CalendarPage() {
         {mobile
           ? "Press and hold a block to move it, or hold its bottom edge to change the length. Tap empty space to add an event."
           : "Drag a block to move it, drag its bottom edge to change the length, and right-click it to change the colour. Drag across empty space to add an event."}{" "}
-        The line at {CHECK_TIME} holds your homework checks: tick one off, or tap its name to change what to check.
+        The slim blocks at {CHECK_TIME} are homework checks: tap one to tick it off or change what to check.
       </p>
 
       {/* "This one or all?" after moving something that repeats */}
@@ -637,45 +637,29 @@ function Ghost({ drag }: { drag: Drag }) {
   );
 }
 
-/** Homework checks sit on one line at 22:30, like tasks in Google Calendar, instead of taking up a block. */
+/** Homework checks at 22:30: slim blocks in the student's colour, stacked under each other. */
 function CheckLine({ date, onOpen }: { date: string; onOpen: (studentId: string) => void }) {
   const { store } = useData();
-  const { setDone } = useCheckActions();
   const checks = checkTasksOn(store, date);
   if (!checks.length) return null;
   const top = ((minutes(CHECK_TIME) - START_H * 60) / 60) * HOUR;
-  const lineColor = checks.length === 1 ? checks[0].student.color : "var(--ink-2)";
   return (
-    <div className="absolute inset-x-0 z-[1]" style={{ top }} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
-      <div className="relative flex items-center">
-        <span className="-ml-[3px] h-[7px] w-[7px] rounded-full" style={{ background: lineColor }} />
-        <span className="h-[2px] flex-1" style={{ background: lineColor }} />
-      </div>
-      <div className="flex flex-wrap gap-[3px] px-[3px] pt-[3px]">
-        {checks.map((c) => (
-          <div
-            key={c.key}
-            className={cx(
-              "flex min-w-0 max-w-full items-center gap-1 rounded-full border bg-surface py-[1px] pl-[2px] pr-2 text-[11px] leading-tight transition-opacity duration-300",
-              c.done && "opacity-55",
-            )}
-            style={{ borderColor: c.student.color }}
-          >
-            <button
-              type="button"
-              aria-label={c.done ? `Mark check for ${c.student.name} not done` : `Mark check for ${c.student.name} done`}
-              onClick={() => setDone(c, !c.done)}
-              className="flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full border transition-colors duration-200"
-              style={{ borderColor: c.student.color, background: c.done ? c.student.color : "transparent", color: textOn(c.student.color) }}
-            >
-              {c.done && <Check size={10} strokeWidth={3} />}
-            </button>
-            <button type="button" onClick={() => onOpen(c.student.id)} className={cx("min-w-0 truncate font-semibold", c.done && "line-through")} title={c.contents ?? undefined}>
-              {c.student.name}
-            </button>
-          </div>
-        ))}
-      </div>
+    <div className="absolute inset-x-0 z-[1] flex flex-col gap-[2px]" style={{ top: top + 1 }} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+      {checks.map((c) => (
+        <button
+          key={c.key}
+          type="button"
+          onClick={() => onOpen(c.student.id)}
+          title={`${CHECK_TIME}${c.contents ? ` · ${c.contents}` : ""}`}
+          className={cx(
+            "mx-[2px] flex h-[19px] min-w-0 items-center gap-1 overflow-hidden rounded-[6px] px-1.5 text-left text-[11px] leading-none transition-[filter,opacity] duration-300 hover:brightness-110",
+            c.done && "opacity-45",
+          )}
+          style={{ background: c.student.color, color: textOn(c.student.color) }}
+        >
+          <span className={cx("truncate font-semibold", c.done && "line-through")}>Check {c.student.name}</span>
+        </button>
+      ))}
     </div>
   );
 }
