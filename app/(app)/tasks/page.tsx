@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Flag, Plus, Trash2 } from "lucide-react";
+import { CheckRow, CheckSheet } from "@/components/checks";
 import { useData } from "@/components/data";
 import { MilestoneBar } from "@/components/milestone-bar";
 import { Strike, TASK_ENTER, TASK_EXIT, useCompleteTask } from "@/components/complete";
@@ -9,6 +10,7 @@ import { Field, Page, PageHeader, Section, Segmented, Sheet, Tick } from "@/comp
 import { addDays, relDay, today, weekday } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import { describeTask, duplicateTask } from "@/lib/dupes";
+import { checkTasksBetween, type CheckTask } from "@/lib/teaching";
 import type { Task } from "@/lib/types";
 
 /** A time at the end of the text: "3pm", "9:30am", "15:00", "15h", "15h30", optionally after "at". */
@@ -69,13 +71,24 @@ export default function TasksPage() {
   const [showDone, setShowDone] = useState(false);
   const t = today();
 
-  const lists = useMemo(() => ["All", ...Array.from(new Set(["Personal", "Work", ...store.tasks.map((x) => x.list)]))], [store.tasks]);
+  const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
+  const checks = checkTasksBetween(store, t, 8).filter((c) => !c.done);
+  const lists = useMemo(
+    () => ["All", ...Array.from(new Set(["Personal", "Work", ...store.tasks.map((x) => x.list), ...(checks.length ? ["Teaching"] : [])]))],
+    [store.tasks, checks.length],
+  );
   const visible = store.tasks.filter((x) => list === "All" || x.list === list);
-  const open = visible.filter((x) => !x.done);
-  const groups: { title: string; items: Task[]; tone?: string }[] = [
+  // Homework checks come from the timetable; saved ones are listed through it too.
+  const open = visible.filter((x) => !x.done && !x.student_id);
+  const shownChecks = list === "All" || list === "Teaching" ? checks : [];
+  const groups: { title: string; items: Task[]; checks?: CheckTask[]; tone?: string }[] = [
     { title: "Overdue", items: open.filter((x) => x.due_on && x.due_on < t), tone: "text-pen" },
-    { title: "Today", items: open.filter((x) => x.due_on === t) },
-    { title: "Next 7 days", items: open.filter((x) => x.due_on && x.due_on > t && x.due_on <= addDays(t, 7)) },
+    { title: "Today", items: open.filter((x) => x.due_on === t), checks: shownChecks.filter((c) => c.date === t) },
+    {
+      title: "Next 7 days",
+      items: open.filter((x) => x.due_on && x.due_on > t && x.due_on <= addDays(t, 7)),
+      checks: shownChecks.filter((c) => c.date > t),
+    },
     { title: "Later", items: open.filter((x) => x.due_on && x.due_on > addDays(t, 7)) },
     { title: "No date", items: open.filter((x) => !x.due_on && x.horizon !== "long") },
     { title: "Long-term goals", items: open.filter((x) => !x.due_on && x.horizon === "long") },
@@ -136,8 +149,8 @@ export default function TasksPage() {
 
       {groups.map(
         (g) =>
-          g.items.length > 0 && (
-            <Section key={g.title} title={<span className={g.tone}>{g.title} · {g.items.length}</span>}>
+          g.items.length + (g.checks?.length ?? 0) > 0 && (
+            <Section key={g.title} title={<span className={g.tone}>{g.title} · {g.items.length + (g.checks?.length ?? 0)}</span>}>
               <div className="-mx-2 flex flex-col overflow-x-clip px-2">
                 <AnimatePresence initial={false}>
                   {g.items
@@ -145,12 +158,15 @@ export default function TasksPage() {
                     .map((task) => (
                       <TaskRow key={task.id} task={task} onOpen={() => setOpenId(task.id)} />
                     ))}
+                  {g.checks?.map((c) => (
+                    <CheckRow key={c.key} c={c} onOpen={() => setOpenCheck({ studentId: c.student.id, date: c.date })} />
+                  ))}
                 </AnimatePresence>
               </div>
             </Section>
           ),
       )}
-      {open.length === 0 && <p className="mb-8 text-[14px] text-muted">Nothing open. Enjoy it, or add the next thing above.</p>}
+      {open.length + shownChecks.length === 0 && <p className="mb-8 text-[14px] text-muted">Nothing open. Enjoy it, or add the next thing above.</p>}
 
       {done.length > 0 && (
         <div>
@@ -160,7 +176,11 @@ export default function TasksPage() {
           {showDone && (
             <AnimatePresence initial={false}>
               {done.slice(0, 50).map((task) => (
-                <TaskRow key={task.id} task={task} onOpen={() => setOpenId(task.id)} />
+                <TaskRow
+                  key={task.id}
+                  task={task}
+                  onOpen={() => (task.student_id && task.due_on ? setOpenCheck({ studentId: task.student_id, date: task.due_on }) : setOpenId(task.id))}
+                />
               ))}
             </AnimatePresence>
           )}
@@ -168,6 +188,7 @@ export default function TasksPage() {
       )}
 
       <TaskSheet task={openTask} onClose={() => setOpenId(null)} />
+      <CheckSheet at={openCheck} onClose={() => setOpenCheck(null)} />
     </Page>
   );
 }

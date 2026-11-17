@@ -1,8 +1,9 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { needsScope, useCalendarEdits, type Scope, type Target } from "@/components/calendar-edit";
+import { CheckSheet, useCheckActions } from "@/components/checks";
 import { ColorPicker } from "@/components/color-picker";
 import { useData } from "@/components/data";
 import { EventSheet, LessonSheet } from "@/components/event-sheet";
@@ -10,7 +11,7 @@ import { Page } from "@/components/ui";
 import { textOn } from "@/lib/colors";
 import { addDays, fmtDay, fromMinutes, minutes, MONTHS, parseDate, startOfWeek, today, WD_SHORT } from "@/lib/dates";
 import { cx } from "@/lib/format";
-import { agendaOn, type Occurrence } from "@/lib/teaching";
+import { agendaOn, CHECK_TIME, checkTasksOn, type Occurrence } from "@/lib/teaching";
 
 const START_H = 6;
 const END_H = 24;
@@ -34,7 +35,7 @@ function useIsMobile() {
 type Placed = Occurrence & { lane: number; lanes: number; top: number; height: number };
 
 function layout(items: Occurrence[]): Placed[] {
-  const timed = items.filter((o) => o.start && o.end).sort((a, b) => minutes(a.start!) - minutes(b.start!));
+  const timed = items.filter((o) => o.start && o.end && o.kind !== "check").sort((a, b) => minutes(a.start!) - minutes(b.start!));
   const placed: Placed[] = [];
   let cluster: Placed[] = [];
   let clusterEnd = -1;
@@ -85,6 +86,7 @@ export default function CalendarPage() {
   const [newAt, setNewAt] = useState<{ date: string; start: string; end?: string } | null>(null);
   const [openEvent, setOpenEvent] = useState<{ id: string; date: string } | null>(null);
   const [openLesson, setOpenLesson] = useState<Occurrence | null>(null);
+  const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
   const [pending, setPending] = useState<Pending | null>(null);
   const [colorMenu, setColorMenu] = useState<{ o: Occurrence; x: number; y: number } | null>(null);
@@ -112,6 +114,38 @@ export default function CalendarPage() {
     return () => clearInterval(i);
   }, []);
 
+  // The header never moves: the page itself doesn't scroll here, only the time grid does.
+  const caption = useRef<HTMLParagraphElement>(null);
+  const [gridH, setGridH] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const prev = [root.style.overflow, document.body.style.overflow, root.style.overscrollBehavior];
+    root.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    root.style.overscrollBehavior = "none";
+    window.scrollTo(0, 0);
+    const fit = () => {
+      const sc = scroller.current;
+      if (!sc) return;
+      const nav = document.querySelector<HTMLElement>("[data-bottom-nav]");
+      const navH = nav && getComputedStyle(nav).display !== "none" ? nav.offsetHeight : 0;
+      const capH = caption.current ? caption.current.offsetHeight + 8 : 0;
+      const bottomGap = mobile ? 10 : 24;
+      setGridH(Math.max(200, window.innerHeight - sc.getBoundingClientRect().top - capH - navH - bottomGap));
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    if (caption.current) ro.observe(caption.current);
+    window.addEventListener("resize", fit);
+    window.visualViewport?.addEventListener("resize", fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", fit);
+      window.visualViewport?.removeEventListener("resize", fit);
+      [root.style.overflow, document.body.style.overflow, root.style.overscrollBehavior] = prev;
+    };
+  }, [mobile]);
+
   const step = mobile ? 1 : 7;
   const first = parseDate(days[0]);
   const title = `${MONTHS[first.getMonth()]} ${first.getFullYear()}`;
@@ -119,6 +153,7 @@ export default function CalendarPage() {
 
   const onOcc = (o: Occurrence) => {
     if (o.kind === "event" && o.event) setOpenEvent({ id: o.event.id, date: o.date });
+    else if (o.kind === "check" && o.studentId) setOpenCheck({ studentId: o.studentId, date: o.date });
     else setOpenLesson(o);
   };
 
@@ -357,7 +392,11 @@ export default function CalendarPage() {
             ))}
           </div>
         )}
-        <div ref={scroller} className="relative max-h-[calc(100dvh-230px)] md:max-h-[calc(100dvh-200px)] overflow-y-auto">
+        <div
+          ref={scroller}
+          className="relative overflow-y-auto overscroll-contain"
+          style={{ height: gridH ?? undefined, maxHeight: gridH ? undefined : "calc(100dvh - 230px)" }}
+        >
           <div className="grid" style={{ gridTemplateColumns: `52px repeat(${days.length}, 1fr)` }}>
             {/* Hours */}
             <div className="relative" style={{ height: (END_H - START_H) * HOUR }}>
@@ -404,6 +443,7 @@ export default function CalendarPage() {
                       onMenu={(x, y) => !dragRef.current && setColorMenu({ o, x, y })}
                     />
                   ))}
+                  <CheckLine date={d} onOpen={(studentId) => !suppressClick.current && setOpenCheck({ studentId, date: d })} />
                   {ghost && <Ghost drag={ghost} />}
                   {d === t && nowMin >= START_H * 60 && (
                     <div className="pointer-events-none absolute inset-x-0 z-[2] flex items-center" style={{ top: ((nowMin - START_H * 60) / 60) * HOUR }}>
@@ -417,11 +457,11 @@ export default function CalendarPage() {
           </div>
         </div>
       </div>
-      <p className="mt-2 text-[12px] text-muted">
+      <p ref={caption} className="mt-2 hidden text-[12px] text-muted md:block">
         {mobile
           ? "Press and hold a block to move it, or hold its bottom edge to change the length. Tap empty space to add an event."
           : "Drag a block to move it, drag its bottom edge to change the length, and right-click it to change the colour. Drag across empty space to add an event."}{" "}
-        Dashed blocks are homework checks.
+        The line at {CHECK_TIME} holds your homework checks: tick one off, or tap its name to change what to check.
       </p>
 
       {/* "This one or all?" after moving something that repeats */}
@@ -498,6 +538,7 @@ export default function CalendarPage() {
         }}
       />
       <LessonSheet occ={openLesson} onClose={() => setOpenLesson(null)} />
+      <CheckSheet at={openCheck} onClose={() => setOpenCheck(null)} />
     </Page>
   );
 }
@@ -592,6 +633,49 @@ function Ghost({ drag }: { drag: Drag }) {
     >
       <div className="font-semibold truncate">{o ? o.title : "New event"}</div>
       <div className="num opacity-90">{label}</div>
+    </div>
+  );
+}
+
+/** Homework checks sit on one line at 22:30, like tasks in Google Calendar, instead of taking up a block. */
+function CheckLine({ date, onOpen }: { date: string; onOpen: (studentId: string) => void }) {
+  const { store } = useData();
+  const { setDone } = useCheckActions();
+  const checks = checkTasksOn(store, date);
+  if (!checks.length) return null;
+  const top = ((minutes(CHECK_TIME) - START_H * 60) / 60) * HOUR;
+  const lineColor = checks.length === 1 ? checks[0].student.color : "var(--ink-2)";
+  return (
+    <div className="absolute inset-x-0 z-[1]" style={{ top }} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+      <div className="relative flex items-center">
+        <span className="-ml-[3px] h-[7px] w-[7px] rounded-full" style={{ background: lineColor }} />
+        <span className="h-[2px] flex-1" style={{ background: lineColor }} />
+      </div>
+      <div className="flex flex-wrap gap-[3px] px-[3px] pt-[3px]">
+        {checks.map((c) => (
+          <div
+            key={c.key}
+            className={cx(
+              "flex min-w-0 max-w-full items-center gap-1 rounded-full border bg-surface py-[1px] pl-[2px] pr-2 text-[11px] leading-tight transition-opacity duration-300",
+              c.done && "opacity-55",
+            )}
+            style={{ borderColor: c.student.color }}
+          >
+            <button
+              type="button"
+              aria-label={c.done ? `Mark check for ${c.student.name} not done` : `Mark check for ${c.student.name} done`}
+              onClick={() => setDone(c, !c.done)}
+              className="flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full border transition-colors duration-200"
+              style={{ borderColor: c.student.color, background: c.done ? c.student.color : "transparent", color: textOn(c.student.color) }}
+            >
+              {c.done && <Check size={10} strokeWidth={3} />}
+            </button>
+            <button type="button" onClick={() => onOpen(c.student.id)} className={cx("min-w-0 truncate font-semibold", c.done && "line-through")} title={c.contents ?? undefined}>
+              {c.student.name}
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

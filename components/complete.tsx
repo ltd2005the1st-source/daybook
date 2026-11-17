@@ -41,7 +41,7 @@ export const COMPLETE_HOLD_MS = 750;
  * Ticking a task: the tick fills blue and draws its check, the title is crossed out,
  * then the task is saved as done and slides out of the list.
  */
-export function useCompleteTask(task: Task) {
+export function useCompleteTask(task: Pick<Task, "id" | "title" | "done">, setDone?: (done: boolean) => void) {
   const { update, toast } = useData();
   const [completing, setCompleting] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -49,14 +49,17 @@ export function useCompleteTask(task: Task) {
     if (timer.current) clearTimeout(timer.current);
   }, []);
 
+  const save = (done: boolean) =>
+    setDone ? setDone(done) : update("tasks", task.id, done ? { done, done_at: new Date().toISOString() } : { done, done_at: null });
+
   const commit = () => {
-    update("tasks", task.id, { done: true, done_at: new Date().toISOString() });
-    toast(`Done: ${task.title}`, () => update("tasks", task.id, { done: false, done_at: null }));
+    save(true);
+    toast(`Done: ${task.title}`, () => save(false));
   };
 
   const toggle = () => {
     if (task.done) {
-      update("tasks", task.id, { done: false, done_at: null });
+      save(false);
       return;
     }
     if (completing) {

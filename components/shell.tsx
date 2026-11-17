@@ -152,7 +152,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Mobile tab bar */}
-      <nav className="no-print md:hidden fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/90 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+      <nav data-bottom-nav className="no-print md:hidden fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/90 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         <div className="grid grid-cols-6">
           {NAV.map((n) => {
             const active = n.href === "/" ? path === "/" : path.startsWith(n.href);

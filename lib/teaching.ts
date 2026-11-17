@@ -1,5 +1,5 @@
-import { addDays, daysInMonth, fromMinutes, minutes, weekday } from "./dates";
-import type { CalEvent, Lesson, Slot, Store, Student } from "./types";
+import { addDays, daysInMonth, minutes, weekday } from "./dates";
+import type { CalEvent, Homework, Lesson, Slot, Store, Student, Task } from "./types";
 
 export type DayMark = "taught" | "missed_owe" | "cancelled" | "planned" | "none";
 
@@ -56,6 +56,7 @@ export type Occurrence = {
   event?: CalEvent;
   status?: DayMark;
   tentative?: boolean;
+  done?: boolean;
 };
 
 /** Lessons on a given date (from weekly slots plus extra lessons). Cancelled/missed ones are kept so they can be shown struck out. */
@@ -98,32 +99,65 @@ export function lessonsOn(store: Store, date: string): Occurrence[] {
   return out;
 }
 
-/** Homework check blocks: the night before each lesson, or at fixed weekly times. */
-export function checksOn(store: Store, date: string): Occurrence[] {
-  const out: Occurrence[] = [];
+/** Homework checks are tasks at 22:30 the night before each class. */
+export const CHECK_TIME = "22:30";
+
+export type CheckTask = {
+  key: string;
+  student: Student;
+  date: string; // the night you check
+  classDate: string; // the class it is for
+  row: Task | undefined; // saved once you tick it or change this one
+  contents: string | null;
+  done: boolean;
+  homework: Homework[];
+};
+
+/** A check's own text if you changed just this one, otherwise the student's usual text. */
+export const checkContents = (st: Student, row: Task | undefined) => (row && row.notes != null ? row.notes : st.check_note ?? null);
+
+export function checkTasksOn(store: Store, date: string): CheckTask[] {
+  const out: CheckTask[] = [];
+  const classDate = addDays(date, 1);
   for (const st of store.students) {
     if (!st.active) continue;
-    const mk = (start: string) => ({
-      key: `check:${st.id}:${date}:${start}`,
-      kind: "check" as const,
-      title: `Check ${st.name}`,
+    const row = store.tasks.find((t) => t.student_id === st.id && t.due_on === date);
+    const hasClass = lessonsOn(store, classDate).some(
+      (o) => o.studentId === st.id && (o.status === "planned" || o.status === "taught"),
+    );
+    if (!hasClass && !row?.done) continue;
+    out.push({
+      key: `check:${st.id}:${date}`,
+      student: st,
       date,
-      start,
-      end: fromMinutes(minutes(start) + (st.check_minutes || 60)),
-      color: st.color,
-      studentId: st.id,
+      classDate,
+      row,
+      contents: checkContents(st, row),
+      done: !!row?.done,
+      homework: store.homework.filter((h) => h.student_id === st.id && h.status === "open"),
     });
-    if (st.check_mode === "fixed") {
-      if (st.check_days.includes(weekday(date))) out.push(mk(st.check_time));
-    } else {
-      const tomorrow = addDays(date, 1);
-      const next = lessonsOn(store, tomorrow).find(
-        (o) => o.studentId === st.id && (o.status === "planned" || o.status === "taught"),
-      );
-      if (next) out.push(mk(st.check_time));
-    }
   }
   return out;
+}
+
+/** Check tasks from `from` for `days` nights. */
+export function checkTasksBetween(store: Store, from: string, days: number): CheckTask[] {
+  return Array.from({ length: days }, (_, i) => checkTasksOn(store, addDays(from, i))).flat();
+}
+
+/** Checks as calendar items: a line at 22:30, not a block. */
+export function checksOn(store: Store, date: string): Occurrence[] {
+  return checkTasksOn(store, date).map((c) => ({
+    key: c.key,
+    kind: "check" as const,
+    title: `Check ${c.student.name}`,
+    date,
+    start: CHECK_TIME,
+    end: CHECK_TIME,
+    color: c.student.color,
+    studentId: c.student.id,
+    done: c.done,
+  }));
 }
 
 export function eventsOn(store: Pick<Store, "events">, date: string): Occurrence[] {

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useData } from "./data";
-import { ConfirmButton, Field, MinutesInput, Sheet, Tick, Segmented, Dot } from "./ui";
+import { ConfirmButton, Field, Sheet, Tick, Segmented, Dot } from "./ui";
 import { WD_SHORT, fmtDay, minutes, today } from "@/lib/dates";
 import { cx, parseAmount, vnd } from "@/lib/format";
 import { nextLesson, slotsOf } from "@/lib/teaching";
@@ -53,11 +53,7 @@ function HomeworkTab({ s }: { s: Student }) {
             Next class <b>{fmtDay(nl.date, { weekday: true })}</b> at <span className="num">{nl.start}</span>.{" "}
           </>
         ) : null}
-        {s.check_mode === "night_before" ? (
-          <>You check homework the night before, at <span className="num">{s.check_time}</span>.</>
-        ) : (
-          <>You check homework every {s.check_days.map((d) => WD_SHORT[d]).join(", ") || "…"} at <span className="num">{s.check_time}</span>.</>
-        )}
+        <>A check task comes up at <span className="num">22:30</span> the night before each class.</>
       </p>
       <form
         onSubmit={(e) => {
@@ -268,42 +264,20 @@ function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
         </div>
       </Field>
 
-      <div className="label mt-5 mb-2">Homework check</div>
-      <Segmented
-        value={s.check_mode}
-        onChange={(v) => update("students", s.id, { check_mode: v })}
-        options={[
-          { value: "night_before", label: "Night before class" },
-          { value: "fixed", label: "Fixed days" },
-        ]}
+      <div className="label mt-5 mb-2">What to check every time</div>
+      <textarea
+        key={s.id}
+        className="field min-h-[80px] text-[14px]"
+        placeholder="e.g. Workbook pages, vocabulary notebook"
+        defaultValue={s.check_note ?? ""}
+        onBlur={(e) => {
+          const v = e.target.value.trim() || null;
+          if (v !== (s.check_note ?? null)) update("students", s.id, { check_note: v });
+        }}
       />
-      <div className="mt-3 grid grid-cols-3 gap-3">
-        <Field label="Starts at">
-          <input type="time" className="field num" value={s.check_time} onChange={(e) => update("students", s.id, { check_time: e.target.value })} />
-        </Field>
-        <Field label="Minutes">
-          <input type="number" min={15} step={15} className="field num" value={s.check_minutes} onChange={(e) => update("students", s.id, { check_minutes: +e.target.value })} />
-        </Field>
-        <Field label="Remind me (min before)">
-          <MinutesInput value={Array.isArray(s.remind_before) ? s.remind_before : [s.remind_before]} onChange={(v) => update("students", s.id, { remind_before: v })} />
-        </Field>
-      </div>
-      {s.check_mode === "fixed" && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {WEEK.map((d) => {
-            const on = s.check_days.includes(d);
-            return (
-              <button
-                key={d}
-                onClick={() => update("students", s.id, { check_days: on ? s.check_days.filter((x) => x !== d) : [...s.check_days, d] })}
-                className={cx("rounded-md border px-2.5 py-1 text-[13px]", on ? "border-ink bg-ink text-bg" : "border-line text-ink-2 hover:bg-hover")}
-              >
-                {WD_SHORT[d]}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      <p className="mb-3 mt-1 text-[12px] text-muted">
+        Shown on every 22:30 check for {s.name} and in its reminder. To change one night only, tap that check on the Calendar or under Checks on Teaching.
+      </p>
 
       <div className="mt-6 flex items-center justify-between border-t border-line pt-4">
         <label className="flex items-center gap-2 text-[13.5px]">

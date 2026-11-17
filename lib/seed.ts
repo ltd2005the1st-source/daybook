@@ -15,6 +15,7 @@ export function buildSeed(): Store {
     members: [],
     makeup_baseline: 0,
     active: true,
+    check_note: null,
     check_mode: "night_before",
     check_time: "22:30",
     check_days: [],

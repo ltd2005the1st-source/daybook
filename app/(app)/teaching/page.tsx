@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { AnimatePresence } from "motion/react";
+import { CheckRow, CheckSheet } from "@/components/checks";
 import { ChevronLeft, ChevronRight, Plus, ReceiptText } from "lucide-react";
 import { useData } from "@/components/data";
 import { Legend, Register } from "@/components/register";
@@ -8,7 +10,7 @@ import { MakeupStepper, StudentSheet, STUDENT_COLORS } from "@/components/studen
 import { Dot, Field, Page, PageHeader, Section, Segmented, Sheet, Tick } from "@/components/ui";
 import { fmtMonth, monthOf, relDay, shiftMonth, today } from "@/lib/dates";
 import { parseAmount, vnd } from "@/lib/format";
-import { checksOn, makeupsOwed, nextLesson, taughtIn } from "@/lib/teaching";
+import { checkTasksBetween, makeupsOwed, nextLesson, taughtIn } from "@/lib/teaching";
 import type { Student } from "@/lib/types";
 
 export default function TeachingPage() {
@@ -33,7 +35,8 @@ export default function TeachingPage() {
     .filter((x) => x.items.length)
     .sort((a, b) => (a.next?.date ?? "9").localeCompare(b.next?.date ?? "9"));
 
-  const tonight = checksOn(store, t);
+  const checks = checkTasksBetween(store, t, 7).filter((c) => !c.done);
+  const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
 
   return (
     <Page wide>
@@ -82,13 +85,19 @@ export default function TeachingPage() {
         </div>
 
         <aside>
+          <Section title="Checks at 22:30">
+            {checks.length === 0 && <p className="text-[13.5px] text-muted">No classes in the next week, so no checks.</p>}
+            <div className="flex flex-col overflow-x-clip">
+              <AnimatePresence initial={false}>
+                {checks.map((c) => (
+                  <CheckRow key={c.key} c={c} compact onOpen={() => setOpenCheck({ studentId: c.student.id, date: c.date })} />
+                ))}
+              </AnimatePresence>
+            </div>
+            <p className="mt-1 text-[12px] text-muted">One for each student with class the next day. Tap one to change what to check, for that night or every night.</p>
+          </Section>
+
           <Section title="Homework to check">
-            {tonight.length > 0 && (
-              <div className="mb-3 rounded-lg border border-pen/30 bg-pen-soft px-3 py-2 text-[13px]">
-                <span className="font-semibold text-pen">Tonight</span>{" "}
-                {tonight.map((c) => `${c.title.replace("Check ", "")} at ${c.start}`).join(", ")}
-              </div>
-            )}
             {openHw.length === 0 && <p className="text-[13.5px] text-muted">Nothing waiting. Log homework from a student’s page.</p>}
             <div className="flex flex-col gap-4">
               {openHw.map(({ s, items, next }) => (
@@ -155,6 +164,7 @@ export default function TeachingPage() {
 
       <StudentSheet student={pickedStudent} onClose={() => setPicked(null)} />
       <AddStudent open={adding} onClose={() => setAdding(false)} onCreated={(s) => setPicked(s.id)} count={store.students.length} />
+      <CheckSheet at={openCheck} onClose={() => setOpenCheck(null)} />
     </Page>
   );
 }

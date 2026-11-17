@@ -34,7 +34,8 @@ export type Student = Base & {
   rate: number; // VND per session
   makeup_baseline: number; // makeups owed before tracking started
   active: boolean;
-  check_mode: "night_before" | "fixed";
+  check_note: string | null; // what to check every time (each night can be changed on its own)
+  check_mode: "night_before" | "fixed"; // no longer used: checks are always the night before
   check_time: string; // when the homework check block starts
   check_days: number[]; // weekdays for fixed mode (0 = Sunday)
   check_minutes: number; // how long the check block is
@@ -113,6 +114,7 @@ export type Task = Base & {
   done: boolean;
   done_at: string | null;
   sort: number;
+  student_id?: string | null; // set on homework-check tasks
 };
 
 export type Milestone = Base & {

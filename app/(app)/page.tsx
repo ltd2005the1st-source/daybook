@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { Strike, TASK_ENTER, TASK_EXIT, useCompleteTask } from "@/components/complete";
+import { CheckRow, CheckSheet } from "@/components/checks";
 import { useData } from "@/components/data";
 import { MilestoneBar } from "@/components/milestone-bar";
 import { QuickAdd } from "@/components/money";
@@ -11,7 +12,7 @@ import { useMarkLesson } from "@/components/register";
 import { Dot, Page, Section, Tick } from "@/components/ui";
 import { addDays, fmtDay, minutes, MONTHS, monthOf, parseDate, startOfWeek, today, WD_LONG } from "@/lib/dates";
 import { cx, vnd } from "@/lib/format";
-import { agendaOn, makeupsOwed, taughtIn, type Occurrence } from "@/lib/teaching";
+import { agendaOn, checkTasksOn, makeupsOwed, taughtIn, type Occurrence } from "@/lib/teaching";
 import type { Task } from "@/lib/types";
 
 function DueTask({ task, today: t }: { task: Task; today: string }) {
@@ -64,7 +65,9 @@ export default function TodayPage() {
   const agenda = agendaOn(store, t);
   const tomorrow = agendaOn(store, addDays(t, 1)).filter((o) => o.kind === "lesson");
   const checks = agenda.filter((o) => o.kind === "check");
-  const tasks = store.tasks.filter((x) => !x.done && x.due_on && x.due_on <= t).sort((a, b) => Number(b.priority) - Number(a.priority));
+  const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
+  const checkTasks = checkTasksOn(store, t).filter((c) => !c.done);
+  const tasks = store.tasks.filter((x) => !x.done && !x.student_id && x.due_on && x.due_on <= t).sort((a, b) => Number(b.priority) - Number(a.priority));
   const month = monthOf(t);
   const spent = store.transactions.filter((x) => x.kind === "expense" && x.date.startsWith(month)).reduce((n, x) => n + x.amount, 0);
   const earned =
@@ -107,7 +110,7 @@ export default function TodayPage() {
           {name ? `, ${name}` : ""}.
         </h1>
         <p className="mt-2 max-w-[640px] text-[15px] text-ink-2">
-          {summaryLine(agenda, checks.length, tasks.length, nowMin)}
+          {summaryLine(agenda, checks.filter((c) => !c.done).length, tasks.length, nowMin)}
         </p>
       </header>
 
@@ -137,13 +140,13 @@ export default function TodayPage() {
                     </span>
                     <div className={cx("min-w-0 rounded-md px-2 py-1 -mx-2", live && "bg-hover")}>
                       <div className="flex items-center gap-2">
-                        <span className={cx("text-[14.5px] font-medium", (o.status === "cancelled" || o.status === "missed_owe") && "line-through text-muted")}>
+                        <span className={cx("text-[14.5px] font-medium", (o.status === "cancelled" || o.status === "missed_owe" || o.done) && "line-through text-muted")}>
                           {o.title}
                         </span>
                         {live && <span className="rounded bg-pen px-1.5 text-[10.5px] font-bold uppercase tracking-wide text-white">Now</span>}
                       </div>
                       <div className="text-[12px] text-muted">
-                        <span className="num">{o.start && o.end ? `${o.start}–${o.end}` : ""}</span>
+                        <span className="num">{o.kind !== "check" && o.start && o.end ? `${o.start}–${o.end}` : ""}</span>
                         {o.kind === "check" && o.studentId && <HwCount studentId={o.studentId} />}
                       </div>
                       {o.kind === "lesson" && o.studentId && (o.status === "planned" || o.status === "taught") && (
@@ -167,11 +170,14 @@ export default function TodayPage() {
 
         <div>
           <Section title="Due today" action={<Link href="/tasks" className="text-[12.5px] text-muted hover:text-ink">All tasks →</Link>}>
-            {tasks.length === 0 && <p className="text-[13.5px] text-muted">Nothing due. Nice.</p>}
+            {tasks.length + checkTasks.length === 0 && <p className="text-[13.5px] text-muted">Nothing due. Nice.</p>}
             <div className="flex flex-col overflow-x-clip">
               <AnimatePresence initial={false}>
                 {tasks.slice(0, 8).map((x) => (
                   <DueTask key={x.id} task={x} today={t} />
+                ))}
+                {checkTasks.map((c) => (
+                  <CheckRow key={c.key} c={c} compact onOpen={() => setOpenCheck({ studentId: c.student.id, date: c.date })} />
                 ))}
               </AnimatePresence>
               {tasks.length > 8 && <Link href="/tasks" className="text-[12.5px] text-muted">+{tasks.length - 8} more</Link>}
@@ -228,6 +234,7 @@ export default function TodayPage() {
           </Section>
         </div>
       </div>
+      <CheckSheet at={openCheck} onClose={() => setOpenCheck(null)} />
     </Page>
   );
 }

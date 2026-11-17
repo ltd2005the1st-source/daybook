@@ -1,5 +1,5 @@
 import { fromMinutes, minutes } from "./dates";
-import { checksOn, eventsOn, lessonsOn } from "./teaching";
+import { CHECK_TIME, checkTasksOn, eventsOn, lessonsOn } from "./teaching";
 import { DEFAULT_REMIND, type Store } from "./types";
 
 export type Reminder = { key: string; at: number; title: string; body: string; url: string };
@@ -12,21 +12,23 @@ export type Reminder = { key: string; at: number; title: string; body: string; u
 export function remindersFor(store: Store, date: string): Reminder[] {
   const out: Reminder[] = [];
 
-  // Homework checks (night before class, or fixed days)
-  for (const c of checksOn(store, date)) {
-    const st = store.students.find((s) => s.id === c.studentId);
-    if (!st || !c.start) continue;
-    const open = store.homework.filter((h) => h.student_id === st.id && h.status === "open");
-    const before = Array.isArray(st.remind_before) && st.remind_before.length ? st.remind_before : DEFAULT_REMIND;
-    for (const r of before) {
-      out.push({
-        key: `check:${st.id}:${date}:${r}`,
-        at: minutes(c.start) - r,
-        title: `Check ${st.name}’s homework at ${c.start}`,
-        body: open.length ? open.map((h) => `• ${h.title}`).join("\n") : "No homework logged yet. Log what you assigned.",
-        url: "/teaching",
-      });
-    }
+  // Homework checks: one reminder at 22:30 for every student with class tomorrow
+  const checks = checkTasksOn(store, date).filter((c) => !c.done);
+  if (checks.length) {
+    const one = checks.length === 1;
+    out.push({
+      key: `check:${date}:${CHECK_TIME}:${checks.map((c) => c.student.id).sort().join(",")}`,
+      at: minutes(CHECK_TIME),
+      title: one ? `Check ${checks[0].student.name}’s homework` : `Check homework: ${checks.map((c) => c.student.name).join(", ")}`,
+      body: checks
+        .map((c) => {
+          const lines = [c.contents?.trim(), ...c.homework.map((h) => `• ${h.title}`)].filter(Boolean);
+          const text = lines.length ? lines.join("\n") : "Nothing logged yet.";
+          return one ? text : `${c.student.name}: ${text.replace(/\n/g, "; ")}`;
+        })
+        .join("\n"),
+      url: "/calendar",
+    });
   }
 
   // Classes
@@ -45,7 +47,7 @@ export function remindersFor(store: Store, date: string): Reminder[] {
 
   // Tasks with a time
   for (const t of store.tasks) {
-    if (t.done || t.due_on !== date || !t.due_time) continue;
+    if (t.done || t.student_id || t.due_on !== date || !t.due_time) continue;
     for (const r of DEFAULT_REMIND) {
       out.push({
         key: `task:${t.id}:${date}:${t.due_time}:${r}`,

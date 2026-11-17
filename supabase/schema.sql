@@ -47,6 +47,7 @@ create table if not exists public.students (
   rate bigint not null default 0,
   makeup_baseline int not null default 0,
   active boolean not null default true,
+  check_note text,
   check_mode text not null default 'night_before' check (check_mode in ('night_before','fixed')),
   check_time text not null default '22:30',
   check_days int[] not null default '{}',
@@ -139,7 +140,8 @@ create table if not exists public.tasks (
   horizon text not null default 'now' check (horizon in ('now','soon','long')),
   done boolean not null default false,
   done_at timestamptz,
-  sort int not null default 0
+  sort int not null default 0,
+  student_id uuid references public.students on delete cascade
 );
 
 create table if not exists public.milestones (
@@ -222,3 +224,8 @@ begin
     execute format('alter table public.%I replica identity full', t);
   end loop;
 end $$;
+
+-- Upgrades for databases made before these columns existed (safe to run again).
+alter table public.students add column if not exists check_note text;
+alter table public.tasks add column if not exists student_id uuid references public.students on delete cascade;
+create unique index if not exists tasks_one_check_per_night on public.tasks (user_id, student_id, due_on) where student_id is not null;

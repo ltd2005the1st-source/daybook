@@ -1,4 +1,5 @@
 "use client";
+import { HomeworkEditor } from "./checks";
 import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useData } from "./data";
@@ -188,7 +189,6 @@ export function LessonSheet({ occ, onClose }: { occ: Occurrence | null; onClose:
   const { store, update } = useData();
   const mark = useMarkLesson();
   const s = occ?.studentId ? store.students.find((x) => x.id === occ.studentId) : undefined;
-  const hw = s ? store.homework.filter((h) => h.student_id === s.id && h.status === "open") : [];
   const current = occ && s ? store.lessons.find((l) => l.student_id === s.id && l.date === occ.date)?.status ?? "planned" : "planned";
 
   return (
@@ -237,14 +237,7 @@ export function LessonSheet({ occ, onClose }: { occ: Occurrence | null; onClose:
               ))}
             </div>
           )}
-          <div className="label mb-1.5">Homework waiting to be checked</div>
-          {hw.length === 0 && <p className="text-[13.5px] text-muted">Nothing open.</p>}
-          {hw.map((h) => (
-            <div key={h.id} className="flex items-start gap-2.5 py-1.5">
-              <Tick checked={false} color="var(--pen)" label="Checked" onChange={() => update("homework", h.id, { status: "checked", checked_on: occ.date })} />
-              <span className="text-[14px]">{h.title}</span>
-            </div>
-          ))}
+          <HomeworkEditor studentId={s.id} name={s.name} />
           <div className="label mb-1.5 mt-5">Colour for {s.name}</div>
           <ColorPicker value={s.color} onChange={(c) => update("students", s.id, { color: c })} size={24} />
           <p className="mt-4 text-[12px] text-muted">

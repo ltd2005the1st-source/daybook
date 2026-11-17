@@ -1,6 +1,6 @@
 "use client";
 import { useData } from "./data";
-import { fmtDay, minutes, weekday } from "@/lib/dates";
+import { fmtDay, weekday } from "@/lib/dates";
 import { describeEvent, duplicateEvent } from "@/lib/dupes";
 import { lessonRow, lessonsOn, type Occurrence } from "@/lib/teaching";
 import type { Store, TableName, Tables } from "@/lib/types";
@@ -116,17 +116,6 @@ export function useCalendarEdits() {
           msg += " (this class only)";
         }
       }
-    } else if (o.kind === "check" && o.studentId) {
-      const st = store.students.find((x) => x.id === o.studentId);
-      if (!st) return false;
-      const len = Math.max(15, (minutes(to.end) || 1440) - minutes(to.start));
-      const patch: Partial<Tables["students"]> = { check_time: to.start, check_minutes: len };
-      if (moved && st.check_mode === "fixed") {
-        patch.check_days = [...new Set(st.check_days.map((d) => (d === weekday(o.date) ? weekday(to.date) : d)))];
-      }
-      upd("students", st.id, patch);
-      msg = `Homework checks for ${st.name}: ${span(to)}`;
-      if (moved && st.check_mode !== "fixed") msg += ". They stay the night before class, so only the time changed.";
     } else {
       return false;
     }
