@@ -309,3 +309,11 @@ body.cal-dragging * {
   cursor: grabbing !important;
   user-select: none !important;
 }
+
+/* Music: three bars that rise and fall while something plays */
+@keyframes music-bar {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+.music-bar { animation: music-bar 0.9s cubic-bezier(0.65, 0, 0.35, 1) infinite; height: 4px; }
+@media (prefers-reduced-motion: reduce) { .music-bar { animation: none; height: 9px; } }

@@ -17,6 +17,7 @@ const START_H = 6;
 const END_H = 24;
 const HOUR = 52;
 const SNAP = 15; // minutes
+const desktopNow = () => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches;
 const snap = (m: number) => Math.round(m / SNAP) * SNAP;
 const endLabel = (t: string | null) => (t === "00:00" ? "24:00" : t);
 
@@ -130,17 +131,21 @@ export default function CalendarPage() {
       const nav = document.querySelector<HTMLElement>("[data-bottom-nav]");
       const navH = nav && getComputedStyle(nav).display !== "none" ? nav.offsetHeight : 0;
       const capH = caption.current ? caption.current.offsetHeight + 8 : 0;
+      const dock = document.querySelector<HTMLElement>("[data-music-dock]");
+      const dockH = dock && !desktopNow() ? dock.offsetHeight + 8 : 0;
       const bottomGap = mobile ? 10 : 24;
-      setGridH(Math.max(200, window.innerHeight - sc.getBoundingClientRect().top - capH - navH - bottomGap));
+      setGridH(Math.max(200, window.innerHeight - sc.getBoundingClientRect().top - capH - navH - dockH - bottomGap));
     };
     fit();
     const ro = new ResizeObserver(fit);
     if (caption.current) ro.observe(caption.current);
     window.addEventListener("resize", fit);
+    window.addEventListener("daybook:dock", fit);
     window.visualViewport?.addEventListener("resize", fit);
     return () => {
       ro.disconnect();
       window.removeEventListener("resize", fit);
+      window.removeEventListener("daybook:dock", fit);
       window.visualViewport?.removeEventListener("resize", fit);
       [root.style.overflow, document.body.style.overflow, root.style.overscrollBehavior] = prev;
     };

@@ -14,6 +14,7 @@ import { Login } from "./login";
 import { Palette } from "./palette";
 import { cx } from "@/lib/format";
 import { NAV } from "./nav";
+import { MusicDock, MusicProvider } from "./music";
 
 
 function useTheme() {
@@ -69,6 +70,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     // Anything that animates without its own timing eases in and out the same way.
     <MotionConfig transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }} reducedMotion="user">
+    <MusicProvider>
     <div className="min-h-dvh md:flex">
       {/* Sidebar (desktop) */}
       <aside className="no-print hidden md:flex w-[232px] shrink-0 flex-col border-r border-line bg-sunken sticky top-0 h-dvh px-2.5 py-3">
@@ -147,13 +149,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="min-w-0 flex-1 pb-28 md:pb-10">
+      <main className="min-w-0 flex-1 pb-[calc(7rem+var(--dock,0px))] md:pb-[calc(2.5rem+var(--dock,0px))]">
         {ready ? children : <Loading />}
       </main>
 
       {/* Mobile tab bar */}
       <nav data-bottom-nav className="no-print md:hidden fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/90 backdrop-blur pb-[env(safe-area-inset-bottom)]">
-        <div className="grid grid-cols-6">
+        <div className="grid" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
           {NAV.map((n) => {
             const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
             return (
@@ -161,7 +163,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 key={n.href}
                 href={n.href}
                 className={cx(
-                  "flex flex-col items-center gap-0.5 py-2 text-[10.5px]",
+                  "flex min-w-0 flex-col items-center gap-0.5 py-2 text-[10px]",
                   active ? "text-ink font-semibold" : "text-muted",
                 )}
               >
@@ -174,6 +176,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </nav>
 
       <Palette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <MusicDock />
 
       {/* Toasts */}
       <div className="no-print fixed bottom-[calc(env(safe-area-inset-bottom)+80px)] md:bottom-6 left-1/2 z-50 -translate-x-1/2 flex flex-col gap-2 items-center">
@@ -209,6 +212,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </div>
     </div>
+    </MusicProvider>
     </MotionConfig>
   );
 }

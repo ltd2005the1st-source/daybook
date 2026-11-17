@@ -301,5 +301,6 @@ export function buildSeed(): Store {
     milestones: [],
     habits,
     habit_logs: [],
+    music: [],
   };
 }

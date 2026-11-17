@@ -12,6 +12,7 @@ import ReceiptView from "@/app/(app)/teaching/receipts/[id]/page";
 import MoneyPage from "@/app/(app)/money/page";
 import HabitsPage from "@/app/(app)/habits/page";
 import SettingsPage from "@/app/(app)/settings/page";
+import MusicPage from "@/app/(app)/music/page";
 
 const params = new Map<string, Promise<{ id: string }>>();
 function receiptParams(id: string) {
@@ -34,6 +35,7 @@ function Routes() {
   if (path === "/money") return <MoneyPage />;
   if (path === "/habits") return <HabitsPage />;
   if (path === "/settings") return <SettingsPage />;
+  if (path === "/music") return <MusicPage />;
   return <TodayPage />;
 }
 

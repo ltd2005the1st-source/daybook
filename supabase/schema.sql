@@ -194,12 +194,23 @@ create table if not exists public.notifications_sent (
   sent_at timestamptz not null default now()
 );
 
+create table if not exists public.music (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users on delete cascade,
+  created_at timestamptz not null default now(),
+  title text not null,
+  kind text not null check (kind in ('playlist','album','track','artist','episode','show')),
+  spotify_id text not null,
+  image text,
+  sort int not null default 0
+);
+
 -- Row level security: you only ever see your own rows.
 do $$
 declare t text;
 begin
   foreach t in array array['transactions','debts','students','slots','lessons','homework','receipts',
-    'events','tasks','milestones','habits','habit_logs','push_subscriptions']
+    'events','tasks','milestones','habits','habit_logs','music','push_subscriptions']
   loop
     execute format('alter table public.%I enable row level security', t);
     execute format('drop policy if exists own_rows on public.%I', t);
@@ -215,7 +226,7 @@ do $$
 declare t text;
 begin
   foreach t in array array['transactions','debts','students','slots','lessons','homework','receipts',
-    'events','tasks','milestones','habits','habit_logs']
+    'events','tasks','milestones','habits','habit_logs','music']
   loop
     begin
       execute format('alter publication supabase_realtime add table public.%I', t);

@@ -157,6 +157,16 @@ export type Tables = {
   milestones: Milestone;
   habits: Habit;
   habit_logs: HabitLog;
+  music: MusicItem;
+};
+
+/** A Spotify playlist, album or song saved to play inside the app. */
+export type MusicItem = Base & {
+  title: string;
+  kind: "playlist" | "album" | "track" | "artist" | "episode" | "show";
+  spotify_id: string;
+  image: string | null;
+  sort: number;
 };
 
 export type TableName = keyof Tables;
@@ -173,6 +183,7 @@ export const TABLES: TableName[] = [
   "milestones",
   "habits",
   "habit_logs",
+  "music",
 ];
 
 export type Store = { [K in TableName]: Tables[K][] };
