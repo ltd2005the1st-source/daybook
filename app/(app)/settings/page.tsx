@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Bell, Download, Upload } from "lucide-react";
+import { ChangePin } from "@/components/change-pin";
 import { useData } from "@/components/data";
 import { ConfirmButton, Field, Page, PageHeader, Section } from "@/components/ui";
 import { remindersFor, fmtAt } from "@/lib/reminders";
@@ -86,6 +87,11 @@ export default function SettingsPage() {
             }}
           />
         </Field>
+        {online && session && (
+          <Field label={`Signed in as ${(session.user.app_metadata?.username as string | undefined) ?? session.user.email}`}>
+            <ChangePin />
+          </Field>
+        )}
       </Section>
 
       <Section title="Reminders on this device">

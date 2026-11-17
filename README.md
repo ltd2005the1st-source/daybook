@@ -46,10 +46,13 @@ You need free accounts on GitHub, Supabase and Netlify. Nothing here costs money
    | `VAPID_PRIVATE_KEY` | VAPID private key |
    | `VAPID_SUBJECT` | `mailto:` followed by your email |
    | `CRON_SECRET` | any long random string you make up |
+   | `PIN_PEPPER` | another long random string (32+ characters). Never change it later, or your PIN stops working. |
 
    Click **Deploy**. Rename the site under **Project configuration → Change project name** if you want a nicer address, such as `daybook-dat.netlify.app`.
 5. **Supabase login URL**: in Supabase **Authentication → URL Configuration**, set Site URL to your Netlify address.
-6. **First sign-in**: open your Netlify address, create your account with email and a password, then press **Load my starter data**.
+6. **First sign-in**: open your Netlify address, pick a username and a 4-digit PIN, then press **Load my starter data**. Each device stays signed in. If you made an account with email and password before, the sign-in page asks for them once and switches you over.
+
+   Sign-in is a username and 4-digit PIN. The server turns the PIN into a long password with `PIN_PEPPER`, so PINs can't be guessed against Supabase directly, and 5 wrong PINs lock the account for 15 minutes (doubling after that, up to a day). Only the first account can be created from the sign-in page. In Supabase **Authentication → Sign In / Providers**, you can turn off **Allow new users to sign up**; Daybook's own sign-in keeps working.
 7. **Reminders**: in Supabase **Database → Extensions**, enable `pg_cron` and `pg_net`. Open [`supabase/cron.sql`](supabase/cron.sql), replace `YOUR-SITE.netlify.app` and `YOUR-CRON-SECRET`, and run it in the SQL Editor. Supabase then pings `/api/cron/reminders` every 5 minutes.
 8. **Phone**: open the site in Safari (iPhone) or Chrome (Android) and choose **Add to Home Screen**. On iPhone, reminders only work from the home-screen app. Open Daybook from the icon, go to **Settings → Turn on reminders**, allow notifications, then **Send a test**.
 

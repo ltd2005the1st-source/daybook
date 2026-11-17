@@ -119,7 +119,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div className="px-2.5 pt-2 text-[11.5px] text-muted leading-snug">
             {online ? (
               <>
-                Synced · {session?.user.email}
+                Synced · {(session?.user.app_metadata?.username as string | undefined) ?? session?.user.email}
                 <button onClick={signOut} className="block underline-offset-2 hover:underline">
                   Sign out
                 </button>
