@@ -1,3 +1,4 @@
+import { migrateClasses } from "./migrate";
 // Starter data taken from your Google Sheet, calendar and Any.do (November 2026).
 import { uid } from "./format";
 import type { Store, Student } from "./types";
@@ -288,7 +289,7 @@ export function buildSeed(): Store {
     },
   ];
 
-  return {
+  return migrateClasses({
     transactions,
     debts,
     students,
@@ -302,5 +303,5 @@ export function buildSeed(): Store {
     habits,
     habit_logs: [],
     music: [],
-  };
+  });
 }

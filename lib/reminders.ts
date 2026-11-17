@@ -1,5 +1,5 @@
 import { fromMinutes, minutes } from "./dates";
-import { CHECK_TIME, checkTasksOn, eventsOn, lessonsOn } from "./teaching";
+import { checkTasksOn, eventsOn, lessonsOn, markFor, noteFor } from "./teaching";
 import { DEFAULT_REMIND, type Store } from "./types";
 
 export type Reminder = { key: string; at: number; title: string; body: string; url: string };
@@ -12,15 +12,16 @@ export type Reminder = { key: string; at: number; title: string; body: string; u
 export function remindersFor(store: Store, date: string): Reminder[] {
   const out: Reminder[] = [];
 
-  // Homework checks: one reminder at 22:30 for every student with class tomorrow
+  // Homework checks: one reminder at each check time, listing everyone due then
   const checks = checkTasksOn(store, date).filter((c) => !c.done);
-  if (checks.length) {
-    const one = checks.length === 1;
+  for (const time of [...new Set(checks.map((c) => c.time))]) {
+    const group = checks.filter((c) => c.time === time);
+    const one = group.length === 1;
     out.push({
-      key: `check:${date}:${CHECK_TIME}:${checks.map((c) => c.student.id).sort().join(",")}`,
-      at: minutes(CHECK_TIME),
-      title: one ? `Check ${checks[0].student.name}’s homework` : `Check homework: ${checks.map((c) => c.student.name).join(", ")}`,
-      body: checks
+      key: `check:${date}:${time}:${group.map((c) => c.student.id).sort().join(",")}`,
+      at: minutes(time),
+      title: one ? `Check ${group[0].student.name}’s homework` : `Check homework: ${group.map((c) => c.student.name).join(", ")}`,
+      body: group
         .map((c) => {
           const lines = [c.contents?.trim(), ...c.homework.map((h) => `• ${h.title}`)].filter(Boolean);
           const text = lines.length ? lines.join("\n") : "Nothing logged yet.";
@@ -29,20 +30,6 @@ export function remindersFor(store: Store, date: string): Reminder[] {
         .join("\n"),
       url: "/calendar",
     });
-  }
-
-  // Classes
-  for (const l of lessonsOn(store, date)) {
-    if (!l.start || l.status !== "planned") continue;
-    for (const r of DEFAULT_REMIND) {
-      out.push({
-        key: `lesson:${l.studentId}:${date}:${l.start}:${r}`,
-        at: minutes(l.start) - r,
-        title: `${l.title} at ${l.start}`,
-        body: `In ${r} minutes, ${l.start}–${l.end ?? ""}`,
-        url: "/calendar",
-      });
-    }
   }
 
   // Tasks with a time
@@ -62,12 +49,16 @@ export function remindersFor(store: Store, date: string): Reminder[] {
   // Calendar events with reminders
   for (const e of eventsOn(store, date)) {
     if (!e.start || !e.event) continue;
+    // A cancelled or missed class doesn't remind you.
+    if (e.studentId && markFor(store, e.studentId, date) !== "planned") continue;
+    const note = noteFor(e.event, date);
     for (const r of e.event.remind_before?.length ? e.event.remind_before : DEFAULT_REMIND) {
+      const when = r === 0 ? `Starting now (${e.start}–${e.end ?? ""})` : `In ${r} minutes, ${e.start}–${e.end ?? ""}`;
       out.push({
         key: `event:${e.event.id}:${date}:${e.start}:${r}`,
         at: minutes(e.start) - r,
         title: e.title,
-        body: r === 0 ? `Starting now (${e.start}–${e.end ?? ""})` : `In ${r} minutes, ${e.start}–${e.end ?? ""}`,
+        body: note ? `${when}\n${note}` : when,
         url: "/calendar",
       });
     }

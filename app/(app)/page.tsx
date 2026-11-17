@@ -146,7 +146,7 @@ export default function TodayPage() {
                         {live && <span className="rounded bg-pen px-1.5 text-[10.5px] font-bold uppercase tracking-wide text-white">Now</span>}
                       </div>
                       <div className="text-[12px] text-muted">
-                        <span className="num">{o.kind !== "check" && o.start && o.end ? `${o.start}–${o.end}` : ""}</span>
+                        <span className="num">{o.kind !== "check" && o.kind !== "task" && o.start && o.end ? `${o.start}–${o.end}` : ""}</span>
                         {o.kind === "check" && o.studentId && <HwCount studentId={o.studentId} />}
                       </div>
                       {o.kind === "lesson" && o.studentId && (o.status === "planned" || o.status === "taught") && (

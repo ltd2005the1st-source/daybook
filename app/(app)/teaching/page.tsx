@@ -85,7 +85,7 @@ export default function TeachingPage() {
         </div>
 
         <aside>
-          <Section title="Checks at 22:30">
+          <Section title="Homework checks">
             {checks.length === 0 && <p className="text-[13.5px] text-muted">No classes in the next week, so no checks.</p>}
             <div className="flex flex-col overflow-x-clip">
               <AnimatePresence initial={false}>
@@ -94,7 +94,7 @@ export default function TeachingPage() {
                 ))}
               </AnimatePresence>
             </div>
-            <p className="mt-1 text-[12px] text-muted">One for each student with class the next day. Tap one to change what to check, for that night or every night.</p>
+            <p className="mt-1 text-[12px] text-muted">One before each class, at 22:30 the night before unless you move it on the Calendar. Tap one to change what to check.</p>
           </Section>
 
           <Section title="Homework to check">

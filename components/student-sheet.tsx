@@ -5,7 +5,7 @@ import { useData } from "./data";
 import { ConfirmButton, Field, Sheet, Tick, Segmented, Dot } from "./ui";
 import { WD_SHORT, fmtDay, minutes, today } from "@/lib/dates";
 import { cx, parseAmount, vnd } from "@/lib/format";
-import { nextLesson, slotsOf } from "@/lib/teaching";
+import { classSeries, nextLesson } from "@/lib/teaching";
 import type { Student } from "@/lib/types";
 
 export const STUDENT_COLORS = ["#5B86E5", "#3F8250", "#525A80", "#9A6FB0", "#8A3FB0", "#C0703A", "#2B8A8A", "#B04A6A", "#7A7A2E"];
@@ -53,7 +53,7 @@ function HomeworkTab({ s }: { s: Student }) {
             Next class <b>{fmtDay(nl.date, { weekday: true })}</b> at <span className="num">{nl.start}</span>.{" "}
           </>
         ) : null}
-        <>A check task comes up at <span className="num">22:30</span> the night before each class.</>
+        <>A homework check comes up before each class (22:30 the night before, unless you move it).</>
       </p>
       <form
         onSubmit={(e) => {
@@ -100,47 +100,55 @@ function HomeworkTab({ s }: { s: Student }) {
 
 function ScheduleTab({ s }: { s: Student }) {
   const { store, insert, update, remove } = useData();
-  const slots = slotsOf(store, s.id);
+  const series = classSeries(store, s.id).filter((e) => e.days.length && (!e.until || e.until >= today()));
   const [wd, setWd] = useState(6);
   const [start, setStart] = useState("20:30");
   const [end, setEnd] = useState("22:30");
 
-  // Your own busy blocks: other students' classes and routine events, per weekday.
+  // Your own busy times: other classes and events (not focus blocks), per weekday.
   const busy = (day: number, band: string) => {
     const [a, b] = band.split("-").map(minutes);
     const overl = (x: string | null, y: string | null) => x && y && minutes(x) < b && minutes(y) > a;
-    const lesson = store.slots.some((sl) => sl.student_id !== s.id && sl.weekday === day && overl(sl.start_time, sl.end_time));
-    const ev = store.events.some((e) => e.days.includes(day) && e.kind !== "focus" && overl(e.start_time, e.end_time));
-    return lesson || ev;
+    return store.events.some((e) => e.student_id !== s.id && e.days.includes(day) && e.kind !== "focus" && overl(e.start_time, e.end_time));
   };
 
   return (
     <div>
       <div className="label mb-2">Weekly classes</div>
       <ul className="mb-3">
-        {slots.map((sl) => (
-          <li key={sl.id} className="flex items-center gap-3 border-b border-line py-2">
-            <span className="w-10 text-[13px] font-semibold">{WD_SHORT[sl.weekday]}</span>
+        {series.map((e) => (
+          <li key={e.id} className="flex items-center gap-3 border-b border-line py-2">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: e.color }} />
+            <span className="text-[13px] font-semibold">{WEEK.filter((d) => e.days.includes(d)).map((d) => WD_SHORT[d]).join(", ")}</span>
             <span className="num text-[13px]">
-              {sl.start_time}–{sl.end_time}
+              {e.start_time}–{e.end_time}
             </span>
-            <button
-              onClick={() => update("slots", sl.id, { tentative: !sl.tentative })}
-              className={cx("text-[12px] rounded px-1.5 py-0.5", sl.tentative ? "bg-pen-soft text-pen" : "text-muted hover:bg-hover")}
-            >
-              {sl.tentative ? "Pending" : "Confirmed"}
-            </button>
-            <button aria-label="Remove class time" onClick={() => remove("slots", sl.id)} className="ml-auto text-muted hover:text-pen">
+            <button aria-label="Remove these classes" onClick={() => remove("events", e.id)} className="ml-auto text-muted hover:text-pen">
               <Trash2 size={15} />
             </button>
           </li>
         ))}
+        {series.length === 0 && <li className="py-2 text-[13px] text-muted">No weekly classes yet.</li>}
       </ul>
       <form
-        className="flex flex-wrap items-end gap-2 mb-6"
+        className="flex flex-wrap items-end gap-2 mb-2"
         onSubmit={(e) => {
           e.preventDefault();
-          insert("slots", { student_id: s.id, weekday: wd, start_time: start, end_time: end, tentative: false });
+          insert("events", {
+            title: `Teach ${s.name}`,
+            date: today(),
+            start_time: start,
+            end_time: end,
+            days: [wd],
+            until: null,
+            color: s.color,
+            kind: "class",
+            remind_before: [40, 20],
+            notes: null,
+            skip_dates: [],
+            student_id: s.id,
+            occurrence_notes: {},
+          });
         }}
       >
         <select className="field !w-auto" value={wd} onChange={(e) => setWd(+e.target.value)}>
@@ -153,9 +161,10 @@ function ScheduleTab({ s }: { s: Student }) {
         <input type="time" className="field !w-auto num" value={start} onChange={(e) => setStart(e.target.value)} />
         <input type="time" className="field !w-auto num" value={end} onChange={(e) => setEnd(e.target.value)} />
         <button className="btn btn-line">
-          <Plus size={15} /> Add class time
+          <Plus size={15} /> Add weekly class
         </button>
       </form>
+      <p className="mb-6 text-[12px] text-muted">Classes are events on your calendar. Open one there to change its days, time, colour or notes, or to move a single class.</p>
 
       <div className="label mb-1">Free slots</div>
       <p className="text-[12.5px] text-muted mb-2">
@@ -256,7 +265,11 @@ function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
             <button
               key={c}
               aria-label={c}
-              onClick={() => update("students", s.id, { color: c })}
+              onClick={() => {
+                // Classes that still use the old colour follow the new one.
+                store.events.filter((e) => e.student_id === s.id && e.color === s.color).forEach((e) => update("events", e.id, { color: c }));
+                update("students", s.id, { color: c });
+              }}
               className={cx("h-7 w-7 rounded-full ring-offset-2 ring-offset-surface", s.color === c && "ring-2 ring-ink")}
               style={{ background: c }}
             />
@@ -276,7 +289,7 @@ function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
         }}
       />
       <p className="mb-3 mt-1 text-[12px] text-muted">
-        Shown on every 22:30 check for {s.name} and in its reminder. To change one night only, tap that check on the Calendar or under Checks on Teaching.
+        Shown on every homework check for {s.name} and in its reminder. To change one night only, tap that check on the Calendar or under Checks on Teaching.
       </p>
 
       <div className="mt-6 flex items-center justify-between border-t border-line pt-4">

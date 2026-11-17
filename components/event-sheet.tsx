@@ -1,20 +1,27 @@
 "use client";
-import { HomeworkEditor } from "./checks";
+import { HomeworkEditor, Switch } from "./checks";
 import { useEffect, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Copy, Trash2 } from "lucide-react";
 import { useData } from "./data";
 import { useMarkLesson } from "./register";
 import { ColorPicker } from "./color-picker";
 import { EVENT_COLORS } from "@/lib/colors";
 import { describeEvent, duplicateEvent } from "@/lib/dupes";
 import { Dot, Field, MinutesInput, Sheet, Tick } from "./ui";
-import { fmtDay, fromMinutes, minutes, WD_SHORT, weekday } from "@/lib/dates";
+import { fmtDay, fromMinutes, minutes, WD_SHORT } from "@/lib/dates";
 import { cx } from "@/lib/format";
-import type { Occurrence } from "@/lib/teaching";
-import { DEFAULT_REMIND, type CalEvent } from "@/lib/types";
+import { lessonRow, noteFor, type Occurrence } from "@/lib/teaching";
+import { DEFAULT_REMIND, type CalEvent, type LessonStatus } from "@/lib/types";
 
-const KINDS: CalEvent["kind"][] = ["focus", "routine", "personal", "work", "other"];
+const KINDS: CalEvent["kind"][] = ["class", "focus", "routine", "personal", "work", "other"];
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
+
+const STATUS: [LessonStatus | null, string][] = [
+  ["taught", "Taught"],
+  ["missed_owe", "Missed"],
+  ["cancelled", "Cancelled"],
+  [null, "Not yet"],
+];
 
 export function EventSheet({
   open,
@@ -23,6 +30,7 @@ export function EventSheet({
   defaultStart,
   defaultEnd,
   onClose,
+  onCopy,
 }: {
   open: boolean;
   eventId: string | null;
@@ -30,8 +38,10 @@ export function EventSheet({
   defaultStart?: string;
   defaultEnd?: string;
   onClose: () => void;
+  onCopy?: (e: CalEvent, date: string) => void;
 }) {
   const { store, insert, update, remove } = useData();
+  const mark = useMarkLesson();
   const existing = eventId ? store.events.find((e) => e.id === eventId) ?? null : null;
   const blank = (): Omit<CalEvent, "id"> => ({
     title: "",
@@ -45,28 +55,54 @@ export function EventSheet({
     remind_before: [...DEFAULT_REMIND],
     notes: null,
     skip_dates: [],
+    student_id: null,
+    occurrence_notes: {},
   });
   const [draft, setDraft] = useState<Omit<CalEvent, "id">>(blank);
+  const [note, setNote] = useState("");
+  const [sync, setSync] = useState(true);
   useEffect(() => {
-    if (open) setDraft(existing ? { ...existing } : blank());
+    if (!open) return;
+    setDraft(existing ? { ...existing } : blank());
+    setNote(existing ? noteFor(existing, occurrenceDate) ?? "" : "");
+    // On unless this repeat already has notes of its own.
+    setSync(!(existing?.occurrence_notes && occurrenceDate in existing.occurrence_notes));
   }, [open, eventId, occurrenceDate, defaultStart, defaultEnd]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = (p: Partial<CalEvent>) => setDraft((d) => ({ ...d, ...p }));
   const allDay = draft.start_time === null;
   const repeats = draft.days.length > 0;
+  const student = draft.student_id ? store.students.find((x) => x.id === draft.student_id) : undefined;
+  const students = store.students.filter((x) => x.active || x.id === draft.student_id);
+  const status = existing?.student_id ? lessonRow(store, existing.student_id, occurrenceDate)?.status ?? null : null;
 
   const clash = draft.title.trim() ? duplicateEvent(store, { ...draft, title: draft.title.trim() }, existing?.id) : undefined;
 
   function save() {
     if (!draft.title.trim() || clash) return;
-    const row = { ...draft, title: draft.title.trim() };
+    const text = note.trim() ? note.trim() : null;
+    const row: Omit<CalEvent, "id"> = { ...draft, title: draft.title.trim() };
+    if (!repeats || sync) {
+      // The same notes on every repeat; repeats that had their own follow along again.
+      row.notes = text;
+      row.occurrence_notes = {};
+    } else {
+      row.occurrence_notes = { ...(draft.occurrence_notes ?? {}), [occurrenceDate]: text ?? "" };
+    }
     if (existing) update("events", existing.id, row);
     else insert("events", row);
     onClose();
   }
 
+  const pickStudent = (id: string) => {
+    const st = store.students.find((x) => x.id === id);
+    if (!st) return set({ student_id: null, kind: draft.kind === "class" ? "personal" : draft.kind });
+    const autoTitle = !draft.title.trim() || draft.title.startsWith("Teach ");
+    set({ student_id: st.id, kind: "class", color: st.color, ...(autoTitle ? { title: `Teach ${st.name}` } : {}) });
+  };
+
   return (
-    <Sheet open={open} onClose={onClose} title={existing ? "Edit event" : "New event"}>
+    <Sheet open={open} onClose={onClose} title={existing ? (existing.student_id ? "Edit class" : "Edit event") : "New event"}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -85,6 +121,29 @@ export function EventSheet({
             {describeEvent(clash)} Change the name or the time to add it.
           </p>
         )}
+
+        {existing?.student_id && (
+          <div className="mb-4 rounded-lg border border-line p-3">
+            <div className="label mb-2">This class, {fmtDay(occurrenceDate, { weekday: true })}</div>
+            <div className="grid grid-cols-4 gap-1.5">
+              {STATUS.map(([st, label]) => (
+                <button
+                  type="button"
+                  key={label}
+                  onClick={() => mark(existing.student_id!, occurrenceDate, st)}
+                  className={cx(
+                    "btn justify-center border px-1 py-1.5 text-[13px] transition-colors duration-200",
+                    st === status ? "border-ink bg-ink text-bg" : "border-line hover:bg-hover",
+                    st === "missed_owe" && status !== "missed_owe" && "text-pen",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-3 gap-2">
           <Field label="Date">
             <input type="date" className="field num" value={draft.date} onChange={(e) => set({ date: e.target.value })} />
@@ -127,6 +186,16 @@ export function EventSheet({
         )}
 
         <div className="grid grid-cols-2 gap-3">
+          <Field label="Class with">
+            <select className="field" value={draft.student_id ?? ""} onChange={(e) => pickStudent(e.target.value)}>
+              <option value="">Not a class</option>
+              {students.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.name}
+                </option>
+              ))}
+            </select>
+          </Field>
           <Field label="Type">
             <select className="field" value={draft.kind} onChange={(e) => set({ kind: e.target.value as CalEvent["kind"] })}>
               {KINDS.map((k) => (
@@ -136,20 +205,42 @@ export function EventSheet({
               ))}
             </select>
           </Field>
-          <Field label="Remind me (min before)">
-            <MinutesInput value={draft.remind_before} onChange={(v) => set({ remind_before: v })} />
-          </Field>
         </div>
+        <Field label="Remind me (min before)">
+          <MinutesInput value={draft.remind_before} onChange={(v) => set({ remind_before: v })} />
+        </Field>
         <Field label="Color">
           <ColorPicker value={draft.color} onChange={(c) => set({ color: c })} />
         </Field>
         <Field label="Notes">
-          <textarea className="field min-h-[70px]" value={draft.notes ?? ""} onChange={(e) => set({ notes: e.target.value || null })} />
+          <textarea className="field min-h-[70px]" value={note} onChange={(e) => setNote(e.target.value)} />
         </Field>
+        {repeats && existing && (
+          <div className="-mt-2 mb-4">
+            <label className="flex cursor-pointer items-center justify-between gap-3 text-[13.5px]">
+              <span>Sync notes across all repeats</span>
+              <Switch on={sync} onChange={setSync} label="Sync notes across all repeats" />
+            </label>
+            <p className="mt-0.5 text-[12px] text-muted">
+              {sync ? "These notes show on every repeat." : `These notes are only for ${fmtDay(occurrenceDate, { weekday: true })}.`}
+            </p>
+          </div>
+        )}
+
+        {student && existing && (
+          <div className="mb-5">
+            <HomeworkEditor studentId={student.id} name={student.name} />
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center justify-between gap-2">
           {existing ? (
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1">
+              {onCopy && (
+                <button type="button" className="btn btn-ghost" onClick={() => onCopy(existing, occurrenceDate)}>
+                  <Copy size={15} /> Copy
+                </button>
+              )}
               {repeats && (
                 <button
                   type="button"

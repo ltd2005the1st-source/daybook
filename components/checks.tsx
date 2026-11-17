@@ -5,24 +5,24 @@ import { AnimatePresence, motion } from "motion/react";
 import { useData } from "./data";
 import { Strike, TASK_ENTER, TASK_EXIT, useCompleteTask } from "./complete";
 import { Dot, Sheet, Tick } from "./ui";
-import { fmtDay, relDay, today } from "@/lib/dates";
+import { addDays, fmtDay, relDay, today } from "@/lib/dates";
 import { cx } from "@/lib/format";
-import { CHECK_TIME, checkTasksOn, type CheckTask } from "@/lib/teaching";
+import { checkFor, checkOffset, checkRow, checkTasksOn, checkTime, daysBetween, type CheckTask } from "@/lib/teaching";
 import type { Task } from "@/lib/types";
 
 /**
- * Homework checks are tasks at 22:30 the night before each class. They exist on their own
- * (nothing is stored) until you tick one or change just that night's text; then a task row
- * linked to the student keeps it.
+ * Homework checks are tasks, at 22:30 the night before each class unless you move them. They exist on
+ * their own (nothing is stored) until you tick one, move it or change just its text; then a task row
+ * linked to the student and the class keeps it.
  */
 export function useCheckActions() {
   const { storeRef, insert, update, toast } = useData();
 
-  const rowOf = (studentId: string, date: string) =>
-    storeRef.current.tasks.find((t) => t.student_id === studentId && t.due_on === date);
+  const rowOf = (studentId: string, classDate: string) => checkRow(storeRef.current, studentId, classDate);
 
-  const ensure = (c: Pick<CheckTask, "student" | "date">, patch: Partial<Pick<Task, "done" | "done_at" | "notes">>) => {
-    const row = rowOf(c.student.id, c.date);
+  type Patch = Partial<Pick<Task, "done" | "done_at" | "notes" | "due_on" | "due_time">>;
+  const ensure = (c: Pick<CheckTask, "student" | "date" | "time" | "classDate">, patch: Patch) => {
+    const row = rowOf(c.student.id, c.classDate);
     if (row) {
       update("tasks", row.id, patch);
       return;
@@ -32,18 +32,47 @@ export function useCheckActions() {
       notes: null,
       list: "Teaching",
       due_on: c.date,
-      due_time: CHECK_TIME,
+      due_time: c.time,
       priority: false,
       horizon: "now",
       done: false,
       done_at: null,
       sort: 0,
       student_id: c.student.id,
+      check_for: c.classDate,
       ...patch,
     });
   };
 
-  const setDone = (c: Pick<CheckTask, "student" | "date">, done: boolean) =>
+  /** Moves one check, or every check for this student from this class on. */
+  const move = (c: CheckTask, to: { date: string; time: string }, scope: "one" | "all") => {
+    const name = c.student.name;
+    if (scope === "one") {
+      const before = c.row ? { due_on: c.row.due_on, due_time: c.row.due_time } : null;
+      ensure(c, { due_on: to.date, due_time: to.time });
+      toast(`Check ${name}: ${fmtDay(to.date, { weekday: true })}, ${to.time} (this one only)`, () => {
+        const row = rowOf(c.student.id, c.classDate);
+        if (!row) return;
+        update("tasks", row.id, before ?? { due_on: c.date, due_time: c.time });
+      });
+      return;
+    }
+    const offset = Math.min(6, Math.max(0, daysBetween(to.date, c.classDate)));
+    const prevStudent = { check_time: checkTime(c.student), check_offset: checkOffset(c.student) };
+    const rows = storeRef.current.tasks.filter((t) => t.student_id === c.student.id && !t.done && (checkFor(t) ?? "") >= c.classDate);
+    const prevRows = rows.map((t) => [t.id, { due_on: t.due_on, due_time: t.due_time }] as const);
+    update("students", c.student.id, { check_time: to.time, check_offset: offset });
+    rows.forEach((t) => update("tasks", t.id, { due_on: addDays(checkFor(t)!, -offset), due_time: to.time }));
+    toast(
+      `Every check for ${name}: ${offset === 0 ? "the day of class" : offset === 1 ? "the day before class" : `${offset} days before class`} at ${to.time}`,
+      () => {
+        update("students", c.student.id, prevStudent);
+        prevRows.forEach(([id, p]) => update("tasks", id, p));
+      },
+    );
+  };
+
+  const setDone = (c: Pick<CheckTask, "student" | "date" | "time" | "classDate">, done: boolean) =>
     ensure(c, { done, done_at: done ? new Date().toISOString() : null });
 
   /** Changes what to check, for this night only or for every night. */
@@ -54,7 +83,7 @@ export function useCheckActions() {
       const before = c.row ? c.row.notes : undefined;
       ensure(c, { notes: value ?? "" });
       toast(`Changed ${name}’s check for ${fmtDay(c.date)} only`, () => {
-        const row = rowOf(c.student.id, c.date);
+        const row = rowOf(c.student.id, c.classDate);
         if (row) update("tasks", row.id, { notes: before ?? null });
       });
       return;
@@ -73,12 +102,12 @@ export function useCheckActions() {
     });
   };
 
-  return { setDone, setContents };
+  return { setDone, setContents, move };
 }
 
 const nightLabel = (date: string) => {
   const r = relDay(date);
-  return r === "Today" ? "Tonight" : r === "Tomorrow" ? "Tomorrow night" : `${fmtDay(date, { weekday: true })} night`;
+  return r === "Today" || r === "Tomorrow" ? r : fmtDay(date, { weekday: true });
 };
 
 /** A check in a task list: tick it, or tap it to see and change what to check. */
@@ -108,7 +137,7 @@ export function CheckRow({ c, onOpen, compact }: { c: CheckTask; onOpen: () => v
           {note && <div className="mt-0.5 truncate text-[12.5px] text-ink-2">{note}</div>}
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-muted">
             <span>
-              {nightLabel(c.date)} · <span className="num">{CHECK_TIME}</span>
+              {nightLabel(c.date)} · <span className="num">{c.time}</span>
             </span>
             <span>class {relDay(c.classDate).toLowerCase()}</span>
             {c.homework.length > 0 && <span className="text-pen">{c.homework.length} homework open</span>}
@@ -120,10 +149,10 @@ export function CheckRow({ c, onOpen, compact }: { c: CheckTask; onOpen: () => v
 }
 
 /** One night's check: tick it, change what to check (this one or all of them), tick off homework. */
-export function CheckSheet({ at, onClose }: { at: { studentId: string; date: string } | null; onClose: () => void }) {
+export function CheckSheet({ at, onClose }: { at: { studentId: string; date: string; forDate?: string } | null; onClose: () => void }) {
   const { store } = useData();
   const { setDone, setContents } = useCheckActions();
-  const c = at ? checkTasksOn(store, at.date).find((x) => x.student.id === at.studentId) : undefined;
+  const c = at ? checkTasksOn(store, at.date).find((x) => x.student.id === at.studentId && (!at.forDate || x.classDate === at.forDate)) : undefined;
   const [text, setText] = useState("");
   const ownText = !!c?.row && c.row.notes != null;
   const [sync, setSync] = useState(true);
@@ -160,7 +189,7 @@ export function CheckSheet({ at, onClose }: { at: { studentId: string; date: str
       {c && (
         <div key={key}>
           <p className="mb-4 text-[13.5px] text-ink-2">
-            {nightLabel(c.date)}, <span className="num">{CHECK_TIME}</span> · for the class {relDay(c.classDate).toLowerCase()} (
+            {nightLabel(c.date)}, <span className="num">{c.time}</span> · for the class {relDay(c.classDate).toLowerCase()} (
             {fmtDay(c.classDate, { weekday: true })})
           </p>
 
@@ -184,7 +213,7 @@ export function CheckSheet({ at, onClose }: { at: { studentId: string; date: str
             {sync
               ? `What you type here shows on every check for ${c.student.name}.`
               : `Only the check on ${fmtDay(c.date, { weekday: true })} changes. The others keep their text.`}{" "}
-            It’s also what the 22:30 reminder says.
+            It’s also what the reminder says.
           </p>
 
           {changed && (
@@ -277,7 +306,7 @@ export function HomeworkEditor({ studentId, name }: { studentId: string; name: s
   );
 }
 
-function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
+export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
     <button
       type="button"

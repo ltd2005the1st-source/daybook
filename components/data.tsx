@@ -4,6 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import { ONLINE, supabase } from "@/lib/supabase";
 import { buildSeed } from "@/lib/seed";
 import { uid } from "@/lib/format";
+import { migrateClasses } from "@/lib/migrate";
 import { TABLES, type Store, type TableName, type Tables } from "@/lib/types";
 
 const LOCAL_KEY = "daybook.store.v1";
@@ -43,7 +44,7 @@ function readLocal(): Store | null {
   try {
     const raw = localStorage.getItem(LOCAL_KEY);
     if (!raw) return null;
-    return { ...empty(), ...JSON.parse(raw) } as Store;
+    return migrateClasses({ ...empty(), ...JSON.parse(raw) } as Store);
   } catch {
     return null;
   }

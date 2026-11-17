@@ -48,6 +48,7 @@ create table if not exists public.students (
   makeup_baseline int not null default 0,
   active boolean not null default true,
   check_note text,
+  check_offset int not null default 1,
   check_mode text not null default 'night_before' check (check_mode in ('night_before','fixed')),
   check_time text not null default '22:30',
   check_days int[] not null default '{}',
@@ -124,7 +125,9 @@ create table if not exists public.events (
   kind text not null default 'personal',
   remind_before int[] not null default '{40,20}',
   notes text,
-  skip_dates text[] not null default '{}'
+  skip_dates text[] not null default '{}',
+  student_id uuid references public.students on delete cascade,
+  occurrence_notes jsonb not null default '{}'
 );
 
 create table if not exists public.tasks (
@@ -141,7 +144,8 @@ create table if not exists public.tasks (
   done boolean not null default false,
   done_at timestamptz,
   sort int not null default 0,
-  student_id uuid references public.students on delete cascade
+  student_id uuid references public.students on delete cascade,
+  check_for date
 );
 
 create table if not exists public.milestones (
@@ -236,7 +240,4 @@ begin
   end loop;
 end $$;
 
--- Upgrades for databases made before these columns existed (safe to run again).
-alter table public.students add column if not exists check_note text;
-alter table public.tasks add column if not exists student_id uuid references public.students on delete cascade;
-create unique index if not exists tasks_one_check_per_night on public.tasks (user_id, student_id, due_on) where student_id is not null;
+-- Upgrades for databases made before these columns existed: run supabase/upgrade-classes-as-events.sql.

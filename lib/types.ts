@@ -35,6 +35,7 @@ export type Student = Base & {
   makeup_baseline: number; // makeups owed before tracking started
   active: boolean;
   check_note: string | null; // what to check every time (each night can be changed on its own)
+  check_offset?: number; // days before class the check comes up (1 = the night before)
   check_mode: "night_before" | "fixed"; // no longer used: checks are always the night before
   check_time: string; // when the homework check block starts
   check_days: number[]; // weekdays for fixed mode (0 = Sunday)
@@ -97,10 +98,12 @@ export type CalEvent = Base & {
   days: number[]; // weekly repeat days; empty = one-off
   until: string | null;
   color: string;
-  kind: "focus" | "routine" | "personal" | "work" | "other";
+  kind: "focus" | "routine" | "personal" | "work" | "class" | "other";
   remind_before: number[]; // minutes
-  notes: string | null;
+  notes: string | null; // notes for every repeat
   skip_dates: string[];
+  student_id?: string | null; // set when this is a class with a student
+  occurrence_notes?: Record<string, string>; // date -> notes for just that repeat
 };
 
 export type Task = Base & {
@@ -115,6 +118,7 @@ export type Task = Base & {
   done_at: string | null;
   sort: number;
   student_id?: string | null; // set on homework-check tasks
+  check_for?: string | null; // the class date a homework check is for
 };
 
 export type Milestone = Base & {
