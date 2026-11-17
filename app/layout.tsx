@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -7,12 +7,6 @@ const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
   weight: ["400", "500", "600", "700", "800"],
 });
-const bevn = Be_Vietnam_Pro({
-  subsets: ["latin", "vietnamese"],
-  variable: "--font-bevn",
-  weight: ["400", "500", "600", "700"],
-});
-const jbm = JetBrains_Mono({ subsets: ["latin", "vietnamese"], variable: "--font-jbm", weight: ["400", "500", "600"] });
 
 export const metadata: Metadata = {
   title: "Daybook",
@@ -37,7 +31,7 @@ const themeScript = `(function(){try{var t=localStorage.getItem('daybook.theme')
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${bricolage.variable} ${bevn.variable} ${jbm.variable}`} suppressHydrationWarning>
+    <html lang="en" className={bricolage.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

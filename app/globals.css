@@ -67,8 +67,8 @@
   --color-good: var(--good);
   --color-good-soft: var(--good-soft);
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-bevn), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jbm), ui-monospace, monospace;
+  --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --shadow-card: var(--shadow);
   --shadow-pop: var(--shadow-pop);
 }
@@ -100,7 +100,7 @@ body {
 .num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 
 .display {
