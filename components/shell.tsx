@@ -233,16 +233,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
         >
           {/* The bar's surface. A strip wider than the bar slides sideways (a GPU transform, no
               repainting): flat surface, then a 100px piece with the round notch and softly rounded
-              shoulders, then more flat surface. The pill clips it to the bar's rounded shape. */}
+              shoulders, then more flat surface. The pill clips it to the bar's rounded shape. The notch
+              piece bleeds 2px over both flat pieces, so no hairline seam shows at fractional pixels. */}
           <div className="tabbar-pill absolute inset-0 overflow-hidden rounded-[26px]" aria-hidden>
             <div className="tabbar-strip absolute inset-y-0 left-0 flex">
               <div className="tabbar-flat" />
               <div className="relative h-full w-[100px] shrink-0">
                 <svg className="tabbar-fill absolute inset-0" width="100" height="64" viewBox="0 0 100 64">
-                  <path d="M0 0H8.19A8 8 0 0 1 16.15 7.24A34 34 0 0 0 83.85 7.24A8 8 0 0 1 91.81 0H100V64H0Z" />
+                  <path d="M-2 0H8.19A8 8 0 0 1 16.15 7.24A34 34 0 0 0 83.85 7.24A8 8 0 0 1 91.81 0H102V64H-2Z" />
                 </svg>
                 <svg className={cx("tabbar-fill tabbar-patch absolute inset-0", activeIdx < 0 && "is-on")} width="100" height="64" viewBox="0 0 100 64">
-                  <rect width="100" height="64" />
+                  <rect x="-2" width="104" height="64" />
                 </svg>
               </div>
               <div className="tabbar-flat" />
