@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { User } from "@supabase/supabase-js";
 import { admin, allUsers, pinPassword, usernameOf } from "./pin-auth";
 import { TABLES, type TableName } from "./types";
+import { addShowcaseMock } from "./showcase-mock";
 
 /**
  * The public showcase account: username "tester", PIN 0000. It holds an independent snapshot of the
@@ -11,6 +12,8 @@ import { TABLES, type TableName } from "./types";
 
 export const SHOWCASE_USERNAME = "tester";
 export const SHOWCASE_PIN = "0000";
+/** Bump when the showcase contents change, so the owner's next visit rebuilds it once. */
+export const SHOWCASE_VERSION = 2;
 
 export const isShowcase = (u: User | null | undefined) => !!u && (u.app_metadata?.showcase === true || usernameOf(u) === SHOWCASE_USERNAME);
 
@@ -67,7 +70,7 @@ async function ensureShowcaseUser(users: User[]): Promise<User> {
   // Always (re)set the known PIN and clear any lock, so the showcase stays easy to open.
   const { data, error } = await sb.auth.admin.updateUserById(user.id, {
     password: pinPassword(user.id, SHOWCASE_PIN),
-    app_metadata: { ...user.app_metadata, username: SHOWCASE_USERNAME, showcase: true, pin_fails: 0, pin_locked_until: null },
+    app_metadata: { ...user.app_metadata, username: SHOWCASE_USERNAME, showcase: true, showcase_version: SHOWCASE_VERSION, pin_fails: 0, pin_locked_until: null },
   });
   if (error || !data.user) throw new Error(error?.message ?? "Could not set the tester PIN.");
   return data.user;
@@ -113,5 +116,6 @@ export async function refreshShowcase(ownerId: string): Promise<Record<string, n
     }
     counts[t] = ok.length;
   }
-  return counts;
+  const mock = await addShowcaseMock(tester.id);
+  return { ...counts, mock_tasks: mock.tasks, mock_milestones: mock.milestones, mock_habit_logs: mock.habit_logs };
 }
