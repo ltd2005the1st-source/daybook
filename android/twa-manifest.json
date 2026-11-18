@@ -1,0 +1,53 @@
+{
+  "packageId": "app.netlify.mydeardaybook",
+  "host": "mydeardaybook.netlify.app",
+  "name": "Daybook",
+  "launcherName": "Daybook",
+  "display": "standalone",
+  "themeColor": "#26251F",
+  "themeColorDark": "#26251F",
+  "navigationColor": "#26251F",
+  "navigationColorDark": "#26251F",
+  "navigationDividerColor": "#26251F",
+  "navigationDividerColorDark": "#26251F",
+  "backgroundColor": "#FBFBFA",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://mydeardaybook.netlify.app/icon-512.png",
+  "maskableIconUrl": "https://mydeardaybook.netlify.app/icon-512.png",
+  "monochromeIconUrl": "https://mydeardaybook.netlify.app/icon-monochrome.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "daybook"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-core",
+  "webManifestUrl": "https://mydeardaybook.netlify.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://mydeardaybook.netlify.app/",
+  "minSdkVersion": 21,
+  "orientation": "default",
+  "fingerprints": [
+    {
+      "name": "upload key (sideloaded APK)",
+      "value": "18:60:28:67:14:2F:56:53:D7:E8:AE:80:02:CB:4C:16:88:E5:4C:CA:4C:FE:1F:99:88:73:1E:A7:80:A5:09:15"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1.0.0"
+}
