@@ -177,6 +177,7 @@ export function CheckSheet({ at, onClose }: { at: { studentId: string; date: str
     <Sheet
       open={!!at && !!c}
       onClose={close}
+      width={600}
       title={
         c ? (
           <span className="flex items-center gap-2">
@@ -200,8 +201,10 @@ export function CheckSheet({ at, onClose }: { at: { studentId: string; date: str
           </label>
 
           <div className="label mb-1.5">What to check</div>
+          {/* At least 7 lines show without scrolling; it grows with what you type, up to most of the screen. */}
           <textarea
-            className="field mb-1 min-h-[96px] text-[14.5px] leading-relaxed"
+            rows={7}
+            className="field mb-1 min-h-[calc(7lh+1.25rem)] max-h-[55dvh] resize-y text-[14.5px] leading-relaxed [field-sizing:content]"
             placeholder={`e.g. Unit 5 workbook, vocabulary notebook`}
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -233,8 +236,6 @@ export function CheckSheet({ at, onClose }: { at: { studentId: string; date: str
               </button>
             </div>
           )}
-
-          <HomeworkEditor studentId={c.student.id} name={c.student.name} />
         </div>
       )}
     </Sheet>
