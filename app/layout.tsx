@@ -5,7 +5,8 @@ import "./globals.css";
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin", "vietnamese"],
   variable: "--font-bricolage",
-  weight: ["400", "500", "600", "700", "800"],
+  // Variable font with the optical-size axis, so big titles get the display cut and small text the text cut.
+  axes: ["opsz"],
 });
 
 export const metadata: Metadata = {

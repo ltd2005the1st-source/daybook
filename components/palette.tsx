@@ -63,13 +63,13 @@ export function Palette({ open, onClose }: { open: boolean; onClose: () => void 
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[14vh]">
-          <motion.div className="absolute inset-0 bg-black/25" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
+          <motion.div className="absolute inset-0 bg-[var(--scrim)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
           <motion.div
             initial={{ opacity: 0, scale: 0.97, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.26, ease: [0.65, 0, 0.35, 1] }}
-            className="relative w-full max-w-[540px] overflow-hidden rounded-xl border border-line bg-surface shadow-pop"
+            className="relative w-full max-w-[540px] overflow-hidden rounded-2xl border border-line dark:border-[var(--hairline)] bg-surface shadow-pop"
           >
             <input
               ref={ref}

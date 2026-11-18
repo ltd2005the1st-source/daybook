@@ -24,8 +24,17 @@
   --pen-soft: rgba(200, 65, 43, 0.09);
   --good: #2e7a55;
   --good-soft: rgba(46, 122, 85, 0.1);
-  --shadow: 0 1px 2px rgba(15, 15, 10, 0.04), 0 8px 24px -12px rgba(15, 15, 10, 0.12);
-  --shadow-pop: 0 2px 6px rgba(15, 15, 10, 0.06), 0 24px 48px -16px rgba(15, 15, 10, 0.25);
+  /* Depth: a hairline contact shadow plus a soft ambient one. Bigger surfaces cast deeper shadows. */
+  --shadow: 0 0 0 0.5px rgba(15, 15, 10, 0.04), 0 1px 2px rgba(15, 15, 10, 0.05), 0 6px 16px -10px rgba(15, 15, 10, 0.14);
+  --shadow-pop: 0 0 0 0.5px rgba(15, 15, 10, 0.06), 0 4px 12px -2px rgba(15, 15, 10, 0.08), 0 32px 64px -20px rgba(15, 15, 10, 0.3);
+  /* Translucent material for floating chrome (bars, toasts). Content scrolls underneath. */
+  --material: rgba(251, 251, 250, 0.8);
+  --material-thick: rgba(251, 251, 250, 0.86);
+  --material-edge: rgba(255, 255, 255, 0.7);
+  --hairline: rgba(15, 15, 10, 0.08);
+  --scrim: rgba(20, 20, 15, 0.22);
+  --ring: color-mix(in oklab, var(--accent) 28%, transparent);
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
   color-scheme: light;
 }
 
@@ -45,8 +54,13 @@
   --pen-soft: rgba(240, 122, 100, 0.12);
   --good: #6cc597;
   --good-soft: rgba(108, 197, 151, 0.12);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
-  --shadow-pop: 0 2px 6px rgba(0, 0, 0, 0.35), 0 24px 48px -16px rgba(0, 0, 0, 0.7);
+  --shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 20px -12px rgba(0, 0, 0, 0.6);
+  --shadow-pop: 0 0 0 0.5px rgba(255, 255, 255, 0.07), 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 32px 64px -20px rgba(0, 0, 0, 0.75);
+  --material: rgba(25, 25, 24, 0.78);
+  --material-thick: rgba(30, 30, 29, 0.86);
+  --material-edge: rgba(255, 255, 255, 0.06);
+  --hairline: rgba(255, 255, 255, 0.08);
+  --scrim: rgba(0, 0, 0, 0.5);
   color-scheme: dark;
 }
 
@@ -83,7 +97,12 @@ body {
   font-family: var(--font-sans);
   font-size: 14.5px;
   line-height: 1.5;
+  /* Small text gets a touch of air; display sizes tighten (see .display). */
+  letter-spacing: 0.003em;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -94,7 +113,8 @@ body {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 5px var(--ring);
 }
 
 .num {
@@ -106,14 +126,20 @@ body {
 .display {
   font-family: var(--font-display);
   font-optical-sizing: auto;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
+}
+/* Page titles: the largest type, so the tightest tracking and leading. */
+.title {
+  letter-spacing: -0.028em;
+  line-height: 1.02;
+  text-wrap: balance;
 }
 
 /* Small caps label used for section eyebrows */
 .label {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -123,10 +149,10 @@ body {
   width: 100%;
   background: transparent;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 7px 10px;
   color: var(--ink);
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease), box-shadow 0.2s var(--ease);
 }
 .field:hover {
   background: var(--hover);
@@ -135,6 +161,7 @@ body {
   outline: none;
   border-color: var(--accent);
   background: var(--surface);
+  box-shadow: 0 0 0 4px var(--ring);
 }
 .field::placeholder {
   color: var(--muted);
@@ -144,19 +171,30 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 6px 11px;
   font-weight: 500;
   font-size: 13.5px;
-  transition: background 0.15s, transform 0.1s, color 0.15s;
+  letter-spacing: 0.005em;
+  /* Release eases back; the press itself is instant (below). */
+  transition: background 0.15s var(--ease), transform 0.22s var(--ease), color 0.15s var(--ease), box-shadow 0.15s var(--ease);
   white-space: nowrap;
+  touch-action: manipulation;
 }
-.btn:active {
-  transform: translateY(1px);
+/* Feedback on press, not on release: shrink a little the moment it's touched. */
+.btn:active,
+.press:active {
+  transform: scale(0.96);
+  transition-duration: 0.06s;
+}
+.press {
+  transition: transform 0.22s var(--ease), background-color 0.15s var(--ease), border-color 0.15s var(--ease), color 0.15s var(--ease);
+  touch-action: manipulation;
 }
 .btn-primary {
   background: var(--ink);
   color: var(--bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(15, 15, 10, 0.18);
 }
 .btn-primary:hover {
   background: color-mix(in oklab, var(--ink) 85%, var(--accent));
@@ -179,7 +217,82 @@ body {
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 14px;
+}
+/* Layered so a shadow utility on a card (e.g. shadow-pop) still wins. */
+@layer components {
+  .card {
+    box-shadow: var(--shadow);
+  }
+}
+:root[data-theme="dark"] .card {
+  border-color: var(--hairline);
+}
+
+/* Translucent chrome: blurs and lifts what scrolls beneath it. A bright top edge catches the light. */
+.material {
+  background: var(--material);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+}
+.material-thick {
+  background: var(--material-thick);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
+  backdrop-filter: blur(30px) saturate(190%);
+  box-shadow: inset 0 1px 0 var(--material-edge);
+}
+/* Scroll edge: a hairline only once content is actually passing underneath. */
+.edge-bottom {
+  box-shadow: 0 0.5px 0 transparent;
+  transition: box-shadow 0.25s var(--ease);
+}
+.edge-bottom[data-scrolled] {
+  box-shadow: 0 0.5px 0 var(--hairline), 0 8px 16px -14px rgba(0, 0, 0, 0.25);
+}
+.edge-top {
+  box-shadow: 0 -0.5px 0 var(--hairline), inset 0 0.5px 0 var(--material-edge);
+}
+
+/* Theme switch: colours ease across instead of flashing. Added for a moment by the toggle. */
+.theme-fade,
+.theme-fade *,
+.theme-fade *::before,
+.theme-fade *::after {
+  transition:
+    background-color 0.35s var(--ease),
+    border-color 0.35s var(--ease),
+    color 0.35s var(--ease),
+    fill 0.35s var(--ease),
+    stroke 0.35s var(--ease) !important;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .material,
+  .material-thick {
+    background: var(--bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@media (prefers-contrast: more) {
+  :root {
+    --line: #c9c7c0;
+    --muted: #6a675f;
+    --hairline: rgba(15, 15, 10, 0.3);
+  }
+  :root[data-theme="dark"] {
+    --line: #4a4946;
+    --muted: #aaa69c;
+    --hairline: rgba(255, 255, 255, 0.3);
+  }
+  .material,
+  .material-thick {
+    background: var(--bg);
+    backdrop-filter: none;
+  }
+  .edge-bottom {
+    box-shadow: 0 1px 0 var(--line-strong);
+  }
 }
 
 /* Exercise-book ruling used behind the register and receipts */
@@ -222,6 +335,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .btn:active,
+  .press:active {
+    transform: none;
+  }
   *,
   *::before,
   *::after {

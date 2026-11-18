@@ -24,7 +24,13 @@ function useTheme() {
   }, []);
   const toggle = () => {
     const next = theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
+    const root = document.documentElement;
+    // Ease the colours across rather than jumping from light to dark in one frame.
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      root.classList.add("theme-fade");
+      window.setTimeout(() => root.classList.remove("theme-fade"), 400);
+    }
+    root.dataset.theme = next;
     try {
       localStorage.setItem("daybook.theme", next);
     } catch {}
@@ -38,6 +44,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { theme, toggle } = useTheme();
   const [paletteOpen, setPaletteOpen] = useState(false);
+  // The top bar only shows its edge once the page has scrolled under it.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 4);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
   // Publish the mobile top bar's height so sticky headers inside pages can sit just below it.
   const topbarObserver = useRef<ResizeObserver | null>(null);
   const topbarRef = (el: HTMLElement | null) => {
@@ -80,10 +94,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </Link>
         <button
           onClick={() => setPaletteOpen(true)}
-          className="mb-2 flex items-center justify-between rounded-md border border-line bg-surface px-2.5 py-1.5 text-[13px] text-muted hover:text-ink"
+          className="press mb-3 flex items-center justify-between rounded-lg border border-line bg-surface px-2.5 py-1.5 text-[13px] text-muted shadow-card hover:text-ink"
         >
           <span>Jump or add…</span>
-          <kbd className="num text-[11px]">⌘K</kbd>
+          <kbd className="num rounded-[5px] border border-line px-1 text-[10.5px] leading-[16px]">⌘K</kbd>
         </button>
         <nav className="flex flex-col gap-px">
           {NAV.map((n) => {
@@ -93,18 +107,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 key={n.href}
                 href={n.href}
                 className={cx(
-                  "relative flex items-center gap-2.5 rounded-md px-2.5 py-[7px] text-[14px] transition-colors",
+                  "press relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[14px]",
                   active ? "text-ink font-medium" : "text-ink-2 hover:bg-hover hover:text-ink",
                 )}
               >
                 {active && (
                   <motion.span
                     layoutId="nav-active"
-                    className="absolute inset-0 rounded-md bg-hover"
+                    className="absolute inset-0 rounded-lg bg-surface shadow-card"
                     transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
                   />
                 )}
-                <n.icon size={16} strokeWidth={1.8} className="relative" />
+                <n.icon size={16} strokeWidth={active ? 2 : 1.8} className={cx("relative", active && "text-accent")} />
                 <span className="relative">{n.label}</span>
               </Link>
             );
@@ -134,16 +148,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Mobile top bar */}
-      <header ref={topbarRef} className="no-print md:hidden sticky top-0 z-30 flex items-center justify-between border-b border-line bg-bg/85 backdrop-blur px-4 pt-[max(env(safe-area-inset-top),10px)] pb-2.5">
+      <header ref={topbarRef} data-scrolled={scrolled || undefined} className="no-print md:hidden sticky top-0 z-30 flex items-center justify-between material edge-bottom px-4 pt-[max(env(safe-area-inset-top),10px)] pb-2.5">
         <Link href="/" className="flex items-center gap-2">
           <img src="/icon.svg" alt="" className="h-6 w-6 rounded-[6px]" />
           <span className="display text-[17px] font-semibold">Daybook</span>
         </Link>
         <div className="flex items-center gap-1">
-          <button aria-label="Toggle theme" onClick={toggle} className="btn btn-ghost px-2">
+          <button aria-label="Toggle theme" onClick={toggle} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
             {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
           </button>
-          <Link aria-label="Settings" href="/settings" className="btn btn-ghost px-2">
+          <Link aria-label="Settings" href="/settings" className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
             <PanelRightOpen size={17} />
           </Link>
         </div>
@@ -154,7 +168,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Mobile tab bar */}
-      <nav data-bottom-nav className="no-print md:hidden fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/90 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+      <nav data-bottom-nav className="no-print md:hidden fixed inset-x-0 bottom-0 z-30 material-thick edge-top pb-[env(safe-area-inset-bottom)]">
         <div className="grid" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
           {NAV.map((n) => {
             const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
@@ -162,13 +176,23 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <Link
                 key={n.href}
                 href={n.href}
+                aria-current={active ? "page" : undefined}
                 className={cx(
-                  "flex min-w-0 flex-col items-center gap-0.5 py-2 text-[10px]",
+                  "press flex min-w-0 flex-col items-center gap-[3px] pt-2 pb-1.5 text-[10px] tracking-[0.01em]",
                   active ? "text-ink font-semibold" : "text-muted",
                 )}
               >
-                <n.icon size={20} strokeWidth={active ? 2.1 : 1.7} />
-                {n.label}
+                <span className="relative flex h-7 w-12 max-w-full items-center justify-center">
+                  {active && (
+                    <motion.span
+                      layoutId="tab-active"
+                      className="absolute inset-0 rounded-full bg-accent-soft"
+                      transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
+                    />
+                  )}
+                  <n.icon size={20} strokeWidth={active ? 2.1 : 1.7} className={cx("relative", active && "text-accent")} />
+                </span>
+                <span className="max-w-full truncate">{n.label}</span>
               </Link>
             );
           })}
@@ -190,7 +214,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               animate={{ opacity: 1, y: 0, transition: { duration: 0.34, ease: [0.65, 0, 0.35, 1] } }}
               exit={{ opacity: 0, y: 28, transition: { duration: 0.3, ease: [0.65, 0, 0.35, 1] } }}
               transition={{ layout: { duration: 0.3, ease: [0.65, 0, 0.35, 1] } }}
-              className="flex items-center gap-3 rounded-lg bg-ink px-3.5 py-2 text-[13.5px] text-bg shadow-pop"
+              className="flex items-center gap-3 rounded-full bg-ink/90 py-2 pl-4 pr-3 text-[13.5px] text-bg shadow-pop backdrop-blur-xl"
             >
               {t.text}
               {t.undo && (

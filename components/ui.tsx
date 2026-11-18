@@ -21,7 +21,7 @@ export function PageHeader({
     <div className="mb-6 md:mb-8 flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0">
         {eyebrow && <div className="label mb-1.5">{eyebrow}</div>}
-        <h1 className="display text-[30px] md:text-[38px] font-semibold leading-[1.05]">{title}</h1>
+        <h1 className="display title text-[32px] md:text-[40px] font-semibold">{title}</h1>
       </div>
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
     </div>
@@ -74,7 +74,7 @@ export function Sheet({
       {open && (
         <div className="fixed inset-0 z-40 flex items-end md:items-center justify-center">
           <motion.div
-            className="absolute inset-0 bg-black/25 dark:bg-black/50"
+            className="absolute inset-0 bg-[var(--scrim)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -83,16 +83,18 @@ export function Sheet({
           <motion.div
             role="dialog"
             aria-modal="true"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.32, ease: [0.65, 0, 0.35, 1] }}
-            style={{ maxWidth: width }}
-            className="relative w-full max-h-[88dvh] overflow-y-auto rounded-t-2xl md:rounded-xl bg-surface border border-line shadow-pop pb-[env(safe-area-inset-bottom)]"
+            // Materialises rather than just fading: rises from where it docks, sharpening as it
+            // arrives, and leaves along the same path it came in on.
+            initial={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
+            transition={{ duration: 0.34, ease: [0.65, 0, 0.35, 1] }}
+            style={{ maxWidth: width, transformOrigin: "50% 100%" }}
+            className="relative w-full max-h-[88dvh] overflow-y-auto rounded-t-[22px] md:rounded-[18px] bg-surface border border-line dark:border-[var(--hairline)] shadow-pop pb-[env(safe-area-inset-bottom)]"
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between bg-surface/95 backdrop-blur px-5 pt-4 pb-2">
-              <h3 className="display text-[19px] font-semibold">{title}</h3>
-              <button aria-label="Close" onClick={onClose} className="btn btn-ghost px-1.5">
+            <div className="sticky top-0 z-10 flex items-center justify-between bg-surface/80 backdrop-blur-xl px-5 pt-4 pb-2">
+              <h3 className="display text-[20px] font-semibold">{title}</h3>
+              <button aria-label="Close" onClick={onClose} className="press inline-flex h-8 w-8 items-center justify-center rounded-full bg-hover text-ink-2 hover:text-ink">
                 <X size={17} />
               </button>
             </div>
@@ -163,7 +165,7 @@ export function Tick({
         onChange();
       }}
       className={cx(
-        "relative shrink-0 inline-flex items-center justify-center border-[1.5px] transition-colors duration-200",
+        "press relative shrink-0 inline-flex items-center justify-center border-[1.5px] transition-colors duration-200",
         round ? "rounded-full" : "rounded-[5px]",
         pop && "tick-pop",
       )}
@@ -207,19 +209,19 @@ export function Segmented<T extends string>({
   className?: string;
 }) {
   return (
-    <div className={cx("inline-flex rounded-lg bg-hover p-0.5", className)}>
+    <div className={cx("inline-flex rounded-[10px] bg-hover p-[3px]", className)}>
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
           className={cx(
-            "relative rounded-md px-2.5 py-1 text-[13px] transition-colors",
+            "press relative rounded-[7px] px-2.5 py-1 text-[13px]",
             value === o.value ? "text-ink font-medium" : "text-muted hover:text-ink",
           )}
         >
           {value === o.value && (
-            <motion.span layoutId={`seg-${options.map((x) => x.value).join("")}`} className="absolute inset-0 rounded-md bg-surface shadow-card" transition={{ duration: 0.32, ease: [0.65, 0, 0.35, 1] }} />
+            <motion.span layoutId={`seg-${options.map((x) => x.value).join("")}`} className="absolute inset-0 rounded-[7px] bg-surface shadow-card" transition={{ duration: 0.32, ease: [0.65, 0, 0.35, 1] }} />
           )}
           <span className="relative">{o.label}</span>
         </button>
@@ -229,7 +231,7 @@ export function Segmented<T extends string>({
 }
 
 export function Empty({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-lg border border-dashed border-line-strong px-4 py-5 text-center text-[13.5px] text-muted">{children}</div>;
+  return <div className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-[13.5px] text-muted">{children}</div>;
 }
 
 /** A destructive button that asks for a second tap instead of a browser dialog. */
