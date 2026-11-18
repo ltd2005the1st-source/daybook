@@ -15,6 +15,7 @@ import { Palette } from "./palette";
 import { cx } from "@/lib/format";
 import { NAV } from "./nav";
 import { MusicDock, MusicProvider } from "./music";
+import { useSmoothWheel } from "./smooth-scroll";
 
 
 function useTheme() {
@@ -43,6 +44,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { ready, needsLogin, online, toasts, dismissToast, signOut, session } = useData();
   const path = usePathname();
   const { theme, toggle } = useTheme();
+  useSmoothWheel();
   const [paletteOpen, setPaletteOpen] = useState(false);
   // The top bar only shows its edge once the page has scrolled under it.
   const [scrolled, setScrolled] = useState(false);
@@ -107,7 +109,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 key={n.href}
                 href={n.href}
                 className={cx(
-                  "press relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[14px]",
+                  "press nav-item relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[14px]",
                   active ? "text-ink font-medium" : "text-ink-2 hover:bg-hover hover:text-ink",
                 )}
               >
