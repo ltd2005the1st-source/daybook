@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AnimatePresence } from "motion/react";
-import { CheckRow, CheckSheet } from "@/components/checks";
+import { CheckRow, CheckSheet, repeatedNotes } from "@/components/checks";
 import { ChevronLeft, ChevronRight, Plus, ReceiptText } from "lucide-react";
 import { useData } from "@/components/data";
 import { Legend, Register } from "@/components/register";
@@ -36,6 +36,8 @@ export default function TeachingPage() {
     .sort((a, b) => (a.next?.date ?? "9").localeCompare(b.next?.date ?? "9"));
 
   const checks = checkTasksBetween(store, t, 7).filter((c) => !c.done);
+  // Show a repeated check note only on the soonest check for that student.
+  const sameNote = repeatedNotes(checks);
   const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
 
   return (
@@ -90,7 +92,7 @@ export default function TeachingPage() {
             <div className="row-list flex flex-col overflow-x-clip">
               <AnimatePresence initial={false}>
                 {checks.map((c) => (
-                  <CheckRow key={c.key} c={c} compact onOpen={() => setOpenCheck({ studentId: c.student.id, date: c.date })} />
+                  <CheckRow key={c.key} c={c} hideNote={sameNote.has(c.key)} compact onOpen={() => setOpenCheck({ studentId: c.student.id, date: c.date })} />
                 ))}
               </AnimatePresence>
             </div>
