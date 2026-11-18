@@ -133,14 +133,15 @@ export default function TodayPage() {
                     transition={{ delay: i * 0.03 }}
                     className="relative grid grid-cols-[52px_14px_1fr] items-start gap-2 py-1.5"
                   >
-                    <span className={cx("num pt-0.5 text-[12.5px]", live ? "font-semibold text-pen" : "text-muted")}>{o.start ?? "all day"}</span>
-                    <span className="relative flex justify-center pt-[7px]">
+                    {/* Time, dot and name share one 22px line (4px down, matching the name's padding) so they sit level. */}
+                    <span className={cx("num pt-1 text-[13px] leading-[22px]", live ? "font-semibold text-pen" : "text-muted")}>{o.start ?? "all day"}</span>
+                    <span className="relative mt-1 flex h-[22px] items-center justify-center">
                       <span className={cx("h-2.5 w-2.5 rounded-full", o.kind === "check" && "ring-2 ring-offset-0")} style={{ background: o.kind === "check" ? "var(--surface)" : o.color, ["--tw-ring-color" as string]: o.color }} />
-                      {live && <span className="absolute top-[4px] h-4 w-4 animate-ping rounded-full opacity-30" style={{ background: o.color }} />}
+                      {live && <span className="absolute h-4 w-4 animate-ping rounded-full opacity-30" style={{ background: o.color }} />}
                     </span>
                     <div className={cx("min-w-0 rounded-md px-2 py-1 -mx-2", live && "bg-hover")}>
                       <div className="flex items-center gap-2">
-                        <span className={cx("text-[14.5px] font-medium", (o.status === "cancelled" || o.status === "missed_owe" || o.done) && "line-through text-muted")}>
+                        <span className={cx("text-[14.5px] font-medium leading-[22px]", (o.status === "cancelled" || o.status === "missed_owe" || o.done) && "line-through text-muted")}>
                           {o.title}
                         </span>
                         {live && <span className="rounded bg-pen px-1.5 text-[10.5px] font-bold uppercase tracking-wide text-white">Now</span>}
@@ -242,7 +243,7 @@ export default function TodayPage() {
 function HwCount({ studentId }: { studentId: string }) {
   const { store } = useData();
   const n = store.homework.filter((h) => h.student_id === studentId && h.status === "open").length;
-  return <span className={cx("ml-2", n > 0 && "text-pen")}>{n ? `${n} to check` : "nothing logged"}</span>;
+  return <span className={cx(n > 0 && "text-pen")}>{n ? `${n} to check` : "nothing logged"}</span>;
 }
 
 function summaryLine(agenda: Occurrence[], checks: number, tasks: number, nowMin: number): string {
