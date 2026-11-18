@@ -138,7 +138,7 @@ export function Register({ month, students, onPickStudent }: { month: string; st
                 {/* The date column stays put when you swipe sideways on a phone. */}
                 <div className="sticky left-0 z-[1] bg-surface">
                   <div className={cx("flex h-full items-baseline gap-1.5 px-3 py-[5px]", weekend && "bg-sunken/60", isToday && "!bg-accent-soft")}>
-                  <span className={cx("num text-[13px]", isToday ? "font-semibold text-accent" : "text-ink")}>{parseDate(d).getDate()}</span>
+                  <span className={cx("num inline-block w-[2ch] tabular-nums text-right text-[13px]", isToday ? "font-semibold text-accent" : "text-ink")}>{parseDate(d).getDate()}</span>
                   <span className={cx("text-[11.5px]", weekend ? "text-ink-2" : "text-muted")}>{WD_SHORT[wd]}</span>
                   </div>
                 </div>
