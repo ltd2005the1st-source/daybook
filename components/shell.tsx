@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import {
+  LayoutGrid,
   Moon,
   PanelRightOpen,
   Sparkles,
@@ -11,6 +12,8 @@ import {
   X,
 } from "lucide-react";
 import { useData } from "./data";
+import { AppGrid, AppLinks } from "./apps";
+import { Sheet } from "./ui";
 import { Login } from "./login";
 import { Palette } from "./palette";
 import { Assistant, useAssistantShortcut } from "./assistant";
@@ -60,6 +63,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   useSmoothWheel();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [askOpen, setAskOpen] = useState(false);
+  const [appsOpen, setAppsOpen] = useState(false);
   const [askSeed, setAskSeed] = useState<string | null>(null);
   const toggleAsk = useCallback(() => setAskOpen((v) => !v), []);
   useAssistantShortcut(toggleAsk);
@@ -132,6 +136,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <span>Jump or add…</span>
           <kbd className="num rounded-[5px] border border-line px-1 text-[10.5px] leading-[16px]">⌘K</kbd>
         </button>
+        <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-3 [mask-image:linear-gradient(to_bottom,black_calc(100%-20px),transparent)]">
         <nav className="flex flex-col gap-px">
           {NAV.map((n, i) => {
             const active = i === activeIdx;
@@ -158,6 +163,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+        <AppLinks />
+        </div>
         <div className="mt-auto flex flex-col gap-px">
           <button onClick={() => setAskOpen(true)} className="btn btn-ghost justify-between">
             <span className="flex items-center gap-2.5">
@@ -194,6 +201,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <span className="display text-[17px] font-semibold">Daybook</span>
         </Link>
         <div className="flex items-center gap-1">
+          <button aria-label="Apps" onClick={() => setAppsOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
+            <LayoutGrid size={17} />
+          </button>
           <button aria-label="Ask Claude" onClick={() => setAskOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-accent hover:bg-hover">
             <Sparkles size={17} />
           </button>
@@ -284,6 +294,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
           setAskOpen(true);
         }}
       />
+      <Sheet open={appsOpen} onClose={() => setAppsOpen(false)} title="Apps" width={420}>
+        <AppGrid onPick={() => setAppsOpen(false)} />
+      </Sheet>
       <Assistant open={askOpen} onClose={() => setAskOpen(false)} seed={askSeed} onSeedUsed={() => setAskSeed(null)} />
       <MusicDock />
 
