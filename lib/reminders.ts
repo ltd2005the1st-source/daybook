@@ -1,4 +1,4 @@
-import { fromMinutes, minutes } from "./dates";
+import { addDays, fromMinutes, minutes } from "./dates";
 import { checkTasksOn, eventsOn, lessonsOn, markFor, noteFor } from "./teaching";
 import { DEFAULT_REMIND, type Store } from "./types";
 
@@ -100,3 +100,20 @@ export function remindersFor(store: Store, date: string): Reminder[] {
 }
 
 export const fmtAt = (m: number) => fromMinutes(m);
+
+/**
+ * Reminders from `fromDate` (Vietnam date) over `days` days as absolute times, for the Android app,
+ * which schedules them on the phone itself. Only ones still ahead of `now` are returned.
+ */
+export function upcomingReminders(store: Store, fromDate: string, days = 2, now = Date.now()) {
+  const out: { key: string; when: number; title: string; body: string; url: string }[] = [];
+  for (let i = 0; i < days; i++) {
+    const date = addDays(fromDate, i);
+    const midnight = Date.parse(`${date}T00:00:00+07:00`);
+    for (const r of remindersFor(store, date)) {
+      const when = midnight + r.at * 60_000;
+      if (when > now) out.push({ key: r.key, when, title: r.title, body: r.body, url: r.url });
+    }
+  }
+  return out.sort((a, b) => a.when - b.when);
+}

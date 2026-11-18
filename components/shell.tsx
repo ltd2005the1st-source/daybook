@@ -17,6 +17,7 @@ import { NAV, isDashboardPath } from "./nav";
 import { useActiveSection } from "./scroll-spy";
 import { MusicDock, MusicProvider } from "./music";
 import { useSmoothWheel } from "./smooth-scroll";
+import { NativeSync } from "./native-sync";
 import { sec, ms } from "@/lib/motion";
 
 
@@ -97,6 +98,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     // Anything that animates without its own timing eases in and out the same way.
     <MotionConfig transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }} reducedMotion="user">
     <MusicProvider>
+    <NativeSync />
     <div className="min-h-dvh md:flex">
       {/* Sidebar (desktop) */}
       <aside className="no-print hidden md:flex w-[186px] shrink-0 flex-col border-r border-line bg-sunken sticky top-0 h-[calc(100dvh-var(--dock,0px))] px-2.5 py-3 transition-[height] duration-300 ease-in-out">

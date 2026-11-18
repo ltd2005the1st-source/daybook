@@ -7,6 +7,7 @@ import { ConfirmButton, Field, Page, PageHeader, Section } from "@/components/ui
 import { remindersFor, fmtAt } from "@/lib/reminders";
 import { today } from "@/lib/dates";
 import { cx } from "@/lib/format";
+import { native } from "@/lib/native";
 import { TABLES, type Store } from "@/lib/types";
 
 /* ---------- Backups ---------- */
@@ -15,7 +16,7 @@ type Backup = { data: Partial<Store>; settings: Record<string, string> };
 // Preferences kept in this browser (theme, name, calendar view…). The local data store itself is in `data`.
 const isSetting = (k: string) => /^daybook[.:]/.test(k) && k !== "daybook.store.v1";
 
-function downloadBackup(store: Store) {
+function downloadBackup(store: Store): boolean | void {
   const settings: Record<string, string> = {};
   try {
     for (let i = 0; i < localStorage.length; i++) {
@@ -25,7 +26,11 @@ function downloadBackup(store: Store) {
   } catch {}
   const counts = Object.fromEntries(TABLES.map((t) => [t, store[t].length]));
   const file = { app: "daybook", version: 1, exported_at: new Date().toISOString(), counts, settings, data: store };
-  const blob = new Blob([JSON.stringify(file, null, 2)], { type: "application/json" });
+  const text = JSON.stringify(file, null, 2);
+  const app = native();
+  // The Android app has no browser downloads, so it writes the file to Downloads itself.
+  if (app) return app.saveFile(`daybook-backup-${today()}.json`, "application/json", text);
+  const blob = new Blob([text], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = `daybook-backup-${today()}.json`;
@@ -63,11 +68,22 @@ export default function SettingsPage() {
   const [busy, setBusy] = useState(false);
   // What happened the last time you turned reminders on or sent a test, kept on screen (a pop-up is too easy to miss).
   const [pushNote, setPushNote] = useState<{ ok: boolean; text: string } | null>(null);
+  // Inside the Android app, reminders are scheduled by the app itself (no web push there).
+  const [inApp, setInApp] = useState(false);
+  const [appAllowed, setAppAllowed] = useState(true);
 
   useEffect(() => {
     try {
       setName(localStorage.getItem("daybook.name") ?? "");
     } catch {}
+    const app = native();
+    if (app) {
+      setInApp(true);
+      setAppAllowed(app.notificationsAllowed());
+      const onVis = () => document.visibilityState === "visible" && setAppAllowed(app.notificationsAllowed());
+      document.addEventListener("visibilitychange", onVis);
+      return () => document.removeEventListener("visibilitychange", onVis);
+    }
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       setPush("unsupported");
       return;
@@ -212,7 +228,23 @@ export default function SettingsPage() {
       </Section>
 
       <Section title="Reminders on this device">
-        {!online ? (
+        {inApp ? (
+          appAllowed ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[13.5px] text-good">On. The Daybook app schedules them on this phone.</span>
+              <button className="btn btn-line" onClick={() => native()?.testNotification()}>
+                <Bell size={15} /> Send a test
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[13.5px] text-pen">Notifications are off for Daybook on this phone.</span>
+              <button className="btn btn-primary" onClick={() => native()?.requestNotifications()}>
+                <Bell size={15} /> Allow notifications
+              </button>
+            </div>
+          )
+        ) : !online ? (
           <p className="text-[13.5px] text-ink-2">Phone reminders need the online version (Supabase). You are in local mode, so reminders show only inside the app.</p>
         ) : push === "unsupported" ? (
           <p className="text-[13.5px] text-ink-2">
@@ -247,7 +279,7 @@ export default function SettingsPage() {
             {pushNote.text}
           </p>
         )}
-        {online && push !== "unsupported" && (
+        {!inApp && online && push !== "unsupported" && (
           <p className="mt-2 text-[12px] text-muted">
             Nothing arriving on Android? Open your phone’s Settings → Apps → Daybook → Notifications and make sure they’re allowed (in the browser, it’s the
             site’s notification setting).
@@ -270,7 +302,11 @@ export default function SettingsPage() {
 
       <Section title="Data">
         <div className="flex flex-wrap gap-2">
-          <button className="btn btn-line" onClick={() => downloadBackup(storeRef.current)}>
+          <button className="btn btn-line" onClick={() => {
+              const saved = downloadBackup(storeRef.current);
+              if (saved === true) toast("Saved to your Downloads folder");
+              if (saved === false) toast("Couldn’t save the file");
+            }}>
             <Download size={15} /> Download my data
           </button>
           <label className={cx("btn btn-line cursor-pointer", restoring && "pointer-events-none opacity-50")}>
