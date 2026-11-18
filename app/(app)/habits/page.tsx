@@ -7,6 +7,7 @@ import { Field, Page, PageHeader, Section, Sheet, Tick } from "@/components/ui";
 import { addDays, fmtDay, fromMinutes, minutes, parseDate, startOfWeek, today, WD_SHORT } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import type { Habit, HabitLog } from "@/lib/types";
+import { sec } from "@/lib/motion";
 
 /** Sleep times live on a night axis from 20:00 to 12:00 the next day. */
 const AXIS_START = 20 * 60;
@@ -122,7 +123,7 @@ function Sleep({ h }: { h: Habit }) {
                         style={{ background: good ? h.color : "var(--pen)", top: `${(top / AXIS_LEN) * 100}%` }}
                         initial={{ height: 0 }}
                         animate={{ height: `${(Math.max(8, bottom - top) / AXIS_LEN) * 100}%` }}
-                        transition={{ duration: 0.6, ease: [0.65, 0, 0.35, 1], delay: i * 0.02 }}
+                        transition={{ duration: sec(0.6), ease: [0.65, 0, 0.35, 1], delay: sec(i * 0.02) }}
                       />
                     )}
                   </div>

@@ -15,6 +15,7 @@ import { describeEvent, duplicateEvent } from "@/lib/dupes";
 import { cx } from "@/lib/format";
 import { agendaOn, checkTasksOn, type Occurrence } from "@/lib/teaching";
 import type { CalEvent } from "@/lib/types";
+import { sec } from "@/lib/motion";
 
 const START_H = 6;
 const END_H = 24;
@@ -581,7 +582,7 @@ export default function CalendarPage() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: EASE }}
+            transition={{ duration: sec(0.3), ease: EASE }}
             className="overflow-hidden"
           >
             <div className="mb-3 flex items-center gap-2 rounded-lg border border-accent/40 bg-accent-soft px-3 py-2 text-[13px]">
@@ -731,7 +732,7 @@ export default function CalendarPage() {
               initial={{ opacity: 0, y: 12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.3, ease: EASE }}
+              transition={{ duration: sec(0.3), ease: EASE }}
               className="relative w-full max-w-[340px] rounded-xl border border-line bg-surface p-4 shadow-pop"
             >
               <div className="display mb-1 text-[17px] font-semibold">{scopeText(pending.o).head}</div>
@@ -761,7 +762,7 @@ export default function CalendarPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.12 }}
+            transition={{ duration: sec(0.12) }}
             className="absolute w-[236px] rounded-xl border border-line bg-surface p-3 shadow-pop"
             style={{ left: Math.min(colorMenu.x, window.innerWidth - 248), top: Math.min(colorMenu.y, window.innerHeight - 190) }}
             onClick={(e) => e.stopPropagation()}
@@ -953,7 +954,7 @@ function MonthView({ month, onDay, onOcc }: { month: string; onDay: (d: string) 
   const cells = Array.from({ length: 42 }, (_, i) => addDays(start, i));
   const weeks = cells[35].startsWith(month) ? 6 : 5;
   return (
-    <motion.div key={month} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25, ease: EASE }} className="card overflow-hidden">
+    <motion.div key={month} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: sec(0.25), ease: EASE }} className="card overflow-hidden">
       <div className="grid grid-cols-7 border-b border-line">
         {cells.slice(0, 7).map((d) => (
           <div key={d} className="label py-2 text-center !text-[10.5px]">
@@ -1032,7 +1033,7 @@ function YearView({ year, onDay }: { year: number; onDay: (d: string) => void })
   const { store } = useData();
   const t = today();
   return (
-    <motion.div key={year} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25, ease: EASE }} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <motion.div key={year} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: sec(0.25), ease: EASE }} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: 12 }, (_, m) => {
         const month = `${year}-${String(m + 1).padStart(2, "0")}`;
         const ds = daysInMonth(month);

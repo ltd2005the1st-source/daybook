@@ -9,6 +9,7 @@ import { addDays, fmtDay, relDay, today } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import { checkFor, checkOffset, checkRow, checkTasksOn, checkTime, daysBetween, type CheckTask } from "@/lib/teaching";
 import type { Task } from "@/lib/types";
+import { sec } from "@/lib/motion";
 
 /**
  * Homework checks are tasks, at 22:30 the night before each class unless you move them. They exist on
@@ -320,7 +321,7 @@ export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boo
         className="absolute left-[3px] top-[3px] h-4 w-4 rounded-full bg-white shadow-sm"
         initial={false}
         animate={{ x: on ? 16 : 0 }}
-        transition={{ duration: 0.25, ease: [0.65, 0, 0.35, 1] }}
+        transition={{ duration: sec(0.25), ease: [0.65, 0, 0.35, 1] }}
       />
     </button>
   );

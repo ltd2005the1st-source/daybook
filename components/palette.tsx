@@ -8,6 +8,7 @@ import { NAV } from "./nav";
 import { today } from "@/lib/dates";
 import { cx, fold } from "@/lib/format";
 import { describeTask, duplicateTask } from "@/lib/dupes";
+import { sec } from "@/lib/motion";
 
 type Item = { id: string; label: string; hint?: string; icon: React.ComponentType<{ size?: number }>; run: () => void };
 
@@ -68,7 +69,7 @@ export function Palette({ open, onClose }: { open: boolean; onClose: () => void 
             initial={{ opacity: 0, scale: 0.97, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.26, ease: [0.65, 0, 0.35, 1] }}
+            transition={{ duration: sec(0.26), ease: [0.65, 0, 0.35, 1] }}
             className="relative w-full max-w-[540px] overflow-hidden rounded-2xl border border-line dark:border-[var(--hairline)] bg-surface shadow-pop"
           >
             <input

@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "motion/react";
 import type { Milestone } from "@/lib/types";
+import { sec } from "@/lib/motion";
 
 /** A progress bar where each milestone is a station along the line. */
 export function MilestoneBar({ items, color = "var(--ink)" }: { items: Milestone[]; color?: string }) {
@@ -16,7 +17,7 @@ export function MilestoneBar({ items, color = "var(--ink)" }: { items: Milestone
         style={{ background: color }}
         initial={false}
         animate={{ width: `calc((100% - 14px) * ${pct})` }}
-        transition={{ duration: 0.6, ease: [0.65, 0, 0.35, 1] }}
+        transition={{ duration: sec(0.6), ease: [0.65, 0, 0.35, 1] }}
       />
       {items.map((m, i) => {
         const left = `calc(7px + (100% - 14px) * ${(i + 1) / n} - 5px)`;
@@ -28,7 +29,7 @@ export function MilestoneBar({ items, color = "var(--ink)" }: { items: Milestone
             style={{ left, borderColor: m.done ? color : "var(--line-strong)", background: m.done ? color : "var(--surface)" }}
             initial={false}
             animate={{ scale: m.done ? [1.5, 1] : 1 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: sec(0.3) }}
           />
         );
       })}

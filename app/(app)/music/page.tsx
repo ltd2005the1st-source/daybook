@@ -8,6 +8,7 @@ import { Page, PageHeader, Segmented } from "@/components/ui";
 import { cx } from "@/lib/format";
 import { isShortLink, KIND_LABEL, lookup, openUrl, parseSpotify } from "@/lib/spotify";
 import type { MusicItem } from "@/lib/types";
+import { sec } from "@/lib/motion";
 
 const EASE = [0.65, 0, 0.35, 1] as const;
 type Filter = "all" | "playlist" | "album" | "track";
@@ -116,7 +117,7 @@ function Card({ m, playing, onPlay }: { m: MusicItem; playing: boolean; onPlay: 
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
-      transition={{ duration: 0.3, ease: EASE }}
+      transition={{ duration: sec(0.3), ease: EASE }}
       className="group min-w-0"
     >
       <button type="button" onClick={onPlay} className="relative block aspect-square w-full overflow-hidden rounded-lg bg-sunken text-left" aria-label={`Play ${m.title}`}>

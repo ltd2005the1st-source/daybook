@@ -14,6 +14,7 @@ import { addDays, fmtDay, minutes, MONTHS, monthOf, parseDate, startOfWeek, toda
 import { cx, vnd } from "@/lib/format";
 import { agendaOn, checkTasksOn, makeupsOwed, taughtIn, type Occurrence } from "@/lib/teaching";
 import type { Task } from "@/lib/types";
+import { sec } from "@/lib/motion";
 
 function DueTask({ task, today: t }: { task: Task; today: string }) {
   const { store } = useData();
@@ -130,7 +131,7 @@ export default function TodayPage() {
                     key={o.key}
                     initial={{ opacity: 0, x: -6 }}
                     animate={{ opacity: past ? 0.45 : 1, x: 0 }}
-                    transition={{ delay: i * 0.03 }}
+                    transition={{ delay: sec(i * 0.03) }}
                     className="relative grid grid-cols-[52px_14px_1fr] items-start gap-2 py-1.5"
                   >
                     {/* Time, dot and name share one 22px line (4px down, matching the name's padding) so they sit level. */}

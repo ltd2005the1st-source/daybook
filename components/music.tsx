@@ -6,6 +6,7 @@ import { useData } from "./data";
 import { cx } from "@/lib/format";
 import { embedUrl, KIND_LABEL } from "@/lib/spotify";
 import type { MusicItem } from "@/lib/types";
+import { sec } from "@/lib/motion";
 
 const KEY = "daybook:playing";
 const EASE = [0.65, 0, 0.35, 1] as const;
@@ -191,7 +192,7 @@ export function MusicDock() {
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
-          transition={{ duration: 0.34, ease: EASE }}
+          transition={{ duration: sec(0.34), ease: EASE }}
           style={{ bottom: navH }}
           className="no-print fixed inset-x-0 z-40 border-t border-line bg-surface shadow-[0_-6px_24px_rgba(0,0,0,0.06)]"
           aria-label="Music player"
@@ -237,7 +238,7 @@ export function MusicDock() {
               className="press inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-hover hover:text-ink"
               onClick={() => setFolded(!folded)}
             >
-              <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.34, ease: EASE }} className="inline-flex">
+              <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: sec(0.34), ease: EASE }} className="inline-flex">
                 <ChevronUp size={18} />
               </motion.span>
             </button>
@@ -250,7 +251,7 @@ export function MusicDock() {
           <motion.div
             initial={false}
             animate={{ height: expanded ? PLAYER_H + 12 : 0 }}
-            transition={{ duration: 0.34, ease: EASE }}
+            transition={{ duration: sec(0.34), ease: EASE }}
             className="overflow-hidden"
             aria-hidden={!expanded}
           >
@@ -284,7 +285,7 @@ export function Bars({ playing = true, className }: { playing?: boolean; classNa
         <span
           key={i}
           className={cx("w-[3px] rounded-full bg-accent", playing ? "music-bar" : "h-[5px]")}
-          style={{ animationDelay: `${i * 0.18}s` }}
+          style={{ animationDelay: `${sec(i * 0.18)}s` }}
         />
       ))}
     </span>

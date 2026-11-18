@@ -11,6 +11,7 @@ import { taughtIn } from "@/lib/teaching";
 import { EXPENSE_CATEGORIES, type Debt, type Transaction } from "@/lib/types";
 import { CAT_COLORS, QuickAdd } from "@/components/money";
 import { FoodSection, isFood } from "@/components/food";
+import { sec } from "@/lib/motion";
 
 
 export default function MoneyPage() {
@@ -103,7 +104,7 @@ export default function MoneyPage() {
                       style={{ background: CAT_COLORS[c] }}
                       initial={{ width: 0 }}
                       animate={{ width: `${(v / maxCat) * 100}%` }}
-                      transition={{ duration: 0.6, ease: [0.65, 0, 0.35, 1] }}
+                      transition={{ duration: sec(0.6), ease: [0.65, 0, 0.35, 1] }}
                     />
                   </div>
                   <span className="num w-[92px] text-right">{vnd(v)}</span>

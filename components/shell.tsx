@@ -16,6 +16,7 @@ import { cx } from "@/lib/format";
 import { NAV } from "./nav";
 import { MusicDock, MusicProvider } from "./music";
 import { useSmoothWheel } from "./smooth-scroll";
+import { sec, ms } from "@/lib/motion";
 
 
 function useTheme() {
@@ -29,7 +30,7 @@ function useTheme() {
     // Ease the colours across rather than jumping from light to dark in one frame.
     if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
       root.classList.add("theme-fade");
-      window.setTimeout(() => root.classList.remove("theme-fade"), 400);
+      window.setTimeout(() => root.classList.remove("theme-fade"), ms(400));
     }
     root.dataset.theme = next;
     try {
@@ -85,7 +86,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     // Anything that animates without its own timing eases in and out the same way.
-    <MotionConfig transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }} reducedMotion="user">
+    <MotionConfig transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }} reducedMotion="user">
     <MusicProvider>
     <div className="min-h-dvh md:flex">
       {/* Sidebar (desktop) */}
@@ -117,7 +118,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   <motion.span
                     layoutId="nav-active"
                     className="absolute inset-0 rounded-lg bg-surface shadow-card"
-                    transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
+                    transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }}
                   />
                 )}
                 <n.icon size={16} strokeWidth={active ? 2 : 1.8} className={cx("relative", active && "text-accent")} />
@@ -189,7 +190,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                     <motion.span
                       layoutId="tab-active"
                       className="absolute inset-0 rounded-full bg-accent-soft"
-                      transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
+                      transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }}
                     />
                   )}
                   <n.icon size={20} strokeWidth={active ? 2.1 : 1.7} className={cx("relative", active && "text-accent")} />
@@ -213,9 +214,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
               layout
               // Eases up into place, then eases back down as it leaves.
               initial={{ opacity: 0, y: 28 }}
-              animate={{ opacity: 1, y: 0, transition: { duration: 0.34, ease: [0.65, 0, 0.35, 1] } }}
-              exit={{ opacity: 0, y: 28, transition: { duration: 0.3, ease: [0.65, 0, 0.35, 1] } }}
-              transition={{ layout: { duration: 0.3, ease: [0.65, 0, 0.35, 1] } }}
+              animate={{ opacity: 1, y: 0, transition: { duration: sec(0.34), ease: [0.65, 0, 0.35, 1] } }}
+              exit={{ opacity: 0, y: 28, transition: { duration: sec(0.3), ease: [0.65, 0, 0.35, 1] } }}
+              transition={{ layout: { duration: sec(0.3), ease: [0.65, 0, 0.35, 1] } }}
               className="flex items-center gap-3 rounded-full bg-ink/90 py-2 pl-4 pr-3 text-[13.5px] text-bg shadow-pop backdrop-blur-xl"
             >
               {t.text}
