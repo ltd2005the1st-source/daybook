@@ -12,6 +12,7 @@ import { fmtMonth, monthOf, relDay, shiftMonth, today } from "@/lib/dates";
 import { parseAmount, vnd } from "@/lib/format";
 import { checkTasksBetween, makeupsOwed, nextLesson, taughtIn } from "@/lib/teaching";
 import type { Student } from "@/lib/types";
+import { Money } from "@/components/rolling";
 
 export default function TeachingPage() {
   const { store, update } = useData();
@@ -62,7 +63,7 @@ export default function TeachingPage() {
 
       <p className="mb-5 text-[15px] text-ink-2 leading-relaxed">
         <span className="num font-semibold text-ink">{taught}</span> sessions taught in {fmtMonth(month).split(" ")[0]} for{" "}
-        <span className="num font-semibold text-ink">{vnd(earned)}</span>.{" "}
+        <Money value={earned} className="num font-semibold text-ink" />.{" "}
         {owed > 0 ? (
           <>
             You have noted <span className="num font-semibold text-pen">{owed}</span> makeup {owed === 1 ? "session" : "sessions"} left
@@ -72,7 +73,7 @@ export default function TeachingPage() {
         )}
         {toCollect > 0 && (
           <>
-            {" "}and have <span className="num font-semibold text-ink">{vnd(toCollect)}</span> to collect
+            {" "}and have <Money value={toCollect} className="num font-semibold text-ink" /> to collect
           </>
         )}
         .

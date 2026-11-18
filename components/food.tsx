@@ -8,6 +8,7 @@ import { daysInMonth, fmtDay, MONTHS, monthOf, today } from "@/lib/dates";
 import { cx, parseAmount, vnd } from "@/lib/format";
 import type { Store, Transaction } from "@/lib/types";
 import { sec } from "@/lib/motion";
+import { Money } from "@/components/rolling";
 
 /**
  * Food & drinks is logged as one amount per day and read in three 10-day periods
@@ -99,7 +100,7 @@ export function FoodSection({ month }: { month: string }) {
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="display text-[18px] font-semibold">Food &amp; drinks</h2>
         <span className="text-[12.5px] text-muted">
-          This month <span className="num font-semibold text-ink">{vnd(monthTotal)}</span>
+          This month <Money value={monthTotal} className="num font-semibold text-ink" />
         </span>
       </div>
 
@@ -125,7 +126,7 @@ export function FoodSection({ month }: { month: string }) {
             className={cx("rounded-lg border px-2.5 pb-2 pt-2.5 transition-colors duration-300", i === current ? "border-accent/50 bg-accent-soft" : "border-line")}
           >
             <div className="label !text-[10.5px]">{periodLabel(days)}</div>
-            <div className="num mt-0.5 text-[15px] md:text-[19px] font-semibold leading-tight">{vnd(totals[i], { compact: true })}</div>
+            <div className="num mt-0.5 text-[15px] md:text-[19px] font-semibold leading-tight"><Money value={totals[i]} compact /></div>
             {/* One bar per day; tap a day to change it */}
             <div className="mt-2 flex h-12 items-end gap-[3px]">
               {days.map((d) => {

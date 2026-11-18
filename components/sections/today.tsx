@@ -12,10 +12,11 @@ import { QuickAdd } from "@/components/money";
 import { useMarkLesson } from "@/components/register";
 import { Dot, Page, Section, Tick } from "@/components/ui";
 import { addDays, fmtDay, minutes, MONTHS, monthOf, parseDate, startOfWeek, today, WD_LONG } from "@/lib/dates";
-import { cx, vnd } from "@/lib/format";
+import { cx } from "@/lib/format";
 import { agendaOn, checkTasksOn, makeupsOwed, taughtIn, type Occurrence } from "@/lib/teaching";
 import type { Task } from "@/lib/types";
 import { sec } from "@/lib/motion";
+import { Money } from "@/components/rolling";
 
 function DueTask({ task, today: t }: { task: Task; today: string }) {
   const { store } = useData();
@@ -236,8 +237,8 @@ export default function TodayPage() {
 
           <Section title={`Money · ${MONTHS[d.getMonth()]}`} action={<Link href="/money" className="text-[12.5px] text-muted hover:text-ink">Ledger →</Link>}>
             <p className="mb-3 text-[13.5px] text-ink-2">
-              In <span className="num font-semibold text-ink">{vnd(earned)}</span> · out <span className="num font-semibold text-ink">{vnd(spent)}</span> · kept{" "}
-              <span className={cx("num font-semibold", earned - spent >= 0 ? "text-good" : "text-pen")}>{vnd(earned - spent)}</span>
+              In <Money value={earned} className="num font-semibold text-ink" /> · out <Money value={spent} className="num font-semibold text-ink" /> · kept{" "}
+              <Money value={earned - spent} className={cx("num font-semibold", earned - spent >= 0 ? "text-good" : "text-pen")} />
             </p>
             <QuickAdd compact />
           </Section>
