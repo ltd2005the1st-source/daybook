@@ -93,14 +93,14 @@ export function buildSeed(): Store {
   const slots = [
     slot(weekend, 6, "20:30", "22:30"),
     slot(weekend, 0, "09:00", "11:00"),
+    slot(linh, 1, "20:30", "22:30"),
     slot(linh, 3, "20:30", "22:30"),
     slot(linh, 5, "20:30", "22:30"),
     slot(an, 3, "18:30", "20:30"),
     slot(an, 5, "18:30", "20:30"),
     slot(han, 2, "20:30", "22:30"),
-    slot(han, 4, "14:00", "16:00"),
+    slot(han, 4, "18:30", "20:30"),
     slot(bach, 4, "20:30", "22:30"),
-    slot(bach, 6, "09:00", "11:00", true),
   ];
 
   const taught = (s: Student, days: number[]) =>

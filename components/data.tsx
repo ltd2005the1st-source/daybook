@@ -175,7 +175,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const report = useCallback(
     (what: string, err: { message: string } | null) => {
       if (err) {
-        toast(`Couldn't save ${what}: ${err.message}`);
+        // A missing column means the database is behind the app, not that the change itself was wrong.
+        const behind = /schema cache|column .* does not exist/i.test(err.message);
+        toast(behind ? `Couldn't save ${what}: your database needs the latest update SQL.` : `Couldn't save ${what}: ${err.message}`);
         if (ONLINE) loadAll();
       }
     },
