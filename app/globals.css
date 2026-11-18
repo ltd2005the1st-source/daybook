@@ -606,6 +606,8 @@ body.cal-dragging.cal-copying * {
 }
 .tabbar-fill {
   fill: var(--surface);
+  /* The path runs 2px past each side to overlap the flat pieces (hides the subpixel seam). */
+  overflow: visible;
 }
 /* Fills the notch in when no tab is open (Settings), instead of the notch sliding away. */
 .tabbar-patch {
