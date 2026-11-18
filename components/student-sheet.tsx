@@ -312,16 +312,20 @@ function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
 }
 
 export function MakeupStepper({ s, compact }: { s: Student; compact?: boolean }) {
-  const { update } = useData();
+  const { update, storeRef } = useData();
   const n = Math.max(0, s.makeup_baseline ?? 0);
-  const set = (v: number) => update("students", s.id, { makeup_baseline: Math.max(0, v) });
+  // Step from the latest value, not the one this render saw, so fast taps never skip or repeat.
+  const step = (d: number) => {
+    const cur = storeRef.current.students.find((x) => x.id === s.id)?.makeup_baseline ?? n;
+    update("students", s.id, { makeup_baseline: Math.max(0, Math.max(0, cur) + d) });
+  };
   return (
     <div className={cx("inline-flex items-center rounded-md border border-line", compact && "text-[12px]")} onClick={(e) => e.stopPropagation()}>
-      <button type="button" aria-label="One fewer makeup" className={cx("text-ink-2 hover:bg-hover", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => set(n - 1)}>
+      <button type="button" aria-label="One fewer makeup" className={cx("text-ink-2 hover:bg-hover", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => step(-1)}>
         −
       </button>
       <span className={cx("num text-center font-semibold", compact ? "w-5" : "w-8", n > 0 && "text-pen")}>{n}</span>
-      <button type="button" aria-label="One more makeup" className={cx("text-ink-2 hover:bg-hover", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => set(n + 1)}>
+      <button type="button" aria-label="One more makeup" className={cx("text-ink-2 hover:bg-hover", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => step(1)}>
         +
       </button>
     </div>
