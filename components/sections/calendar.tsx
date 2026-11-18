@@ -19,7 +19,15 @@ import { sec } from "@/lib/motion";
 
 const START_H = 6;
 const END_H = 24;
-const HOUR = 52;
+// Height of one hour in the week grid. The grid is sized so the whole day (06:00 to midnight)
+// fits on screen with no scrolling inside the calendar; this is the size it falls back to before
+// the screen has been measured, and the most an hour ever gets.
+const MAX_HOUR = 52;
+// Below this the blocks get too cramped to read, so a very short screen lets the calendar grow
+// taller than the screen (the page scrolls) instead of squashing it further.
+const MIN_HOUR = 26;
+// Set from the measured size on every render of the calendar, read by the layout helpers below.
+let HOUR = MAX_HOUR;
 const SNAP = 15; // minutes
 const BAR = 19; // height of a task bar
 const EASE = [0.65, 0, 0.35, 1] as const;
@@ -176,11 +184,6 @@ export default function CalendarPage() {
     return Array.from({ length: 7 }, (_, i) => addDays(s, i));
   }, [anchor, mobile]);
 
-  useEffect(() => {
-    if (view !== "week") return;
-    const h = new Date().getHours();
-    scroller.current?.scrollTo({ top: (Math.max(7, Math.min(h - 1, 18)) - START_H) * HOUR - 8 });
-  }, [mobile, view]);
 
   const [nowMin, setNowMin] = useState(() => new Date().getHours() * 60 + new Date().getMinutes());
   useEffect(() => {
@@ -188,11 +191,11 @@ export default function CalendarPage() {
     return () => clearInterval(i);
   }, []);
 
-  // In the week view the calendar is exactly one screen tall on the dashboard: its header stays
-  // put and only the time grid scrolls inside it. Once the grid reaches its top or bottom, the
-  // page carries on scrolling to the next section.
+  // In the week view the whole day fits on one screen: the hour height shrinks to fit what's left
+  // of the screen below the calendar's header, so nothing ever scrolls inside the calendar.
   const header = useRef<HTMLDivElement>(null);
   const [gridH, setGridH] = useState<number | null>(null);
+  HOUR = gridH ? Math.max(MIN_HOUR, Math.min(MAX_HOUR, Math.floor(gridH / (END_H - START_H)))) : MAX_HOUR;
   useLayoutEffect(() => {
     if (view !== "week") return;
     const fit = () => {
@@ -641,8 +644,7 @@ export default function CalendarPage() {
             )}
             <div
               ref={scroller}
-              className="relative overflow-y-auto"
-              style={{ height: gridH ?? undefined, maxHeight: gridH ? undefined : "calc(100dvh - 230px)" }}
+              className="relative"
             >
               <div className="grid" style={{ gridTemplateColumns: `52px repeat(${days.length}, 1fr)` }}>
                 {/* Hours */}

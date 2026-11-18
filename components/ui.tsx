@@ -88,7 +88,7 @@ export function Sheet({
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-40 flex items-end md:items-center justify-center">
+        <div data-scroll-contain className="fixed inset-0 z-40 flex items-end md:items-center justify-center">
           <motion.div
             className="absolute inset-0 bg-[var(--scrim)]"
             initial={{ opacity: 0 }}
@@ -106,7 +106,7 @@ export function Sheet({
             exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
             transition={{ duration: sec(0.34), ease: [0.65, 0, 0.35, 1] }}
             style={{ maxWidth: width, transformOrigin: "50% 100%" }}
-            className="relative w-full max-h-[88dvh] overflow-y-auto rounded-t-[22px] md:rounded-[18px] bg-surface border border-line dark:border-[var(--hairline)] shadow-pop pb-[env(safe-area-inset-bottom)]"
+            className="relative w-full max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-[22px] md:rounded-[18px] bg-surface border border-line dark:border-[var(--hairline)] shadow-pop pb-[env(safe-area-inset-bottom)]"
           >
             <div className="sticky top-0 z-10 flex items-center justify-between bg-surface/80 backdrop-blur-xl px-5 pt-4 pb-2">
               <h3 className="display text-[20px] font-semibold">{title}</h3>
