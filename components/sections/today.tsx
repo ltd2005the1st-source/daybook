@@ -1,4 +1,5 @@
 "use client";
+import { virtualFixed } from "@/lib/fixed";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -70,7 +71,9 @@ export default function TodayPage() {
   const checkTasks = checkTasksOn(store, t).filter((c) => !c.done);
   const tasks = store.tasks.filter((x) => !x.done && !x.student_id && x.due_on && x.due_on <= t).sort((a, b) => Number(b.priority) - Number(a.priority));
   const month = monthOf(t);
-  const spent = store.transactions.filter((x) => x.kind === "expense" && x.date.startsWith(month)).reduce((n, x) => n + x.amount, 0);
+  const spent =
+    store.transactions.filter((x) => x.kind === "expense" && x.date.startsWith(month)).reduce((n, x) => n + x.amount, 0) +
+    virtualFixed(store.transactions, month).reduce((n, f) => n + f.amount, 0);
   const earned =
     store.students.reduce((n, s) => n + taughtIn(store, s.id, month).length * s.rate, 0) +
     store.transactions.filter((x) => x.kind === "income" && x.date.startsWith(month)).reduce((n, x) => n + x.amount, 0);

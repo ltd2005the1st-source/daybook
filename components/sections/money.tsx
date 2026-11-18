@@ -5,13 +5,15 @@ import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Plus, Repeat, Trash2 } from "lucide-react";
 import { useData } from "@/components/data";
 import { Field, Page, PageHeader, Section, Segmented, Sheet, Tick } from "@/components/ui";
-import { fmtDay, fmtMonth, monthOf, relDay, shiftMonth, today } from "@/lib/dates";
+import { fmtMonth, monthOf, relDay, shiftMonth, today } from "@/lib/dates";
 import { cx, parseAmount, vnd } from "@/lib/format";
 import { taughtIn } from "@/lib/teaching";
 import { EXPENSE_CATEGORIES, type Debt, type Transaction } from "@/lib/types";
 import { CAT_COLORS, QuickAdd } from "@/components/money";
 import { FoodSection, isFood } from "@/components/food";
 import { sec } from "@/lib/motion";
+import { fixedFor } from "@/lib/fixed";
+import { FixedCard } from "@/components/fixed";
 
 
 export default function MoneyPage() {
@@ -27,24 +29,24 @@ export default function MoneyPage() {
   const teaching = store.students.reduce((n, s) => n + taughtIn(store, s.id, month).length * s.rate, 0);
   const manualIncome = txs.filter((t) => t.kind === "income").reduce((n, t) => n + t.amount, 0);
   const income = teaching + manualIncome;
-  const spent = txs.filter((t) => t.kind === "expense").reduce((n, t) => n + t.amount, 0);
+  // Monthly fixed expenses with no row of their own this month still count.
+  const fixed = useMemo(() => fixedFor(store.transactions, month), [store.transactions, month]);
+  const expenses = [...txs.filter((t) => t.kind === "expense"), ...fixed.filter((f) => !f.real)];
+  const spent = expenses.reduce((n, t) => n + t.amount, 0);
+  const fixedTotal = fixed.reduce((n, f) => n + f.amount, 0);
   const byCat = EXPENSE_CATEGORIES.map((c) => ({
     c,
-    v: txs.filter((t) => t.kind === "expense" && t.category === c).reduce((n, t) => n + t.amount, 0),
+    v: expenses.filter((t) => t.category === c).reduce((n, t) => n + t.amount, 0),
   }));
-  const other = txs.filter((t) => t.kind === "expense" && !(EXPENSE_CATEGORIES as readonly string[]).includes(t.category)).reduce((n, t) => n + t.amount, 0);
+  const other = expenses.filter((t) => !(EXPENSE_CATEGORIES as readonly string[]).includes(t.category)).reduce((n, t) => n + t.amount, 0);
   if (other) byCat[byCat.length - 1].v += other;
   const maxCat = Math.max(1, ...byCat.map((x) => x.v));
 
-  // Recurring items logged in an earlier month but not yet this month.
-  const recurringDue = useMemo(() => {
-    const seen = new Map<string, Transaction>();
-    for (const t of store.transactions) if (t.recurring && !isFood(t) && t.date < `${month}-01`) seen.set(t.title.toLowerCase(), t);
-    return [...seen.values()].filter((t) => !store.transactions.some((x) => x.date.startsWith(month) && x.title.toLowerCase() === t.title.toLowerCase()));
-  }, [store.transactions, month]);
-
-  // Daily food & drinks live in their own section, so the entry list stays readable.
-  const listed = useMemo(() => txs.filter((t) => !isFood(t)), [txs]);
+  // Daily food & drinks and monthly fixed expenses have their own sections, so the entry list stays readable.
+  const listed = useMemo(() => {
+    const shown = new Set(fixed.map((f) => f.real?.id));
+    return txs.filter((t) => !isFood(t) && !shown.has(t.id));
+  }, [txs, fixed]);
   const groups = useMemo(() => {
     const m = new Map<string, Transaction[]>();
     for (const t of listed) m.set(t.date, [...(m.get(t.date) ?? []), t]);
@@ -75,7 +77,7 @@ export default function MoneyPage() {
       <div className="mb-8 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-line bg-line">
         {[
           { l: "Came in", v: income, sub: teaching ? `${vnd(teaching, { compact: true })} from teaching` : undefined },
-          { l: "Went out", v: -spent },
+          { l: "Went out", v: -spent, sub: fixedTotal ? `${vnd(fixedTotal, { compact: true })} monthly fixed` : undefined },
           { l: "Kept", v: income - spent, strong: true },
         ].map((x) => (
           <div key={x.l} className="bg-surface px-3 py-3 md:px-5 md:py-4">
@@ -91,6 +93,7 @@ export default function MoneyPage() {
       <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div>
           <QuickAdd />
+          <FixedCard month={month} className="lg:hidden" />
           <FoodSection month={month} />
 
           <Section title="Where it went">
@@ -142,7 +145,7 @@ export default function MoneyPage() {
         </div>
 
         <aside>
-          {recurringDue.length > 0 && <RecurringDue items={recurringDue} month={month} />}
+          <FixedCard month={month} className="hidden lg:block" />
 
           <Section
             title="Owed to you"
@@ -197,33 +200,6 @@ function DebtRow({ d, onEdit, onSettle }: { d: Debt; onEdit: () => void; onSettl
       </button>
       <span className="num">{vnd(d.amount)}</span>
     </div>
-  );
-}
-
-function RecurringDue({ items, month }: { items: Transaction[]; month: string }) {
-  const { insert } = useData();
-  return (
-    <Section title="Recurring, not logged yet">
-      {items.map((t) => {
-        const day = t.date.slice(8);
-        const date = `${month}-${day}`;
-        return (
-          <div key={t.id} className="flex items-center gap-2 border-b border-line py-2 text-[13.5px]">
-            <Repeat size={13} className="text-muted" />
-            <span className="min-w-0 flex-1 truncate">
-              {t.title} <span className="text-muted">· {fmtDay(date)}</span>
-            </span>
-            <span className="num text-ink-2">{vnd(t.amount, { compact: true })}</span>
-            <button
-              className="btn btn-line px-2 py-0.5 text-[12px]"
-              onClick={() => insert("transactions", { ...t, id: undefined, created_at: undefined, date, user_id: undefined })}
-            >
-              Log
-            </button>
-          </div>
-        );
-      })}
-    </Section>
   );
 }
 
