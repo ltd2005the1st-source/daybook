@@ -6,7 +6,7 @@ import { useEffect } from "react";
  *
  * That site eases the wheel with a simple "chase": every frame the page covers a fixed share of
  * the distance still left to go, so it jumps off the mark straight away (no lag at the start) and
- * then glides to a soft stop in roughly three quarters of a second. Each wheel notch moves the
+ * then glides to a soft stop in roughly half a second. Each wheel notch moves the
  * same distance the browser would (no extra multiplier); notches that land mid-glide just push
  * the destination further, so fast spinning builds up speed naturally.
  * Trackpads and touch already glide natively, so they're left alone, as are pinch-zoom,
@@ -14,9 +14,10 @@ import { useEffect } from "react";
  * pointer (calendar, sheets, palette).
  */
 
-// Share of the remaining distance covered per 60fps frame (0.1 = 10%). Applied by elapsed time,
-// so it feels the same on 60Hz and 120Hz screens.
-const LERP = 0.1;
+// Pace of the glide: 0.1 settled in about three quarters of a second; 0.15 is 50% faster, so about
+// half a second. Still starts moving on the very first frame. Applied by elapsed time, so it feels
+// the same on 60Hz and 120Hz screens.
+const LERP = 0.15;
 
 function isWheelNotch(e: WheelEvent): boolean {
   if (e.deltaMode !== 0) return true; // lines or pages: always a real wheel
