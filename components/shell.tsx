@@ -1,17 +1,19 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import {
   Moon,
   PanelRightOpen,
+  Sparkles,
   Sun,
   X,
 } from "lucide-react";
 import { useData } from "./data";
 import { Login } from "./login";
 import { Palette } from "./palette";
+import { Assistant, useAssistantShortcut } from "./assistant";
 import { cx } from "@/lib/format";
 import { NAV, isDashboardPath } from "./nav";
 import { useActiveSection } from "./scroll-spy";
@@ -57,6 +59,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const slotAt = lastIdx.current;
   useSmoothWheel();
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
+  const [askSeed, setAskSeed] = useState<string | null>(null);
+  const toggleAsk = useCallback(() => setAskOpen((v) => !v), []);
+  useAssistantShortcut(toggleAsk);
   // The top bar only shows its edge once the page has scrolled under it.
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -153,6 +159,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
         <div className="mt-auto flex flex-col gap-px">
+          <button onClick={() => setAskOpen(true)} className="btn btn-ghost justify-between">
+            <span className="flex items-center gap-2.5">
+              <Sparkles size={16} strokeWidth={1.8} /> Ask Claude
+            </span>
+            <kbd className="num text-[10.5px] text-muted">⌘J</kbd>
+          </button>
           <button onClick={toggle} className="btn btn-ghost">
             {theme === "dark" ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}
             {theme === "dark" ? "Light mode" : "Dark mode"}
@@ -182,6 +194,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <span className="display text-[17px] font-semibold">Daybook</span>
         </Link>
         <div className="flex items-center gap-1">
+          <button aria-label="Ask Claude" onClick={() => setAskOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-accent hover:bg-hover">
+            <Sparkles size={17} />
+          </button>
           <button aria-label="Toggle theme" onClick={toggle} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
             {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
           </button>
@@ -261,7 +276,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <Palette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <Palette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onAsk={(q) => {
+          setAskSeed(q);
+          setAskOpen(true);
+        }}
+      />
+      <Assistant open={askOpen} onClose={() => setAskOpen(false)} seed={askSeed} onSeedUsed={() => setAskSeed(null)} />
       <MusicDock />
 
       {/* Toasts */}

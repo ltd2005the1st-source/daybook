@@ -88,3 +88,9 @@ when its icon, name, colours or package settings change.
   Play, the "App signing key" from Play Console → Test and release → App integrity.
 - To change version: bump `versionCode` / `versionName` in `android/app/build.gradle`
   and `appVersionCode` / `appVersionName` in `android/twa-manifest.json`.
+
+## Ask Claude (Haiku assistant)
+
+Press ⌘J (or the sparkle button on phones, or type a question in ⌘K) to log things in plain words ("spent 45k on coffee", "taught Bách today", "slept 0:30, woke 7:15") or ask about your data. It runs Claude Haiku 5.5 through `/api/assistant`; the changes it makes run in your browser, so they sync like any other edit. The conversation stays on that device. It is off on the public tester account.
+
+Needs `ANTHROPIC_API_KEY` in Netlify: Site configuration → Environment variables → Add a variable, then redeploy.
