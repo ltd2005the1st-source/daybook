@@ -67,6 +67,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [needsLogin, setNeedsLogin] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const channel = useRef<BroadcastChannel | null>(null);
+  /**
+   * Edits not yet confirmed by the server, per "table:id". Quick repeated edits (like tapping a −/+
+   * stepper) used to fire one request each: they could land out of order, and every realtime echo
+   * of an older write snapped the screen back to an older value, so numbers jumped around.
+   * Now each row has at most one write in flight, later edits are merged into the next one, and
+   * incoming rows (realtime or refetch) are overlaid with these edits until the server has caught up.
+   */
+  const pending = useRef(new Map<string, { patch: Record<string, unknown>; queued: Record<string, unknown> | null; settle?: ReturnType<typeof setTimeout> }>());
+  const overlay = useCallback(<R extends { id: string }>(t: string, row: R): R => {
+    const p = pending.current.get(`${t}:${row.id}`);
+    return p ? { ...row, ...p.patch } : row;
+  }, []);
 
   const commit = useCallback((next: Store, broadcast = true) => {
     storeRef.current = next;
@@ -120,11 +132,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const next = empty();
     results.forEach((r, i) => {
       if (r.error) console.error(TABLES[i], r.error.message);
-      (next as Record<string, unknown[]>)[TABLES[i]] = (r.data as unknown[]) ?? [];
+      (next as Record<string, unknown[]>)[TABLES[i]] = ((r.data as { id: string }[]) ?? []).map((row) => overlay(TABLES[i], row));
     });
     commit(next);
     setReady(true);
-  }, [commit]);
+  }, [commit, overlay]);
 
   useEffect(() => {
     if (!ONLINE) return;
@@ -155,7 +167,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           const id = (payload.old as { id: string }).id;
           nextRows = rows.filter((r) => r.id !== id);
         } else {
-          const row = payload.new as { id: string };
+          const row = overlay(t, payload.new as { id: string });
           const i = rows.findIndex((r) => r.id === row.id);
           nextRows = i === -1 ? [...rows, row] : rows.map((r) => (r.id === row.id ? row : r));
         }
@@ -170,7 +182,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       sb.removeChannel(ch);
       document.removeEventListener("visibilitychange", onVis);
     };
-  }, [session, loadAll, commit]);
+  }, [session, loadAll, commit, overlay]);
 
   // ---- Mutations (optimistic, then persisted) ---------------------------
   const report = useCallback(
@@ -208,13 +220,50 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         ...cur,
         [t]: (cur[t] as Tables[T][]).map((r) => (r.id === id ? { ...r, ...patch } : r)),
       } as Store);
-      if (ONLINE) {
+      if (!ONLINE) return;
+      const key = `${t}:${id}`;
+      const map = pending.current;
+      const p = map.get(key);
+      if (p) {
+        clearTimeout(p.settle);
+        p.patch = { ...p.patch, ...patch };
+        if (p.queued) {
+          p.queued = { ...p.queued, ...patch };
+          return;
+        }
+        if (p.settle === undefined) {
+          // A write is in flight: send this one when it's done.
+          p.queued = { ...patch };
+          return;
+        }
+        p.settle = undefined;
+      }
+      const entry = p ?? { patch: { ...patch }, queued: null };
+      map.set(key, entry);
+      const send = (body: Record<string, unknown>) => {
         supabase()
           .from(t)
-          .update(patch as object)
+          .update(body)
           .eq("id", id)
-          .then(({ error }) => report(t, error));
-      }
+          .then(({ error }) => {
+            if (error) {
+              map.delete(key);
+              report(t, error);
+              return;
+            }
+            if (entry.queued) {
+              const next = entry.queued;
+              entry.queued = null;
+              send(next);
+              return;
+            }
+            // Keep overlaying for a moment so late realtime echoes of older writes can't flash back.
+            entry.settle = setTimeout(() => {
+              if (map.get(key) === entry) map.delete(key);
+            }, 2000);
+          });
+      };
+      send({ ...patch });
     },
     [commit, report],
   );
