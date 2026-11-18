@@ -52,7 +52,7 @@ export function useSmoothWheel() {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let el: Element | null = null;
-    let pos = 0, to = 0, last = 0, lastPos = 0, raf = 0;
+    let pos = 0, to = 0, last = 0, lastPos = 0, raf = 0, lastWheel = 0;
 
     const stop = () => {
       cancelAnimationFrame(raf);
@@ -78,7 +78,14 @@ export function useSmoothWheel() {
     const onWheel = (e: WheelEvent) => {
       if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.shiftKey || !isWheelNotch(e)) return;
       const delta = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * window.innerHeight : e.deltaY;
-      const target = scrollerFor(e.target, Math.sign(delta));
+      const dir = Math.sign(delta);
+      const now = performance.now();
+      let target = scrollerFor(e.target, dir);
+      // Like the browser does natively: while the page is still gliding from your last notches,
+      // keep scrolling the page, so it doesn't stop dead when the calendar slides under the
+      // pointer. Pause for a moment and the next notch scrolls whatever is under the pointer.
+      if (el && raf && now - lastWheel < 300 && Math.sign(to - pos) === dir && canScroll(el, dir)) target = el;
+      lastWheel = now;
       if (!target) return;
       e.preventDefault();
 

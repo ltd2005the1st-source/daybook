@@ -13,7 +13,8 @@ import { useData } from "./data";
 import { Login } from "./login";
 import { Palette } from "./palette";
 import { cx } from "@/lib/format";
-import { NAV } from "./nav";
+import { NAV, isDashboardPath } from "./nav";
+import { useActiveSection } from "./scroll-spy";
 import { MusicDock, MusicProvider } from "./music";
 import { useSmoothWheel } from "./smooth-scroll";
 import { sec, ms } from "@/lib/motion";
@@ -45,8 +46,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { ready, needsLogin, online, toasts, dismissToast, signOut, session } = useData();
   const path = usePathname();
   const { theme, toggle } = useTheme();
-  // Which tab is open, and where the notch sits (it stays where it was while no tab is open).
-  const activeIdx = NAV.findIndex((n) => (n.href === "/" ? path === "/" : path.startsWith(n.href)));
+  // Which section is lit: on the dashboard it follows the scroll; on Settings nothing is, and on
+  // receipts Teaching is. The notch stays where it was while nothing is lit.
+  const section = useActiveSection();
+  const onDashboard = isDashboardPath(path);
+  const activeIdx = onDashboard ? NAV.findIndex((n) => n.id === section) : NAV.findIndex((n) => n.path !== "/" && path.startsWith(n.path));
   const lastNotch = useRef(((Math.max(activeIdx, 0) + 0.5) / NAV.length) * 100);
   if (activeIdx >= 0) lastNotch.current = ((activeIdx + 0.5) / NAV.length) * 100;
   const notchAt = lastNotch.current;
@@ -108,12 +112,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <kbd className="num rounded-[5px] border border-line px-1 text-[10.5px] leading-[16px]">⌘K</kbd>
         </button>
         <nav className="flex flex-col gap-px">
-          {NAV.map((n) => {
-            const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
+          {NAV.map((n, i) => {
+            const active = i === activeIdx;
             return (
               <Link
                 key={n.href}
                 href={n.href}
+                aria-current={active ? "true" : undefined}
                 className={cx(
                   "press nav-item relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[14px]",
                   active ? "text-ink font-medium" : "text-ink-2 hover:bg-hover hover:text-ink",
@@ -200,7 +205,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   href={n.href}
                   aria-label={n.label}
                   title={n.label}
-                  aria-current={active ? "page" : undefined}
+                  aria-current={active ? "true" : undefined}
                   className="press flex min-w-0 items-center justify-center rounded-2xl"
                 >
                   <n.icon

@@ -1,6 +1,8 @@
 // Maps app paths to plain "#name" hashes, the only kind an artifact link keeps.
 export function pathToHash(path: string): string {
   if (path === "/" || path === "") return "today";
+  const section = path.match(/^\/?#([\w-]+)$/);
+  if (section) return section[1];
   if (path === "/settings") return "setup";
   if (path === "/teaching/receipts") return "receipts";
   const m = path.match(/^\/teaching\/receipts\/([\w-]+)$/);
