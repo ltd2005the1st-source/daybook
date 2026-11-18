@@ -99,7 +99,7 @@ export function Palette({ open, onClose }: { open: boolean; onClose: () => void 
                   <button
                     onMouseEnter={() => setI(k)}
                     onClick={it.run}
-                    className={cx("flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-[14px]", k === i && "bg-hover")}
+                    className={cx("flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left text-[14px]", k === i && "bg-hover")}
                   >
                     <it.icon size={16} />
                     <span className="flex-1 truncate">{it.label}</span>

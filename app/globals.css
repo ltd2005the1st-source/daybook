@@ -534,3 +534,19 @@ body.cal-dragging * {
     transform: none !important;
   }
 }
+
+/* Hoverable list rows. The highlight bleeds 10px past the column on each side, so the tick
+   and text sit inside it with room to spare and the column's left edge still lines up.
+   A list that clips sideways (so ticked tasks can slide away) widens its clip box by the
+   same 10px, or it would cut the highlight off flush against the tick. */
+@layer components {
+  .row {
+    margin-inline: -10px;
+    padding-inline: 10px;
+    border-radius: 10px;
+  }
+  .row-list {
+    margin-inline: -10px;
+    padding-inline: 10px;
+  }
+}

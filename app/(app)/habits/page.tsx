@@ -91,7 +91,7 @@ function Sleep({ h }: { h: Habit }) {
 
   return (
     <Section title={<span className="flex items-center gap-2">Sleep <span className="font-normal text-muted">· aim for {tb} to {tw}</span></span>}>
-      <div className="grid gap-6 md:grid-cols-[1fr_260px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[minmax(0,1fr)_260px]">
         {/* Night chart: one column per night, the bar is the time asleep */}
         <div className="card p-3">
           <div className="relative h-[230px]">
@@ -254,7 +254,7 @@ function Exercise({ h }: { h: Habit }) {
   const [date, setDate] = useState(today());
   return (
     <Section title={<span>Exercise <span className="font-normal text-muted">· {target} days a week</span></span>}>
-      <div className="grid gap-6 md:grid-cols-[1fr_260px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[minmax(0,1fr)_260px]">
         <div>
           <div className="mb-3 flex items-end gap-3">
             <div className="display text-[44px] font-semibold leading-none">

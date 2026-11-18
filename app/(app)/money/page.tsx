@@ -87,7 +87,7 @@ export default function MoneyPage() {
         ))}
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div>
           <QuickAdd />
           <FoodSection month={month} />
@@ -121,7 +121,7 @@ export default function MoneyPage() {
                   <button
                     key={t.id}
                     onClick={() => setEdit(t)}
-                    className="group flex w-full items-center gap-3 rounded-md px-2 py-2 -mx-2 text-left hover:bg-hover"
+                    className="row group flex w-full items-center gap-3 py-2 text-left hover:bg-hover"
                   >
                     <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: t.kind === "income" ? "var(--good)" : CAT_COLORS[t.category] ?? CAT_COLORS.Other }} />
                     <span className="min-w-0 flex-1 truncate text-[14px]">
@@ -154,7 +154,7 @@ export default function MoneyPage() {
             {unpaid.map((r) => {
               const s = store.students.find((x) => x.id === r.student_id);
               return (
-                <Link key={r.id} href={`/teaching/receipts/${r.id}`} className="flex items-center justify-between gap-2 border-b border-line py-2 text-[13.5px] hover:bg-hover -mx-2 px-2 rounded">
+                <Link key={r.id} href={`/teaching/receipts/${r.id}`} className="row flex items-center justify-between gap-2 border-b border-line py-2 text-[13.5px] hover:bg-hover">
                   <span>
                     {s?.name} <span className="text-muted">· {fmtMonth(r.month)} receipt</span>
                   </span>
