@@ -111,13 +111,35 @@ const nightLabel = (date: string) => {
   return r === "Today" || r === "Tomorrow" ? r : fmtDay(date, { weekday: true });
 };
 
+// Keep the note's own line breaks (blank lines dropped) so a list stays a list.
+const tidyNote = (text: string | null | undefined) =>
+  text?.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim()).join("\n") || "";
+
+/**
+ * Checks in a list whose note just repeats one shown earlier for the same student.
+ * The soonest check keeps the note; later ones show only title and date.
+ */
+export function repeatedNotes(checks: CheckTask[]): Set<string> {
+  const seen = new Set<string>();
+  const repeated = new Set<string>();
+  [...checks]
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+    .forEach((c) => {
+      const note = tidyNote(c.contents);
+      if (!note) return;
+      const id = `${c.student.id}\u0000${note}`;
+      if (seen.has(id)) repeated.add(c.key);
+      else seen.add(id);
+    });
+  return repeated;
+}
+
 /** A check in a task list: tick it, or tap it to see and change what to check. */
-export function CheckRow({ c, onOpen, compact }: { c: CheckTask; onOpen: () => void; compact?: boolean }) {
+export function CheckRow({ c, onOpen, compact, hideNote }: { c: CheckTask; onOpen: () => void; compact?: boolean; hideNote?: boolean }) {
   const { setDone } = useCheckActions();
   const task = { id: c.key, title: `Check ${c.student.name}`, done: c.done };
   const done = useCompleteTask(task, (v) => setDone(c, v));
-  // Keep the note's own line breaks (blank lines dropped) so a list stays a list.
-  const note = c.contents?.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim()).join("\n");
+  const note = hideNote ? "" : tidyNote(c.contents);
   return (
     <motion.div
       {...TASK_ENTER}

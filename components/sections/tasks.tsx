@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Flag, Plus } from "lucide-react";
-import { CheckRow, CheckSheet } from "@/components/checks";
+import { CheckRow, CheckSheet, repeatedNotes } from "@/components/checks";
 import { useData } from "@/components/data";
 import { TaskSheet } from "@/components/task-sheet";
 import { MilestoneBar } from "@/components/milestone-bar";
@@ -82,6 +82,8 @@ export default function TasksPage() {
   // Homework checks come from the timetable; saved ones are listed through it too.
   const open = visible.filter((x) => !x.done && !x.student_id);
   const shownChecks = list === "All" || list === "Teaching" ? checks : [];
+  // Show a repeated check note only on the soonest check for that student.
+  const sameNote = repeatedNotes(shownChecks);
   const groups: { title: string; items: Task[]; checks?: CheckTask[]; tone?: string }[] = [
     { title: "Overdue", items: open.filter((x) => x.due_on && x.due_on < t), tone: "text-pen" },
     { title: "Today", items: open.filter((x) => x.due_on === t), checks: shownChecks.filter((c) => c.date === t) },
@@ -160,7 +162,7 @@ export default function TasksPage() {
                       <TaskRow key={task.id} task={task} onOpen={() => setOpenId(task.id)} />
                     ))}
                   {g.checks?.map((c) => (
-                    <CheckRow key={c.key} c={c} onOpen={() => setOpenCheck({ studentId: c.student.id, date: c.date })} />
+                    <CheckRow key={c.key} c={c} hideNote={sameNote.has(c.key)} onOpen={() => setOpenCheck({ studentId: c.student.id, date: c.date })} />
                   ))}
                 </AnimatePresence>
               </div>

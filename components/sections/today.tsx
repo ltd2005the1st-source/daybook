@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { Strike, TASK_ENTER, TASK_EXIT, useCompleteTask } from "@/components/complete";
-import { CheckRow, CheckSheet } from "@/components/checks";
+import { CheckRow, CheckSheet, repeatedNotes } from "@/components/checks";
 import { useData } from "@/components/data";
 import { MilestoneBar } from "@/components/milestone-bar";
 import { QuickAdd } from "@/components/money";
@@ -69,6 +69,8 @@ export default function TodayPage() {
   const checks = agenda.filter((o) => o.kind === "check");
   const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
   const checkTasks = checkTasksOn(store, t).filter((c) => !c.done);
+  // Show a repeated check note only on the soonest check for that student.
+  const sameNote = repeatedNotes(checkTasks);
   const tasks = store.tasks.filter((x) => !x.done && !x.student_id && x.due_on && x.due_on <= t).sort((a, b) => Number(b.priority) - Number(a.priority));
   const month = monthOf(t);
   const spent =
@@ -182,7 +184,7 @@ export default function TodayPage() {
                   <DueTask key={x.id} task={x} today={t} />
                 ))}
                 {checkTasks.map((c) => (
-                  <CheckRow key={c.key} c={c} compact onOpen={() => setOpenCheck({ studentId: c.student.id, date: c.date })} />
+                  <CheckRow key={c.key} c={c} hideNote={sameNote.has(c.key)} compact onOpen={() => setOpenCheck({ studentId: c.student.id, date: c.date })} />
                 ))}
               </AnimatePresence>
               {tasks.length > 8 && <Link href="/tasks" className="text-[12.5px] text-muted">+{tasks.length - 8} more</Link>}
