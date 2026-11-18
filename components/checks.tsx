@@ -120,7 +120,7 @@ export function CheckRow({ c, onOpen, compact }: { c: CheckTask; onOpen: () => v
     <motion.div
       {...TASK_ENTER}
       exit={TASK_EXIT}
-      className={cx("group -mx-2 cursor-pointer overflow-hidden rounded-md px-2 hover:bg-hover")}
+      className="row group cursor-pointer overflow-hidden hover:bg-hover"
       onClick={onOpen}
     >
       <div className={cx("flex items-start gap-3", compact ? "py-1.5" : "py-2.5")}>

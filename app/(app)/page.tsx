@@ -139,7 +139,7 @@ export default function TodayPage() {
                       <span className={cx("h-2.5 w-2.5 rounded-full", o.kind === "check" && "ring-2 ring-offset-0")} style={{ background: o.kind === "check" ? "var(--surface)" : o.color, ["--tw-ring-color" as string]: o.color }} />
                       {live && <span className="absolute h-4 w-4 animate-ping rounded-full opacity-30" style={{ background: o.color }} />}
                     </span>
-                    <div className={cx("min-w-0 rounded-md px-2 py-1 -mx-2", live && "bg-hover")}>
+                    <div className={cx("row min-w-0 py-1", live && "bg-hover")}>
                       <div className="flex items-center gap-2">
                         <span className={cx("text-[14.5px] font-medium leading-[22px]", (o.status === "cancelled" || o.status === "missed_owe" || o.done) && "line-through text-muted")}>
                           {o.title}
@@ -172,7 +172,7 @@ export default function TodayPage() {
         <div>
           <Section title="Due today" action={<Link href="/tasks" className="text-[12.5px] text-muted hover:text-ink">All tasks →</Link>}>
             {tasks.length + checkTasks.length === 0 && <p className="text-[13.5px] text-muted">Nothing due. Nice.</p>}
-            <div className="flex flex-col overflow-x-clip">
+            <div className="row-list flex flex-col overflow-x-clip">
               <AnimatePresence initial={false}>
                 {tasks.slice(0, 8).map((x) => (
                   <DueTask key={x.id} task={x} today={t} />

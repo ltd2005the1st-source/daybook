@@ -152,7 +152,7 @@ export default function TasksPage() {
         (g) =>
           g.items.length + (g.checks?.length ?? 0) > 0 && (
             <Section key={g.title} title={<span className={g.tone}>{g.title} · {g.items.length + (g.checks?.length ?? 0)}</span>}>
-              <div className="-mx-2 flex flex-col overflow-x-clip px-2">
+              <div className="row-list flex flex-col overflow-x-clip">
                 <AnimatePresence initial={false}>
                   {g.items
                     .sort((a, b) => Number(b.priority) - Number(a.priority) || a.sort - b.sort)
@@ -204,7 +204,7 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
     <motion.div
       {...TASK_ENTER}
       exit={TASK_EXIT}
-      className="group -mx-2 cursor-pointer overflow-hidden rounded-md px-2 hover:bg-hover"
+      className="row group cursor-pointer overflow-hidden hover:bg-hover"
       onClick={onOpen}
     >
       <div className="flex items-start gap-3 py-2.5">
