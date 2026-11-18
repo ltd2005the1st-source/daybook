@@ -137,9 +137,9 @@ export default function TodayPage() {
                     transition={{ delay: sec(i * 0.03) }}
                     className="relative grid grid-cols-[52px_14px_1fr] items-start gap-2 py-1.5"
                   >
-                    {/* Time, dot and name share one 22px line (4px down, matching the name's padding) so they sit level. */}
+                    {/* Time, dot and name share one 22px line (4px down, matching the name's padding) so they sit level. The dot sits 5px left so the highlighted row (which bleeds 10px left) never touches it. */}
                     <span className={cx("num pt-1 text-[13px] leading-[22px]", live ? "font-semibold text-pen" : "text-muted")}>{o.start ?? "all day"}</span>
-                    <span className="relative mt-1 flex h-[22px] items-center justify-center">
+                    <span className="relative mt-1 flex h-[22px] -translate-x-[5px] items-center justify-center">
                       <span className={cx("h-2.5 w-2.5 rounded-full", o.kind === "check" && "ring-2 ring-offset-0")} style={{ background: o.kind === "check" ? "var(--surface)" : o.color, ["--tw-ring-color" as string]: o.color }} />
                       {live && <span className="absolute h-4 w-4 animate-ping rounded-full opacity-30" style={{ background: o.color }} />}
                     </span>
