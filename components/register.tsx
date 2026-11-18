@@ -102,7 +102,7 @@ export function Register({ month, students, onPickStudent }: { month: string; st
                 className="group flex flex-col items-center justify-end gap-1 px-1 py-2.5 text-center hover:bg-hover"
               >
                 <span className="h-[3px] w-6 rounded-full" style={{ background: s.color }} />
-                <span className="max-w-full truncate text-[12.5px] font-semibold leading-tight group-hover:underline underline-offset-2">{s.name}</span>
+                <span className="max-w-full line-clamp-2 break-words text-[12.5px] font-semibold leading-tight group-hover:underline underline-offset-2">{s.name}</span>
                 {makeupsOwed(store, s) > 0 ? (
                   <span className="num text-[10.5px] text-pen leading-none">{makeupsOwed(store, s)} makeup{makeupsOwed(store, s) === 1 ? "" : "s"}</span>
                 ) : (
