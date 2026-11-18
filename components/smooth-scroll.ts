@@ -4,18 +4,19 @@ import { useEffect } from "react";
 /*
  * Eased mouse-wheel scrolling.
  *
- * A mouse wheel moves in hard notches, so each notch is turned into a short glide on the app's one
- * ease-in-out curve. A notch that lands mid-glide carries the current speed into the new glide (no
+ * A mouse wheel moves in hard notches, so each notch is turned into a very short, light ease-in-out
+ * glide (about a tenth of a second) that begins moving on the first frame. A notch that lands mid-glide carries the current speed into the new glide (no
  * stop-and-start), then eases out at the new resting point. Trackpads and touch already glide
  * natively, so they're left alone, as are pinch-zoom, sideways scrolling and reduced motion.
  * Works on the page and on any scrolling panel under the pointer (calendar, sheets, palette).
  */
 
-const DURATION = 520; // ms per notch
+const DURATION = 170; // ms per notch: short enough to feel instant, long enough to take the edge off
 
-// cubic-bezier(0.65, 0, 0.35, 1), the same curve as everything else in Daybook.
+// A light ease-in-out. Unlike the app's usual curve it starts already moving (the first frame
+// after a wheel tick travels), so scrolling never feels delayed; it only softens the stop.
 function ease(x: number): number {
-  const x1 = 0.65, y1 = 0, x2 = 0.35, y2 = 1;
+  const x1 = 0.2, y1 = 0.12, x2 = 0.2, y2 = 1;
   const bx = (t: number) => 3 * (1 - t) * (1 - t) * t * x1 + 3 * (1 - t) * t * t * x2 + t * t * t;
   const by = (t: number) => 3 * (1 - t) * (1 - t) * t * y1 + 3 * (1 - t) * t * t * y2 + t * t * t;
   let lo = 0, hi = 1, t = x;
