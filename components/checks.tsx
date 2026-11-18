@@ -116,7 +116,8 @@ export function CheckRow({ c, onOpen, compact }: { c: CheckTask; onOpen: () => v
   const { setDone } = useCheckActions();
   const task = { id: c.key, title: `Check ${c.student.name}`, done: c.done };
   const done = useCompleteTask(task, (v) => setDone(c, v));
-  const note = c.contents?.split("\n").filter(Boolean).join(" · ");
+  // Keep the note's own line breaks (blank lines dropped) so a list stays a list.
+  const note = c.contents?.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim()).join("\n");
   return (
     <motion.div
       {...TASK_ENTER}
@@ -135,7 +136,7 @@ export function CheckRow({ c, onOpen, compact }: { c: CheckTask; onOpen: () => v
               {task.title}
             </Strike>
           </div>
-          {note && <div className="mt-0.5 truncate text-[12.5px] text-ink-2">{note}</div>}
+          {note && <div className="mt-0.5 line-clamp-6 whitespace-pre-line break-words text-[12.5px] leading-snug text-ink-2">{note}</div>}
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-muted">
             <span>
               {nightLabel(c.date)} · <span className="num">{c.time}</span>

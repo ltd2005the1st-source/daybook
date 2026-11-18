@@ -90,7 +90,9 @@ export function Dashboard() {
         const el = document.getElementById(n.id);
         if (el && el.getBoundingClientRect().top <= line) id = n.id;
       }
-      if (atEnd && window.scrollY > 0) {
+      // At the very top it is always Today, even while Today is still short and loading.
+      if (window.scrollY < 4) id = NAV[0].id;
+      else if (atEnd) {
         const last = [...NAV].reverse().find((n) => document.getElementById(n.id));
         if (last) id = last.id;
       }
@@ -105,11 +107,15 @@ export function Dashboard() {
       if (!raf) raf = requestAnimationFrame(spy);
     };
     spy();
+    // Sections grow as their data arrives without any scroll, so measure again when the page resizes.
+    const ro = new ResizeObserver(on);
+    ro.observe(document.body);
     window.addEventListener("scroll", on, { passive: true });
     window.addEventListener("resize", on);
     window.addEventListener("daybook:jumped", on);
     return () => {
       cancelAnimationFrame(raf);
+      ro.disconnect();
       window.removeEventListener("scroll", on);
       window.removeEventListener("resize", on);
       window.removeEventListener("daybook:jumped", on);

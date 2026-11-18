@@ -252,12 +252,16 @@ function HwCount({ studentId }: { studentId: string }) {
 
 function summaryLine(agenda: Occurrence[], checks: number, tasks: number, nowMin: number): string {
   const lessons = agenda.filter((o) => o.kind === "lesson" && o.status !== "cancelled" && o.status !== "missed_owe");
+  const missed = agenda.filter((o) => o.kind === "lesson" && o.status === "missed_owe").length;
   const upcoming = lessons.filter((o) => o.start && minutes(o.start) > nowMin);
   const parts: string[] = [];
-  if (lessons.length === 0) parts.push("No classes today");
-  else if (upcoming.length) parts.push(`${upcoming.length} ${upcoming.length === 1 ? "class" : "classes"} still ahead, next is ${upcoming[0].title.replace("Teach ", "")} at ${upcoming[0].start}`);
+  if (lessons.length === 0) {
+    if (!missed) parts.push("No classes today");
+  } else if (upcoming.length) parts.push(`${upcoming.length} ${upcoming.length === 1 ? "class" : "classes"} still ahead, next is ${upcoming[0].title.replace("Teach ", "")} at ${upcoming[0].start}`);
   else parts.push(lessons.length === 1 ? "Today’s class is over" : `All ${lessons.length} classes are over`);
+  if (missed) parts.push(`${missed} ${missed === 1 ? "class" : "classes"} missed`);
   if (checks) parts.push(`${checks} homework ${checks === 1 ? "check" : "checks"} tonight`);
   parts.push(tasks ? `${tasks} ${tasks === 1 ? "task" : "tasks"} due` : "no tasks due");
-  return parts.join(", ") + ".";
+  const line = parts.join(", ") + ".";
+  return line.charAt(0).toUpperCase() + line.slice(1);
 }
