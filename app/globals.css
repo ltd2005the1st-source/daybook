@@ -577,43 +577,55 @@ body.cal-dragging.cal-copying * {
 
 
 /* ---------------------------------------------------------------
-   Phone tab bar. A floating pill with a round notch cut out of its top edge, and a raised
-   circle for the open tab. --notch (where) and --notch-r (how big) are real animatable
-   properties, so the notch and the circle glide together on the app's curve and speed.
+   Phone tab bar. A floating pill whose surface has a round notch (with softly rounded
+   shoulders) for the open tab's raised circle. Everything that moves is a plain transform
+   or opacity change, so it runs on the GPU and retargets smoothly if the open tab changes
+   mid-glide (tapping fast, or the page scroll lighting different sections).
+   --i is the open tab's index, --n the tab count. The bar is a size container, so cqw is its width.
 ---------------------------------------------------------------- */
-@property --notch {
-  syntax: "<percentage>";
-  inherits: true;
-  initial-value: 50%;
-}
-@property --notch-r {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 0px;
-}
 .tabbar {
-  transition:
-    --notch calc(0.38s / var(--speed)) var(--ease),
-    --notch-r calc(0.3s / var(--speed)) var(--ease);
+  container-type: inline-size;
+  --glide: calc(0.42s / var(--speed));
   /* One soft shadow for the whole shape, notch included (a drop-shadow follows the cut-out). */
-  filter: drop-shadow(0 1px 1.5px rgba(15, 15, 10, 0.1)) drop-shadow(0 6px 12px rgba(15, 15, 10, 0.1));
+  filter: drop-shadow(0 1px 2px rgba(15, 15, 10, 0.08)) drop-shadow(0 12px 22px rgba(15, 15, 10, 0.16));
 }
 :root[data-theme="dark"] .tabbar {
-  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.5)) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55));
 }
-.tabbar-pill {
-  -webkit-mask-image: radial-gradient(circle at var(--notch) 4px, transparent calc(var(--notch-r) - 0.5px), #000 var(--notch-r));
-  mask-image: radial-gradient(circle at var(--notch) 4px, transparent calc(var(--notch-r) - 0.5px), #000 var(--notch-r));
+.tabbar-strip {
+  /* Two bar-widths of flat surface plus the 100px notch piece; centre the notch on slot --i. */
+  width: calc(200cqw + 100px);
+  transform: translate3d(calc((var(--i) + 0.5) * 100cqw / var(--n) - 100cqw - 50px), 0, 0);
+  transition: transform var(--glide) var(--ease);
+  will-change: transform;
+}
+.tabbar-flat {
+  width: 100cqw;
+  flex: none;
+  background: var(--surface);
+}
+.tabbar-fill {
+  fill: var(--surface);
+}
+/* Fills the notch in when no tab is open (Settings), instead of the notch sliding away. */
+.tabbar-patch {
+  opacity: 0;
+  transition: opacity calc(0.25s / var(--speed)) var(--ease);
+}
+.tabbar-patch.is-on {
+  opacity: 1;
+}
+.tabbar-carrier {
+  width: calc(100cqw / var(--n));
+  transform: translate3d(calc(var(--i) * 100cqw / var(--n)), 0, 0);
+  transition: transform var(--glide) var(--ease);
+  will-change: transform;
 }
 .tabbar-circle {
-  left: var(--notch);
-  margin-left: -26px;
   box-shadow: 0 8px 16px -6px color-mix(in oklab, var(--accent) 60%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition: opacity calc(0.25s / var(--speed)) var(--ease), transform calc(0.3s / var(--speed)) var(--ease);
 }
 .tabbar-dot {
-  left: var(--notch);
-  margin-left: -2px;
   transition: opacity calc(0.25s / var(--speed)) var(--ease);
 }
 .tabbar-icon,
@@ -625,30 +637,15 @@ body.cal-dragging.cal-copying * {
     color: var(--ink);
   }
 }
+@media (prefers-reduced-motion: reduce) {
+  .tabbar-strip,
+  .tabbar-carrier {
+    transition-duration: 0.01ms;
+  }
+}
 @media (prefers-contrast: more) {
   .tabbar-pill {
-    border-color: var(--line-strong);
-  }
-}
-
-/* One-page dashboard: each section is a page-sized block with a hairline between them,
-   lined up with the content edge. */
-.dash-section {
-  padding-bottom: 2.75rem;
-}
-.dash-section + .dash-section::before {
-  content: "";
-  display: block;
-  height: 1px;
-  max-width: calc(1240px - 5rem);
-  margin-inline: 1rem;
-  background: var(--line);
-}
-@media (min-width: 768px) {
-  .dash-section {
-    padding-bottom: 3.5rem;
-  }
-  .dash-section + .dash-section::before {
-    margin-inline: max(2.5rem, calc((100% - 1240px) / 2 + 2.5rem));
+    outline: 1px solid var(--line-strong);
+    outline-offset: -1px;
   }
 }
