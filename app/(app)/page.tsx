@@ -114,7 +114,7 @@ export default function TodayPage() {
         </p>
       </header>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         {/* Timeline */}
         <div>
           <Section title="Today" action={<Link href="/calendar" className="text-[12.5px] text-muted hover:text-ink">Calendar →</Link>}>

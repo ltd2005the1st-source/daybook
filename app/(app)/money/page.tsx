@@ -87,7 +87,7 @@ export default function MoneyPage() {
         ))}
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div>
           <QuickAdd />
           <FoodSection month={month} />
