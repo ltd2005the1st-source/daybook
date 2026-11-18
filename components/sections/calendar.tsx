@@ -131,7 +131,11 @@ type Drag = {
   start: number;
   end: number;
   active: boolean;
+  copy: boolean; // Ctrl (⌘ on a Mac) held: drop a duplicate and leave the original where it is
 };
+
+// Only events (classes included) can be duplicated; homework checks and tasks just move.
+const canCopy = (o: Occurrence | null) => !!o?.event;
 
 type Pending = { o: Occurrence; to: Target };
 type Clip = { e: CalEvent; date: string };
@@ -283,6 +287,19 @@ export default function CalendarPage() {
     toast(mobile ? `Copied “${e.title}”. Tap a time to paste it.` : `Copied “${e.title}”. Click a time to paste it, or point at a time and press ⌘V.`);
   };
 
+  // Ctrl-drag: a one-off copy at the drop spot. A copy of a repeating event or a weekly class
+  // is a single event on that day only.
+  const duplicate = (e: CalEvent, to: Target) => {
+    const row = copyOf(e, to.date, e.start_time ? { start_time: to.start, end_time: to.end === "24:00" ? "00:00" : to.end } : {});
+    const clash = duplicateEvent(store, row as CalEvent);
+    if (clash) {
+      toast(`${describeEvent(clash)} Not duplicated.`);
+      return;
+    }
+    const r = insert("events", row);
+    toast(`Duplicated “${e.title}” to ${fmtDay(to.date, { weekday: true })}${row.start_time ? `, ${row.start_time}` : ""}`, () => remove("events", r.id, { silent: true }));
+  };
+
   const paste = (date: string, startMin: number) => {
     if (!clip) return;
     const e = clip.e;
@@ -370,7 +387,7 @@ export default function CalendarPage() {
       window.removeEventListener("pointercancel", l.cancel);
       listeners.current = null;
     }
-    document.body.classList.remove("cal-dragging");
+    document.body.classList.remove("cal-dragging", "cal-copying");
   }, []);
 
   function activate() {
@@ -378,6 +395,7 @@ export default function CalendarPage() {
     if (!d) return;
     d.active = true;
     document.body.classList.add("cal-dragging");
+    document.body.classList.toggle("cal-copying", d.copy);
     if (d.pointer === "touch") navigator.vibrate?.(8);
     setDrag({ ...d });
   }
@@ -386,6 +404,9 @@ export default function CalendarPage() {
     const d = dragRef.current;
     if (!d) return;
     const dist = Math.hypot(e.clientX - d.x0, e.clientY - d.y0);
+    // Like Google Calendar: press or let go of Ctrl mid-drag to switch between moving and copying.
+    if (d.mode === "move" && canCopy(d.o)) d.copy = e.ctrlKey || e.metaKey;
+    document.body.classList.toggle("cal-copying", d.active && d.copy);
     if (!d.active) {
       if (d.pointer === "touch") {
         // Moving before the long-press finishes means you are scrolling, not dragging.
@@ -446,6 +467,11 @@ export default function CalendarPage() {
       setDrag(null);
       return;
     }
+    if (d.copy && o.event) {
+      duplicate(o.event, to);
+      setDrag(null);
+      return;
+    }
     if (needsScope(o)) {
       setPending({ o, to }); // keep the block where it was dropped while you choose
       return;
@@ -482,6 +508,7 @@ export default function CalendarPage() {
       start: s,
       end: en,
       active: false,
+      copy: mode === "move" && canCopy(o) && (e.ctrlKey || e.metaKey),
     };
     cleanup();
     listeners.current = { move: onMove, up: onUp, cancel: onCancel };
@@ -656,7 +683,8 @@ export default function CalendarPage() {
                   ))}
                 </div>
                 {days.map((d) => {
-                  const draggingKey = drag?.active && drag.o ? drag.o.key : null;
+                  // While copying, the original stays put at full strength.
+                  const draggingKey = drag?.active && drag.o && !drag.copy ? drag.o.key : null;
                   // The dragged block stays in place (faded) so a phone keeps sending its touch events to it.
                   const items = agendaOn(store, d);
                   const placed = layout(items);
@@ -939,7 +967,7 @@ function Ghost({ drag }: { drag: Drag }) {
       className="pointer-events-none absolute inset-x-[2px] z-[5] flex flex-col overflow-hidden rounded-[6px] px-1.5 py-1 text-[11.5px] leading-tight shadow-pop ring-2 ring-white/70"
       style={{ top, height, ...(o ? blockStyle(o) : { background: "var(--accent)", color: "white", opacity: 0.9 }) }}
     >
-      <div className="font-semibold truncate">{o ? o.title : "New event"}</div>
+      <div className="font-semibold truncate">{drag.copy && <span aria-hidden>+ </span>}{o ? o.title : "New event"}</div>
       <div className="num opacity-90">{label}</div>
     </div>
   );

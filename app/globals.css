@@ -440,6 +440,11 @@ body.cal-dragging * {
   cursor: grabbing !important;
   user-select: none !important;
 }
+/* Ctrl-dragging a calendar block drops a copy */
+body.cal-dragging.cal-copying,
+body.cal-dragging.cal-copying * {
+  cursor: copy !important;
+}
 
 /* Music: three bars that rise and fall while something plays */
 @keyframes music-bar {
