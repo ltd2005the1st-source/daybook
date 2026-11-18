@@ -434,3 +434,101 @@ body.cal-dragging * {
 }
 .music-bar { animation: music-bar 0.9s cubic-bezier(0.65, 0, 0.35, 1) infinite; height: 4px; }
 @media (prefers-reduced-motion: reduce) { .music-bar { animation: none; height: 9px; } }
+
+/* ---------------------------------------------------------------
+   Hover and press. Everything you can point at reacts, on the one
+   ease-in-out curve: colours fade rather than snap, things lift a
+   hair under the pointer and sink a little when pressed.
+---------------------------------------------------------------- */
+@layer base {
+  /* Any hover:bg-…, hover:text-… etc. now fades instead of switching in one frame.
+     Layered as base, so a component's own transition-… utility still wins. */
+  a,
+  button,
+  summary,
+  label,
+  select,
+  [role="button"],
+  [role="checkbox"],
+  [role="tab"] {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow, filter, opacity, transform;
+    transition-duration: 0.22s;
+    transition-timing-function: var(--ease);
+  }
+  svg.lucide {
+    transition: transform 0.28s var(--ease), color 0.22s var(--ease);
+  }
+}
+
+/* Anything clickable sinks a touch on press (bigger rows sink less than small buttons).
+   Draggable calendar pieces are left alone so a drag never shrinks. */
+/* Kept at low specificity so .btn and .press keep their deeper 0.96 press. */
+:where(a, button, [role="button"]):where(:not(:disabled, .cal-block, [class*="cursor-grab"])):active {
+  transform: scale(0.98);
+  transition-duration: 0.06s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* Buttons: primary lifts with a deeper shadow; outlined firms up its edge; icons grow slightly. */
+  .btn-primary:hover:not(:active) {
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 6px 14px -6px rgba(15, 15, 10, 0.35);
+  }
+  .btn-line:hover {
+    border-color: var(--ink-2);
+  }
+  .btn:hover:not(:active) svg.lucide,
+  .nav-item:hover svg.lucide {
+    transform: scale(1.1);
+  }
+
+  /* Arrows point the way they go. */
+  :is(a, button):hover :is(.lucide-arrow-right, .lucide-chevron-right, .lucide-arrow-up-right) {
+    transform: translateX(3px);
+  }
+  :is(a, button):hover .lucide-chevron-left {
+    transform: translateX(-3px);
+  }
+
+  /* Ticks: a soft ring shows where the click will land. */
+  [role="checkbox"]:hover:not([aria-checked="true"]) {
+    box-shadow: 0 0 0 4px var(--hover);
+  }
+
+  /* Clickable cards float up. */
+  :is(a, button).card:hover:not(:active) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-pop);
+  }
+
+  /* Sidebar rows slide their label a hair toward the content. */
+  .nav-item > span:last-child {
+    transition: transform 0.28s var(--ease);
+  }
+  .nav-item:hover > span:last-child {
+    transform: translateX(2px);
+  }
+
+  /* Underlined links draw their underline in instead of popping it. */
+  a[class~="hover:underline"],
+  button[class~="hover:underline"] {
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+  }
+  a[class~="hover:underline"]:hover,
+  button[class~="hover:underline"]:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(a, button, [role="button"]):active,
+  .btn-primary:hover,
+  :is(a, button).card:hover,
+  .nav-item:hover > span:last-child,
+  .btn:hover svg.lucide,
+  .nav-item:hover svg.lucide {
+    transform: none !important;
+  }
+}
