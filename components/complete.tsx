@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useData } from "./data";
 import { cx } from "@/lib/format";
 import type { Task } from "@/lib/types";
+import { sec, ms } from "@/lib/motion";
 
 /** One ease-in-out curve for all motion in the app. */
 export const EASE = [0.65, 0, 0.35, 1] as const;
@@ -15,7 +16,7 @@ export const TASK_ENTER = {
   animate: {
     opacity: 1,
     height: "auto",
-    transition: { height: { duration: 0.34, ease: EASE }, opacity: { duration: 0.26, delay: 0.1, ease: EASE } },
+    transition: { height: { duration: sec(0.34), ease: EASE }, opacity: { duration: sec(0.26), delay: sec(0.1), ease: EASE } },
   },
 } as const;
 
@@ -28,14 +29,14 @@ export const TASK_EXIT = {
   opacity: 0,
   height: 0,
   transition: {
-    x: { duration: 0.42, ease: EASE },
-    opacity: { duration: 0.28, ease: EASE },
-    height: { duration: 0.34, delay: 0.32, ease: EASE },
+    x: { duration: sec(0.42), ease: EASE },
+    opacity: { duration: sec(0.28), ease: EASE },
+    height: { duration: sec(0.34), delay: sec(0.32), ease: EASE },
   },
 } as const;
 
 /** How long a finished task stays on screen (ticked and crossed out) before it leaves the list. */
-export const COMPLETE_HOLD_MS = 750;
+export const COMPLETE_HOLD_MS = ms(750);
 
 /**
  * Ticking a task: the tick fills blue and draws its check, the title is crossed out,

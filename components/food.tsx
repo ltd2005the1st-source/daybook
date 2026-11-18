@@ -7,6 +7,7 @@ import { Field, Sheet } from "./ui";
 import { daysInMonth, fmtDay, MONTHS, monthOf, today } from "@/lib/dates";
 import { cx, parseAmount, vnd } from "@/lib/format";
 import type { Store, Transaction } from "@/lib/types";
+import { sec } from "@/lib/motion";
 
 /**
  * Food & drinks is logged as one amount per day and read in three 10-day periods
@@ -142,7 +143,7 @@ export function FoodSection({ month }: { month: string }) {
                       className={cx("block w-full rounded-[2px]", d === t ? "bg-pen" : "bg-[#5B6FB5] group-hover:brightness-110")}
                       initial={false}
                       animate={{ height: v ? `${Math.max(8, (v / maxDay) * 100)}%` : "2px" }}
-                      transition={{ duration: 0.4, ease: EASE }}
+                      transition={{ duration: sec(0.4), ease: EASE }}
                       style={{ opacity: v ? 1 : 0.25 }}
                     />
                   </button>

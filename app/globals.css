@@ -35,6 +35,8 @@
   --scrim: rgba(20, 20, 15, 0.22);
   --ring: color-mix(in oklab, var(--accent) 28%, transparent);
   --ease: cubic-bezier(0.65, 0, 0.35, 1);
+  /* How fast everything moves; 1 = original pace. Same value as SPEED in lib/motion.ts. */
+  --speed: 1.5;
   color-scheme: light;
 }
 
@@ -62,6 +64,11 @@
   --hairline: rgba(255, 255, 255, 0.08);
   --scrim: rgba(0, 0, 0, 0.5);
   color-scheme: dark;
+}
+
+@theme {
+  /* Tailwind's bare `transition-*` classes use this length. Original 150ms, at the current speed. */
+  --default-transition-duration: calc(150ms / 1.5);
 }
 
 @theme inline {
@@ -152,7 +159,7 @@ body {
   border-radius: 8px;
   padding: 7px 10px;
   color: var(--ink);
-  transition: border-color 0.15s var(--ease), background 0.15s var(--ease), box-shadow 0.2s var(--ease);
+  transition: border-color calc(0.15s / var(--speed)) var(--ease), background calc(0.15s / var(--speed)) var(--ease), box-shadow calc(0.2s / var(--speed)) var(--ease);
 }
 .field:hover {
   background: var(--hover);
@@ -177,7 +184,7 @@ body {
   font-size: 13.5px;
   letter-spacing: 0.005em;
   /* Release eases back; the press itself is instant (below). */
-  transition: background 0.15s var(--ease), transform 0.22s var(--ease), color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  transition: background calc(0.15s / var(--speed)) var(--ease), transform calc(0.22s / var(--speed)) var(--ease), color calc(0.15s / var(--speed)) var(--ease), box-shadow calc(0.15s / var(--speed)) var(--ease);
   white-space: nowrap;
   touch-action: manipulation;
 }
@@ -185,10 +192,10 @@ body {
 .btn:active,
 .press:active {
   transform: scale(0.96);
-  transition-duration: 0.06s;
+  transition-duration: calc(0.06s / var(--speed));
 }
 .press {
-  transition: transform 0.22s var(--ease), background-color 0.15s var(--ease), border-color 0.15s var(--ease), color 0.15s var(--ease);
+  transition: transform calc(0.22s / var(--speed)) var(--ease), background-color calc(0.15s / var(--speed)) var(--ease), border-color calc(0.15s / var(--speed)) var(--ease), color calc(0.15s / var(--speed)) var(--ease);
   touch-action: manipulation;
 }
 .btn-primary {
@@ -244,7 +251,7 @@ body {
 /* Scroll edge: a hairline only once content is actually passing underneath. */
 .edge-bottom {
   box-shadow: 0 0.5px 0 transparent;
-  transition: box-shadow 0.25s var(--ease);
+  transition: box-shadow calc(0.25s / var(--speed)) var(--ease);
 }
 .edge-bottom[data-scrolled] {
   box-shadow: 0 0.5px 0 var(--hairline), 0 8px 16px -14px rgba(0, 0, 0, 0.25);
@@ -259,11 +266,11 @@ body {
 .theme-fade *::before,
 .theme-fade *::after {
   transition:
-    background-color 0.35s var(--ease),
-    border-color 0.35s var(--ease),
-    color 0.35s var(--ease),
-    fill 0.35s var(--ease),
-    stroke 0.35s var(--ease) !important;
+    background-color calc(0.35s / var(--speed)) var(--ease),
+    border-color calc(0.35s / var(--speed)) var(--ease),
+    color calc(0.35s / var(--speed)) var(--ease),
+    fill calc(0.35s / var(--speed)) var(--ease),
+    stroke calc(0.35s / var(--speed)) var(--ease) !important;
 }
 
 @media (prefers-reduced-transparency: reduce) {
@@ -317,7 +324,7 @@ body {
 }
 .pen-stroke {
   stroke-dasharray: var(--len, 30);
-  animation: draw 0.35s cubic-bezier(0.65, 0, 0.35, 1) both;
+  animation: draw calc(0.35s / var(--speed)) cubic-bezier(0.65, 0, 0.35, 1) both;
 }
 
 @keyframes rise {
@@ -331,7 +338,7 @@ body {
   }
 }
 .rise {
-  animation: rise 0.4s cubic-bezier(0.65, 0, 0.35, 1) both;
+  animation: rise calc(0.4s / var(--speed)) cubic-bezier(0.65, 0, 0.35, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -378,8 +385,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background-position: 0 55%;
   background-size: 0% 1.5px;
   transition:
-    background-size 0.32s cubic-bezier(0.65, 0, 0.35, 1),
-    color 0.25s cubic-bezier(0.65, 0, 0.35, 1) 0.2s;
+    background-size calc(0.32s / var(--speed)) cubic-bezier(0.65, 0, 0.35, 1),
+    color calc(0.25s / var(--speed)) cubic-bezier(0.65, 0, 0.35, 1) calc(0.2s / var(--speed));
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
@@ -393,7 +400,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* The tick gives a small press-and-bounce when it is checked. */
 .tick-pop {
-  animation: tick-pop 0.38s cubic-bezier(0.65, 0, 0.35, 1);
+  animation: tick-pop calc(0.38s / var(--speed)) cubic-bezier(0.65, 0, 0.35, 1);
 }
 @keyframes tick-pop {
   0% {
@@ -432,7 +439,7 @@ body.cal-dragging * {
   0%, 100% { height: 4px; }
   50% { height: 14px; }
 }
-.music-bar { animation: music-bar 0.9s cubic-bezier(0.65, 0, 0.35, 1) infinite; height: 4px; }
+.music-bar { animation: music-bar calc(0.9s / var(--speed)) cubic-bezier(0.65, 0, 0.35, 1) infinite; height: 4px; }
 @media (prefers-reduced-motion: reduce) { .music-bar { animation: none; height: 9px; } }
 
 /* ---------------------------------------------------------------
@@ -452,11 +459,11 @@ body.cal-dragging * {
   [role="checkbox"],
   [role="tab"] {
     transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow, filter, opacity, transform;
-    transition-duration: 0.22s;
+    transition-duration: calc(0.22s / var(--speed));
     transition-timing-function: var(--ease);
   }
   svg.lucide {
-    transition: transform 0.28s var(--ease), color 0.22s var(--ease);
+    transition: transform calc(0.28s / var(--speed)) var(--ease), color calc(0.22s / var(--speed)) var(--ease);
   }
 }
 
@@ -465,7 +472,7 @@ body.cal-dragging * {
 /* Kept at low specificity so .btn and .press keep their deeper 0.96 press. */
 :where(a, button, [role="button"]):where(:not(:disabled, .cal-block, [class*="cursor-grab"])):active {
   transform: scale(0.98);
-  transition-duration: 0.06s;
+  transition-duration: calc(0.06s / var(--speed));
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -505,7 +512,7 @@ body.cal-dragging * {
 
   /* Sidebar rows slide their label a hair toward the content. */
   .nav-item > span:last-child {
-    transition: transform 0.28s var(--ease);
+    transition: transform calc(0.28s / var(--speed)) var(--ease);
   }
   .nav-item:hover > span:last-child {
     transform: translateX(2px);
@@ -549,4 +556,9 @@ body.cal-dragging * {
     margin-inline: -10px;
     padding-inline: 10px;
   }
+}
+
+/* Tailwind `duration-200` etc.: same dial as everything else. Unlayered, so it beats the utility. */
+[class*="duration-"] {
+  transition-duration: calc(var(--tw-duration, 150ms) / var(--speed));
 }

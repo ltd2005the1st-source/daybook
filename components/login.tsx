@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { supabase } from "@/lib/supabase";
 import { cx } from "@/lib/format";
+import { sec } from "@/lib/motion";
 
 type Screen = "loading" | "signin" | "setup" | "convert";
 
@@ -40,7 +41,7 @@ export function PinInput({
     <motion.div
       key={shake}
       animate={shake ? { x: [0, -8, 8, -5, 5, 0] } : undefined}
-      transition={{ duration: 0.36, ease: [0.65, 0, 0.35, 1] }}
+      transition={{ duration: sec(0.36), ease: [0.65, 0, 0.35, 1] }}
       className="relative mb-4"
       onClick={() => ref.current?.focus()}
     >
@@ -79,7 +80,7 @@ export function PinInput({
                   key={value[i]}
                   initial={{ y: 6, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.18, ease: [0.65, 0, 0.35, 1] }}
+                  transition={{ duration: sec(0.18), ease: [0.65, 0, 0.35, 1] }}
                   className="num text-[24px] font-semibold text-ink"
                 >
                   {value[i]}
