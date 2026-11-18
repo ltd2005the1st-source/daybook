@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Flag, Plus } from "lucide-react";
 import { CheckRow, CheckSheet, repeatedNotes } from "@/components/checks";
@@ -10,6 +10,7 @@ import { Strike, TASK_ENTER, TASK_EXIT, useCompleteTask } from "@/components/com
 import { Page, PageHeader, Section, Segmented, Tick } from "@/components/ui";
 import { addDays, relDay, today, weekday } from "@/lib/dates";
 import { cx } from "@/lib/format";
+import { sec } from "@/lib/motion";
 import { describeTask, duplicateTask } from "@/lib/dupes";
 import { checkTasksBetween, type CheckTask } from "@/lib/teaching";
 import type { Task } from "@/lib/types";
@@ -64,6 +65,29 @@ function parseQuick(input: string): { title: string; due: string | null; time: s
   return { title: s.trim(), due: due ?? (time ? t : null), time, priority };
 }
 
+/** Groups that fold away, and whether each starts open. Toggles are remembered on this device. */
+const FOLD_KEY = "daybook.tasks.folds";
+const FOLD_DEFAULT: Record<string, boolean> = { "Today & tomorrow": true, "Next 7 days": false, "Long-term goals": false };
+
+function useFolds() {
+  const [open, setOpen] = useState<Record<string, boolean>>(FOLD_DEFAULT);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(FOLD_KEY) ?? "null");
+      if (saved && typeof saved === "object") setOpen({ ...FOLD_DEFAULT, ...saved });
+    } catch {}
+  }, []);
+  const toggle = (title: string) =>
+    setOpen((o) => {
+      const next = { ...o, [title]: !o[title] };
+      try {
+        localStorage.setItem(FOLD_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  return { open, toggle };
+}
+
 export default function TasksPage() {
   const { store, insert, toast } = useData();
   const [list, setList] = useState("All");
@@ -71,6 +95,8 @@ export default function TasksPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [showDone, setShowDone] = useState(false);
   const t = today();
+  const tomorrow = addDays(t, 1);
+  const folds = useFolds();
 
   const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
   const checks = checkTasksBetween(store, t, 8).filter((c) => !c.done);
@@ -86,11 +112,15 @@ export default function TasksPage() {
   const sameNote = repeatedNotes(shownChecks);
   const groups: { title: string; items: Task[]; checks?: CheckTask[]; tone?: string }[] = [
     { title: "Overdue", items: open.filter((x) => x.due_on && x.due_on < t), tone: "text-pen" },
-    { title: "Today", items: open.filter((x) => x.due_on === t), checks: shownChecks.filter((c) => c.date === t) },
+    {
+      title: "Today & tomorrow",
+      items: open.filter((x) => x.due_on === t || x.due_on === tomorrow),
+      checks: shownChecks.filter((c) => c.date <= tomorrow),
+    },
     {
       title: "Next 7 days",
-      items: open.filter((x) => x.due_on && x.due_on > t && x.due_on <= addDays(t, 7)),
-      checks: shownChecks.filter((c) => c.date > t),
+      items: open.filter((x) => x.due_on && x.due_on > tomorrow && x.due_on <= addDays(t, 7)),
+      checks: shownChecks.filter((c) => c.date > tomorrow),
     },
     { title: "Later", items: open.filter((x) => x.due_on && x.due_on > addDays(t, 7)) },
     { title: "No date", items: open.filter((x) => !x.due_on && x.horizon !== "long") },
@@ -153,7 +183,14 @@ export default function TasksPage() {
       {groups.map(
         (g) =>
           g.items.length + (g.checks?.length ?? 0) > 0 && (
-            <Section key={g.title} title={<span className={g.tone}>{g.title} · {g.items.length + (g.checks?.length ?? 0)}</span>}>
+            <TaskGroup
+              key={g.title}
+              title={g.title}
+              count={g.items.length + (g.checks?.length ?? 0)}
+              tone={g.tone}
+              open={g.title in FOLD_DEFAULT ? folds.open[g.title] : undefined}
+              onToggle={() => folds.toggle(g.title)}
+            >
               <div className="row-list flex flex-col overflow-x-clip">
                 <AnimatePresence initial={false}>
                   {g.items
@@ -166,7 +203,7 @@ export default function TasksPage() {
                   ))}
                 </AnimatePresence>
               </div>
-            </Section>
+            </TaskGroup>
           ),
       )}
       {open.length + shownChecks.length === 0 && <p className="mb-8 text-[14px] text-muted">Nothing open. Enjoy it, or add the next thing above.</p>}
@@ -193,6 +230,58 @@ export default function TasksPage() {
       <TaskSheet task={openTask} onClose={() => setOpenId(null)} />
       <CheckSheet at={openCheck} onClose={() => setOpenCheck(null)} />
     </Page>
+  );
+}
+
+/** A task group. With `open` set it gets a chevron header that folds the list away. */
+function TaskGroup({
+  title,
+  count,
+  tone,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  count: number;
+  tone?: string;
+  open?: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  if (open === undefined)
+    return (
+      <Section title={<span className={tone}>{title} · {count}</span>}>
+        {children}
+      </Section>
+    );
+  return (
+    <section className="mb-8">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className={cx("flex w-full items-center gap-1.5 border-b border-line pb-1.5 text-left text-[13px] font-semibold text-ink-2 hover:text-ink", open ? "mb-2.5" : "mb-0")}
+      >
+        <ChevronDown size={15} className={cx("shrink-0 text-muted transition-transform", !open && "-rotate-90")} />
+        <span className={tone}>{title}</span>
+        <span className="num font-normal text-muted">· {count}</span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: sec(0.28), ease: [0.65, 0, 0.35, 1] }}
+            // Padding gives hover rows (which reach 10px past the column) room inside the clip.
+            className="-mx-[10px] overflow-hidden px-[10px]"
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }
 
