@@ -11,6 +11,9 @@ on:
       - "android/**"
       - ".github/workflows/android.yml"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,3 +37,16 @@ jobs:
             android/app/build/outputs/apk/release/*.apk
             android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
+      # Unsigned files are also attached to a rolling pre-release so they can be
+      # fetched and signed offline. They cannot be installed until signed.
+      - name: Publish unsigned build to the android-unsigned pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/release/app-release-unsigned.apk dist/daybook-unsigned.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab dist/daybook-unsigned.aab
+          gh release delete android-unsigned --yes --cleanup-tag || true
+          gh release create android-unsigned dist/* --prerelease --target "$GITHUB_SHA" \
+            --title "Android build (unsigned, ${GITHUB_SHA::7})" \
+            --notes "Unsigned build from ${GITHUB_SHA}. Not installable until signed with the Daybook upload key."
