@@ -194,16 +194,18 @@ export default function TodayPage() {
           {(owed.length > 0 || checks.length > 0) && (
             <Section title="Teaching">
               {owed.length > 0 && (
-                <p className="text-[13.5px] text-ink-2">
-                  Makeups left:{" "}
-                  {owed.map(({ s, n }, i) => (
-                    <span key={s.id}>
-                      <Dot color={s.color} className="mx-1" />
-                      {s.name} <span className="num font-semibold text-pen">{n}</span>
-                      {i < owed.length - 1 ? "," : ""}
-                    </span>
-                  ))}
-                </p>
+                <div>
+                  <div className="label mb-1">Makeups left</div>
+                  <ul className="flex max-w-[300px] flex-col">
+                    {owed.map(({ s, n }) => (
+                      <li key={s.id} className="flex items-center gap-2 py-1 text-[13.5px] text-ink-2">
+                        <Dot color={s.color} />
+                        <span className="min-w-0 flex-1 truncate">{s.name}</span>
+                        <span className="num font-semibold text-pen">{n}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
               <Link href="/teaching" className="mt-1 inline-flex items-center gap-1 text-[12.5px] text-muted hover:text-ink">
                 Open the register <ArrowRight size={13} />
