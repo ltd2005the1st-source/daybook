@@ -67,7 +67,7 @@ export function Palette({ open, onClose }: { open: boolean; onClose: () => void 
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[14vh]">
+        <div data-scroll-contain className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[14vh]">
           <motion.div className="absolute inset-0 bg-[var(--scrim)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
           <motion.div
             initial={{ opacity: 0, scale: 0.97, y: -8 }}
@@ -98,7 +98,7 @@ export function Palette({ open, onClose }: { open: boolean; onClose: () => void 
               placeholder="Go somewhere or add a task"
               className="w-full border-b border-line bg-transparent px-4 py-3.5 text-[16px] outline-none focus-visible:outline-none placeholder:text-muted"
             />
-            <ul className="max-h-[50vh] overflow-y-auto p-1.5">
+            <ul className="max-h-[50vh] overflow-y-auto overscroll-contain p-1.5">
               {items.map((it, k) => (
                 <li key={it.id}>
                   <button

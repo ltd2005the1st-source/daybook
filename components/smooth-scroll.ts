@@ -37,10 +37,15 @@ function canScroll(el: Element, dir: number): boolean {
   return dir > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0;
 }
 
-function scrollerFor(target: EventTarget | null, dir: number): Element | null {
+// Pop-ups mark their backdrop with data-scroll-contain: the wheel scrolls inside them, but never
+// leaks through to the page behind.
+const CONTAINED = "contained";
+
+function scrollerFor(target: EventTarget | null, dir: number): Element | typeof CONTAINED | null {
   let el = target instanceof Element ? target : null;
   while (el && el !== document.body && el !== document.documentElement) {
     if (canScroll(el, dir)) return el;
+    if (el.hasAttribute("data-scroll-contain")) return CONTAINED;
     el = el.parentElement;
   }
   const root = document.scrollingElement;
@@ -52,7 +57,7 @@ export function useSmoothWheel() {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let el: Element | null = null;
-    let pos = 0, to = 0, last = 0, lastPos = 0, raf = 0, lastWheel = 0;
+    let pos = 0, to = 0, last = 0, lastPos = 0, raf = 0, lastWheel = 0, moved = false;
 
     const stop = () => {
       cancelAnimationFrame(raf);
@@ -61,7 +66,9 @@ export function useSmoothWheel() {
     };
 
     const frame = (now: number) => {
-      if (!el) return;
+      raf = 0;
+      // The panel closed or was swapped out mid-glide: let go.
+      if (!el || !el.isConnected) return stop();
       // Someone else moved it (scrollbar drag, keyboard, a jump): let go.
       if (Math.abs(el.scrollTop - lastPos) > 2) return stop();
       const dt = Math.min(0.1, Math.max(0, (now - last) / 1000));
@@ -76,22 +83,36 @@ export function useSmoothWheel() {
     };
 
     const onWheel = (e: WheelEvent) => {
-      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.shiftKey || !isWheelNotch(e)) return;
+      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      if (!isWheelNotch(e)) {
+        // Trackpads scroll natively, except through a pop-up's backdrop to the page behind.
+        if (e.deltaY && scrollerFor(e.target, Math.sign(e.deltaY)) === CONTAINED) e.preventDefault();
+        return;
+      }
       const delta = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * window.innerHeight : e.deltaY;
       const dir = Math.sign(delta);
       const now = performance.now();
-      let target = scrollerFor(e.target, dir);
-      // Like the browser does natively: while the page is still gliding from your last notches,
-      // keep scrolling the page, so it doesn't stop dead when the calendar slides under the
-      // pointer. Pause for a moment and the next notch scrolls whatever is under the pointer.
-      if (el && raf && now - lastWheel < 300 && Math.sign(to - pos) === dir && canScroll(el, dir)) target = el;
+      const found = scrollerFor(e.target, dir);
+      if (found === CONTAINED) {
+        e.preventDefault();
+        return;
+      }
+      let target = found;
+      // While you keep spinning with the mouse held still, keep scrolling what you started on, so
+      // the page doesn't stop dead when the calendar slides under the pointer. Move the mouse, or
+      // pause for a moment, and the next notch scrolls whatever is under the pointer.
+      if (!moved && el && raf && now - lastWheel < 300 && Math.sign(to - pos) === dir && canScroll(el, dir)) target = el;
       lastWheel = now;
+      moved = false;
       if (!target) return;
       e.preventDefault();
 
       const max = target.scrollHeight - target.clientHeight;
       if (el !== target || !raf) {
+        // Switching to another panel mid-glide: the old loop must be fully cleared, or the new
+        // one never starts and the wheel seems dead until something else resets it.
         cancelAnimationFrame(raf);
+        raf = 0;
         el = target;
         pos = to = target.scrollTop;
         // Count the first frame as a full frame, so the very next paint already moves.
@@ -104,14 +125,23 @@ export function useSmoothWheel() {
     };
 
     const cancel = () => el && stop();
+    let mx = -1, my = -1;
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      if (Math.abs(e.clientX - mx) + Math.abs(e.clientY - my) > 3) moved = true;
+      mx = e.clientX;
+      my = e.clientY;
+    };
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("pointerdown", cancel, true);
+    window.addEventListener("pointermove", onMove, { passive: true, capture: true });
     window.addEventListener("touchstart", cancel, { passive: true, capture: true });
     window.addEventListener("keydown", cancel, true);
     return () => {
       stop();
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("pointerdown", cancel, true);
+      window.removeEventListener("pointermove", onMove, true);
       window.removeEventListener("touchstart", cancel, true);
       window.removeEventListener("keydown", cancel, true);
     };
