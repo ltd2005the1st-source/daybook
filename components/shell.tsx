@@ -88,6 +88,19 @@ export function Shell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Makes the public "tester" showcase account the first time the owner opens Daybook after it was added.
+  // The server ignores this for anyone but the owner, and does nothing once the account exists.
+  const showcaseAsked = useRef(false);
+  useEffect(() => {
+    if (!online || !session || showcaseAsked.current || session.user.app_metadata?.showcase) return;
+    showcaseAsked.current = true;
+    fetch("/api/auth/pin", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ action: "showcase", mode: "ensure" }),
+    }).catch(() => {});
+  }, [online, session]);
+
   useEffect(() => {
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
