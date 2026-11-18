@@ -6,7 +6,48 @@ import { useData } from "@/components/data";
 import { ConfirmButton, Field, Page, PageHeader, Section } from "@/components/ui";
 import { remindersFor, fmtAt } from "@/lib/reminders";
 import { today } from "@/lib/dates";
-import type { Store } from "@/lib/types";
+import { cx } from "@/lib/format";
+import { TABLES, type Store } from "@/lib/types";
+
+/* ---------- Backups ---------- */
+
+type Backup = { data: Partial<Store>; settings: Record<string, string> };
+// Preferences kept in this browser (theme, name, calendar view…). The local data store itself is in `data`.
+const isSetting = (k: string) => /^daybook[.:]/.test(k) && k !== "daybook.store.v1";
+
+function downloadBackup(store: Store) {
+  const settings: Record<string, string> = {};
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)!;
+      if (isSetting(k)) settings[k] = localStorage.getItem(k) ?? "";
+    }
+  } catch {}
+  const counts = Object.fromEntries(TABLES.map((t) => [t, store[t].length]));
+  const file = { app: "daybook", version: 1, exported_at: new Date().toISOString(), counts, settings, data: store };
+  const blob = new Blob([JSON.stringify(file, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `daybook-backup-${today()}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/** Reads a new-style backup ({ app, data, settings }) or an older one that was just the data. */
+function readBackup(raw: unknown): Backup {
+  if (!raw || typeof raw !== "object") throw new Error("not a backup");
+  const r = raw as Record<string, unknown>;
+  const data = (r.app === "daybook" ? r.data : r) as Partial<Store>;
+  if (!data || typeof data !== "object" || !TABLES.some((t) => Array.isArray(data[t]))) throw new Error("not a backup");
+  const settings = r.app === "daybook" && r.settings && typeof r.settings === "object" ? (r.settings as Record<string, string>) : {};
+  return { data, settings };
+}
+
+function restoreSettings(settings: Record<string, string>) {
+  try {
+    Object.entries(settings).forEach(([k, v]) => isSetting(k) && typeof v === "string" && localStorage.getItem(k) === null && localStorage.setItem(k, v));
+  } catch {}
+}
 
 function b64ToUint8(b64: string) {
   const pad = "=".repeat((4 - (b64.length % 4)) % 4);
@@ -15,7 +56,8 @@ function b64ToUint8(b64: string) {
 }
 
 export default function SettingsPage() {
-  const { store, online, session, resetLocal, loadSeed, toast, storeRef } = useData();
+  const { store, online, session, resetLocal, loadSeed, restoreBackup, toast, storeRef } = useData();
+  const [restoring, setRestoring] = useState(false);
   const [name, setName] = useState("");
   const [push, setPush] = useState<"unsupported" | "off" | "on" | "denied">("off");
   const [busy, setBusy] = useState(false);
@@ -139,39 +181,37 @@ export default function SettingsPage() {
 
       <Section title="Data">
         <div className="flex flex-wrap gap-2">
-          <button
-            className="btn btn-line"
-            onClick={() => {
-              const blob = new Blob([JSON.stringify(storeRef.current, null, 2)], { type: "application/json" });
-              const a = document.createElement("a");
-              a.href = URL.createObjectURL(blob);
-              a.download = `daybook-${today()}.json`;
-              a.click();
-            }}
-          >
-            <Download size={15} /> Export backup
+          <button className="btn btn-line" onClick={() => downloadBackup(storeRef.current)}>
+            <Download size={15} /> Download my data
           </button>
-          {!online && (
-            <label className="btn btn-line cursor-pointer">
-              <Upload size={15} /> Restore backup
-              <input
-                type="file"
-                accept="application/json"
-                className="hidden"
-                onChange={async (e) => {
-                  const f = e.target.files?.[0];
-                  if (!f) return;
-                  try {
-                    const data = JSON.parse(await f.text()) as Store;
-                    localStorage.setItem("daybook.store.v1", JSON.stringify(data));
-                    location.reload();
-                  } catch {
-                    toast("That file isn’t a Daybook backup.");
-                  }
-                }}
-              />
-            </label>
-          )}
+          <label className={cx("btn btn-line cursor-pointer", restoring && "pointer-events-none opacity-50")}>
+            <Upload size={15} /> {restoring ? "Restoring…" : "Restore from file"}
+            <input
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (!f) return;
+                let parsed: Backup;
+                try {
+                  parsed = readBackup(JSON.parse(await f.text()));
+                } catch {
+                  toast("That file isn’t a Daybook backup.");
+                  return;
+                }
+                setRestoring(true);
+                try {
+                  const n = await restoreBackup(parsed.data);
+                  restoreSettings(parsed.settings);
+                  toast(n ? `Restored ${n} ${n === 1 ? "item" : "items"} from the backup.` : "Nothing to restore: everything in that file is already here.");
+                } finally {
+                  setRestoring(false);
+                }
+              }}
+            />
+          </label>
           {!online && (
             <ConfirmButton className="btn btn-ghost text-pen" confirmLabel="Replace all data?" onConfirm={resetLocal}>
               Reset to starter data
@@ -184,6 +224,10 @@ export default function SettingsPage() {
           )}
         </div>
         <p className="mt-2 text-[12px] text-muted">
+          The download has everything: calendar, classes, students, tasks, money, food, habits, music and your preferences. Restoring only adds back what’s missing; it never
+          changes or deletes anything you have now.
+        </p>
+        <p className="mt-1 text-[12px] text-muted">
           {online ? "Synced through Supabase. Changes appear on your other devices within a second." : "Local mode: everything is saved in this browser only."}
         </p>
       </Section>

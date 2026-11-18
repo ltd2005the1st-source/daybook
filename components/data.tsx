@@ -25,6 +25,7 @@ type Ctx = {
   remove: <T extends TableName>(t: T, id: string, opts?: { silent?: boolean }) => void;
   loadSeed: () => Promise<void>;
   resetLocal: () => void;
+  restoreBackup: (data: Partial<Store>) => Promise<number>;
   toast: (text: string, undo?: () => void) => void;
   toasts: Toast[];
   dismissToast: (id: string) => void;
@@ -257,6 +258,48 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     await loadAll();
   }, [commit, loadAll, toast]);
 
+  /**
+   * Brings back rows from a backup file. It only adds what's missing (matched by id), so nothing you
+   * have now is changed or deleted, and running it twice does nothing the second time.
+   */
+  const restoreBackup = useCallback(
+    async (data: Partial<Store>) => {
+      const cur = storeRef.current;
+      const missing = TABLES.map((t) => {
+        const have = new Set((cur[t] as { id: string }[]).map((r) => r.id));
+        const rows = ((data[t] ?? []) as { id?: string }[]).filter((r) => r && typeof r === "object" && r.id && !have.has(r.id));
+        return [t, rows] as const;
+      });
+      const total = missing.reduce((n, [, rows]) => n + rows.length, 0);
+      if (!total) return 0;
+      if (!ONLINE) {
+        const next = { ...cur } as Record<string, unknown[]>;
+        missing.forEach(([t, rows]) => (next[t] = [...(cur[t] as unknown[]), ...rows]));
+        commit(migrateClasses(next as Store));
+        return total;
+      }
+      const sb = supabase();
+      const uid = session?.user.id;
+      let added = 0;
+      // Parents before children so foreign keys resolve.
+      for (const [t, rows] of missing) {
+        for (let i = 0; i < rows.length; i += 500) {
+          const chunk = rows.slice(i, i + 500).map((r) => ({ ...r, user_id: uid }));
+          const { error } = await sb.from(t).upsert(chunk, { onConflict: "id", ignoreDuplicates: true });
+          if (error) {
+            toast(`Restore stopped at ${t}: ${error.message}`);
+            await loadAll();
+            return added;
+          }
+          added += chunk.length;
+        }
+      }
+      await loadAll();
+      return added;
+    },
+    [commit, loadAll, session, toast],
+  );
+
   const resetLocal = useCallback(() => {
     if (ONLINE) return;
     commit(buildSeed());
@@ -282,13 +325,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       remove,
       loadSeed,
       resetLocal,
+      restoreBackup,
       toast,
       toasts,
       dismissToast,
       signOut,
       storeRef,
     }),
-    [store, ready, session, needsLogin, isEmpty, insert, update, remove, loadSeed, resetLocal, toast, toasts, dismissToast, signOut],
+    [store, ready, session, needsLogin, isEmpty, insert, update, remove, loadSeed, resetLocal, restoreBackup, toast, toasts, dismissToast, signOut],
   );
 
   return <DataCtx.Provider value={value}>{children}</DataCtx.Provider>;
