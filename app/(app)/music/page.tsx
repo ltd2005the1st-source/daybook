@@ -69,7 +69,7 @@ export default function MusicPage() {
       </PageHeader>
 
       <form onSubmit={add} className="mb-2">
-        <div className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-1 focus-within:border-accent">
+        <div className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-1 focus-within:border-ink-2">
           <Plus size={17} className="text-muted" />
           <input
             className="min-w-0 flex-1 bg-transparent py-2 text-[15px] outline-none focus-visible:outline-none placeholder:text-muted"
