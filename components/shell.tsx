@@ -51,9 +51,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const section = useActiveSection();
   const onDashboard = isDashboardPath(path);
   const activeIdx = onDashboard ? NAV.findIndex((n) => n.id === section) : NAV.findIndex((n) => n.path !== "/" && path.startsWith(n.path));
-  const lastNotch = useRef(((Math.max(activeIdx, 0) + 0.5) / NAV.length) * 100);
-  if (activeIdx >= 0) lastNotch.current = ((activeIdx + 0.5) / NAV.length) * 100;
-  const notchAt = lastNotch.current;
+  const lastIdx = useRef(Math.max(activeIdx, 0));
+  if (activeIdx >= 0) lastIdx.current = activeIdx;
+  const slotAt = lastIdx.current;
   useSmoothWheel();
   const [paletteOpen, setPaletteOpen] = useState(false);
   // The top bar only shows its edge once the page has scrolled under it.
@@ -189,13 +189,39 @@ export function Shell({ children }: { children: React.ReactNode }) {
       >
         <div
           className="tabbar pointer-events-auto relative mx-auto h-16 max-w-[440px]"
-          style={{ ["--notch" as string]: `${notchAt}%`, ["--notch-r" as string]: activeIdx >= 0 ? "34px" : "0px" }}
+          style={{ ["--i" as string]: slotAt, ["--n" as string]: NAV.length }}
         >
-          <div className="tabbar-pill absolute inset-0 rounded-[26px] border border-line dark:border-[var(--hairline)] bg-surface" />
-          <div
-            aria-hidden
-            className={cx("tabbar-dot absolute left-0 top-[48px] h-1 w-1 rounded-full bg-accent", activeIdx < 0 && "opacity-0")}
-          />
+          {/* The bar's surface. A strip wider than the bar slides sideways (a GPU transform, no
+              repainting): flat surface, then a 100px piece with the round notch and softly rounded
+              shoulders, then more flat surface. The pill clips it to the bar's rounded shape. */}
+          <div className="tabbar-pill absolute inset-0 overflow-hidden rounded-[26px]" aria-hidden>
+            <div className="tabbar-strip absolute inset-y-0 left-0 flex">
+              <div className="tabbar-flat" />
+              <div className="relative h-full w-[100px] shrink-0">
+                <svg className="tabbar-fill absolute inset-0" width="100" height="64" viewBox="0 0 100 64">
+                  <path d="M0 0H8.19A8 8 0 0 1 16.15 7.24A34 34 0 0 0 83.85 7.24A8 8 0 0 1 91.81 0H100V64H0Z" />
+                </svg>
+                <svg className={cx("tabbar-fill tabbar-patch absolute inset-0", activeIdx < 0 && "is-on")} width="100" height="64" viewBox="0 0 100 64">
+                  <rect width="100" height="64" />
+                </svg>
+              </div>
+              <div className="tabbar-flat" />
+            </div>
+          </div>
+          {/* Circle and dot ride one slot-wide carrier that slides to the open tab. */}
+          <div aria-hidden className="tabbar-carrier pointer-events-none absolute left-0 top-[-22px] h-[86px]">
+            <div className={cx("tabbar-circle relative mx-auto h-[52px] w-[52px] rounded-full bg-accent text-surface", activeIdx < 0 && "scale-50 opacity-0")}>
+              {NAV.map((n, i) => (
+                <n.icon
+                  key={n.href}
+                  size={23}
+                  strokeWidth={2}
+                  className={cx("tabbar-glyph absolute left-1/2 top-1/2 -ml-[11.5px] -mt-[11.5px]", i === activeIdx ? "opacity-100" : "scale-50 opacity-0")}
+                />
+              ))}
+            </div>
+            <div className={cx("tabbar-dot mx-auto mt-[18px] h-1 w-1 rounded-full bg-accent", activeIdx < 0 && "opacity-0")} />
+          </div>
           <div className="relative grid h-full" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
             {NAV.map((n, i) => {
               const active = i === activeIdx;
@@ -216,19 +242,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 </Link>
               );
             })}
-          </div>
-          <div
-            aria-hidden
-            className={cx("tabbar-circle pointer-events-none absolute top-[-22px] h-[52px] w-[52px] rounded-full bg-accent text-surface", activeIdx < 0 && "scale-50 opacity-0")}
-          >
-            {NAV.map((n, i) => (
-              <n.icon
-                key={n.href}
-                size={23}
-                strokeWidth={2}
-                className={cx("tabbar-glyph absolute left-1/2 top-1/2 -ml-[11.5px] -mt-[11.5px]", i === activeIdx ? "opacity-100" : "scale-50 opacity-0")}
-              />
-            ))}
           </div>
         </div>
       </nav>
