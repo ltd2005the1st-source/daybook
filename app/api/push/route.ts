@@ -4,6 +4,10 @@ import { userFromRequest } from "@/lib/server";
 
 export const runtime = "nodejs";
 
+/** Vietnam time, now or some minutes from now, as HH:MM. */
+const hhmm = (plus = 0) =>
+  new Date(Date.now() + plus * 60_000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Ho_Chi_Minh" });
+
 /** Save this device's push subscription (POST), remove it (DELETE), or send a test (PUT). */
 export async function POST(req: Request) {
   const auth = await userFromRequest(req);
@@ -58,7 +62,7 @@ export async function PUT(req: Request) {
     try {
       const r = await webpush.sendNotification(
         row.subscription,
-        JSON.stringify({ title: "Daybook", body: "Reminders are working on this device.", url: "/settings", tag: "test" }),
+        JSON.stringify({ title: "Test reminder", body: `${hhmm()} – ${hhmm(60)}\nReminders are working on this device.`, url: "/settings", tag: "test" }),
         { TTL: 120, urgency: "high" },
       );
       results.push({ ok: true, status: r.statusCode });

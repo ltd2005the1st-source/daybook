@@ -40,7 +40,7 @@ export function remindersFor(store: Store, date: string): Reminder[] {
         key: `task:${t.id}:${date}:${t.due_time}:${r}`,
         at: minutes(t.due_time) - r,
         title: t.title,
-        body: `Due at ${t.due_time}, in ${r} minutes`,
+        body: `${t.due_time}\n${r ? `Due in ${r} minutes` : "Due now"}`,
         url: "/tasks",
       });
     }
@@ -53,7 +53,9 @@ export function remindersFor(store: Store, date: string): Reminder[] {
     if (e.studentId && markFor(store, e.studentId, date) !== "planned") continue;
     const note = noteFor(e.event, date);
     for (const r of e.event.remind_before?.length ? e.event.remind_before : DEFAULT_REMIND) {
-      const when = r === 0 ? `Starting now (${e.start}–${e.end ?? ""})` : `In ${r} minutes, ${e.start}–${e.end ?? ""}`;
+      // Like a calendar alert: the time range first, then when it starts.
+      const range = e.end ? `${e.start} – ${e.end === "00:00" ? "24:00" : e.end}` : e.start;
+      const when = `${range}\n${r === 0 ? "Starting now" : `Starts in ${r} minutes`}`;
       out.push({
         key: `event:${e.event.id}:${date}:${e.start}:${r}`,
         at: minutes(e.start) - r,

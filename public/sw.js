@@ -9,12 +9,16 @@ self.addEventListener("push", (event) => {
   } catch (_) {
     if (event.data) data.body = event.data.text();
   }
+  // Laid out like a calendar alert: bold title, the time range underneath, the Daybook icon, and a Close button.
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: "/icon-192.png",
-      badge: "/icon-192.png",
+      badge: "/icon-monochrome.png",
       tag: data.tag,
+      renotify: !!data.tag,
+      timestamp: Date.now(),
+      actions: [{ action: "close", title: "Close" }],
       data: { url: data.url },
     }),
   );
@@ -22,6 +26,7 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
+  if (event.action === "close") return;
   const url = (event.notification.data && event.notification.data.url) || "/";
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
