@@ -1,9 +1,9 @@
 "use client";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronLeft, ChevronRight, ClipboardPaste, Plus, X } from "lucide-react";
+import { CheckCheck, ChevronLeft, ChevronRight, ClipboardPaste, Plus, RotateCcw, X } from "lucide-react";
 import { copyOf, needsScope, useCalendarEdits, type Scope, type Target } from "@/components/calendar-edit";
-import { CheckSheet } from "@/components/checks";
+import { CheckSheet, useCheckActions } from "@/components/checks";
 import { ColorPicker } from "@/components/color-picker";
 import { useData } from "@/components/data";
 import { EventSheet, LessonSheet } from "@/components/event-sheet";
@@ -13,7 +13,7 @@ import { textOn } from "@/lib/colors";
 import { addDays, daysInMonth, fmtDay, fromMinutes, minutes, monthOf, MONTHS, parseDate, startOfWeek, today, WD_SHORT } from "@/lib/dates";
 import { describeEvent, duplicateEvent } from "@/lib/dupes";
 import { cx } from "@/lib/format";
-import { agendaOn, type Occurrence } from "@/lib/teaching";
+import { agendaOn, checkTasksOn, type Occurrence } from "@/lib/teaching";
 import type { CalEvent } from "@/lib/types";
 
 const START_H = 6;
@@ -209,6 +209,38 @@ export default function CalendarPage() {
   const first = parseDate(view === "week" ? days[0] : anchor);
   const title = view === "year" ? `${first.getFullYear()}` : `${MONTHS[first.getMonth()]} ${first.getFullYear()}`;
   const weekStrip = Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(anchor), i));
+
+  /* ---------- Mark every task in view done or not done ---------- */
+
+  const checks = useCheckActions();
+  const inView = useMemo(() => {
+    if (view === "week") return days;
+    if (view === "month") return daysInMonth(monthOf(anchor));
+    const y = parseDate(anchor).getFullYear();
+    return Array.from({ length: 12 }, (_, m) => daysInMonth(`${y}-${String(m + 1).padStart(2, "0")}`)).flat();
+  }, [view, days, anchor]);
+  const viewTasks = useMemo(() => {
+    const set = new Set(inView);
+    return {
+      checks: inView.flatMap((d) => checkTasksOn(store, d)),
+      tasks: store.tasks.filter((x) => !x.student_id && x.due_on && x.due_time && set.has(x.due_on)),
+    };
+  }, [store, inView]);
+  const viewLabel = view === "week" ? (mobile ? "this day" : "this week") : view === "month" ? "this month" : "this year";
+  const markAll = (done: boolean) => {
+    const cs = viewTasks.checks.filter((c) => c.done !== done);
+    const ts = viewTasks.tasks.filter((x) => x.done !== done);
+    const prevTasks = ts.map((x) => [x.id, { done: x.done, done_at: x.done_at }] as const);
+    cs.forEach((c) => checks.setDone(c, done));
+    ts.forEach((x) => update("tasks", x.id, { done, done_at: done ? new Date().toISOString() : null }));
+    const n = cs.length + ts.length;
+    toast(`${done ? "Marked" : "Unmarked"} ${n} ${n === 1 ? "task" : "tasks"} ${viewLabel}`, () => {
+      cs.forEach((c) => checks.setDone(c, !done));
+      prevTasks.forEach(([id, p]) => update("tasks", id, p));
+    });
+  };
+  const openCount = viewTasks.checks.filter((c) => !c.done).length + viewTasks.tasks.filter((x) => !x.done).length;
+  const doneCount = viewTasks.checks.length + viewTasks.tasks.length - openCount;
 
   const onOcc = (o: Occurrence) => {
     if (o.event) setOpenEvent({ id: o.event.id, date: o.date });
@@ -484,6 +516,24 @@ export default function CalendarPage() {
             ]}
             className="mr-1"
           />
+          <button
+            className="btn btn-line disabled:opacity-40"
+            disabled={openCount === 0}
+            aria-label="Mark all done"
+            onClick={() => markAll(true)}
+            title={`Tick every task and homework check ${viewLabel}`}
+          >
+            <CheckCheck size={15} /> <span className="hidden md:inline">Mark all done</span>
+          </button>
+          <button
+            className="btn btn-line mr-1 disabled:opacity-40"
+            disabled={doneCount === 0}
+            aria-label="Mark all not done"
+            onClick={() => markAll(false)}
+            title={`Untick every task and homework check ${viewLabel}`}
+          >
+            <RotateCcw size={14} /> <span className="hidden md:inline">Mark all not done</span>
+          </button>
           <button aria-label="Previous" className="btn btn-ghost px-1.5" onClick={() => step(-1)}>
             <ChevronLeft size={17} />
           </button>
