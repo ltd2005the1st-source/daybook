@@ -490,9 +490,11 @@ body.cal-dragging * {
     transform: translateX(-3px);
   }
 
-  /* Ticks: a soft ring shows where the click will land. */
+  /* Ticks: the edge darkens where the click will land. Drawn exactly over the box's own
+     border (outline offset = minus the border width), so it never adds a second ring. */
   [role="checkbox"]:hover:not([aria-checked="true"]) {
-    box-shadow: 0 0 0 4px var(--hover);
+    outline: 1.5px solid var(--ink-2);
+    outline-offset: -1.5px;
   }
 
   /* Clickable cards float up. */
