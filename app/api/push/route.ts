@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import webpush from "web-push";
+import * as webpushModule from "web-push";
+
+// web-push is CommonJS: once bundled for Netlify the default import comes through as undefined, so take whichever form exists.
+const webpush = ((webpushModule as unknown as { default?: typeof webpushModule }).default ?? webpushModule) as typeof webpushModule;
 import { userFromRequest } from "@/lib/server";
 
 export const runtime = "nodejs";
