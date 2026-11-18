@@ -14,6 +14,7 @@ import { FoodSection, isFood } from "@/components/food";
 import { sec } from "@/lib/motion";
 import { fixedFor } from "@/lib/fixed";
 import { FixedCard } from "@/components/fixed";
+import { Money } from "@/components/rolling";
 
 
 export default function MoneyPage() {
@@ -76,14 +77,14 @@ export default function MoneyPage() {
       {/* The month as one ledger line */}
       <div className="mb-8 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-line bg-line">
         {[
-          { l: "Came in", v: income, sub: teaching ? `${vnd(teaching, { compact: true })} from teaching` : undefined },
-          { l: "Went out", v: -spent, sub: fixedTotal ? `${vnd(fixedTotal, { compact: true })} monthly fixed` : undefined },
+          { l: "Came in", v: income, sub: teaching ? <><Money value={teaching} compact /> from teaching</> : undefined },
+          { l: "Went out", v: -spent, sub: fixedTotal ? <><Money value={fixedTotal} compact /> monthly fixed</> : undefined },
           { l: "Kept", v: income - spent, strong: true },
         ].map((x) => (
           <div key={x.l} className="bg-surface px-3 py-3 md:px-5 md:py-4">
             <div className="label">{x.l}</div>
             <div className={cx("num mt-1 text-[17px] md:text-[26px] font-semibold leading-tight", x.strong && (x.v >= 0 ? "text-good" : "text-pen"))}>
-              {vnd(x.v)}
+              <Money value={x.v} />
             </div>
             {x.sub && <div className="mt-0.5 text-[11.5px] text-muted">{x.sub}</div>}
           </div>
@@ -110,7 +111,7 @@ export default function MoneyPage() {
                       transition={{ duration: sec(0.6), ease: [0.65, 0, 0.35, 1] }}
                     />
                   </div>
-                  <span className="num w-[92px] text-right">{vnd(v)}</span>
+                  <Money value={v} className="num w-[92px] text-right" />
                 </div>
               ))}
             </div>
@@ -172,7 +173,7 @@ export default function MoneyPage() {
             {!unpaid.length && !receivables.length && <p className="text-[13.5px] text-muted">Nobody owes you anything.</p>}
             <div className="mt-2 flex justify-between text-[13px] font-semibold">
               <span>Total</span>
-              <span className="num">{vnd(unpaid.reduce((n, r) => n + r.amount, 0) + receivables.reduce((n, d) => n + d.amount, 0))}</span>
+              <Money value={unpaid.reduce((n, r) => n + r.amount, 0) + receivables.reduce((n, d) => n + d.amount, 0)} className="num" />
             </div>
           </Section>
 

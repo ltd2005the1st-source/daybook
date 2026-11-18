@@ -8,6 +8,7 @@ import { fmtMonth, monthOf, shiftMonth, today } from "@/lib/dates";
 import { cx, parseAmount, vnd } from "@/lib/format";
 import { dayIn, fixedFor, fixedKey, type FixedItem } from "@/lib/fixed";
 import { EXPENSE_CATEGORIES, type Transaction } from "@/lib/types";
+import { Money } from "@/components/rolling";
 
 const ordinal = (n: number) => {
   const s = n % 100 >= 11 && n % 100 <= 13 ? "th" : (["th", "st", "nd", "rd"][n % 10] ?? "th");
@@ -54,7 +55,7 @@ export function FixedCard({ month, className }: { month: string; className?: str
       {items.length > 0 && (
         <div className="mt-2 flex justify-between text-[13px] font-semibold">
           <span>Total a month</span>
-          <span className="num">{vnd(total)}</span>
+          <Money value={total} className="num" />
         </div>
       )}
       <FixedSheet item={open} month={month} onClose={() => setOpen(null)} />

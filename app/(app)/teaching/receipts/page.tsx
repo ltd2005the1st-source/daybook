@@ -7,6 +7,7 @@ import { Dot, Page, PageHeader, Section, Tick } from "@/components/ui";
 import { fmtDay, fmtMonth, monthOf, shiftMonth, today } from "@/lib/dates";
 import { cx, parseAmount, vnd } from "@/lib/format";
 import { plannedRemaining, taughtIn } from "@/lib/teaching";
+import { Money } from "@/components/rolling";
 
 export default function ReceiptsPage() {
   const { store, insert, update, remove } = useData();
@@ -73,7 +74,7 @@ export default function ReceiptsPage() {
                   value={adj[s.id] ?? ""}
                   onChange={(e) => setAdj({ ...adj, [s.id]: e.target.value })}
                 />
-                <div className="num w-32 text-right text-[16px] font-semibold">{vnd(total)}</div>
+                <div className="num w-32 text-right text-[16px] font-semibold"><Money value={total} /></div>
                 {existing ? (
                   <Link href={`/teaching/receipts/${existing.id}`} className="btn btn-line w-28 justify-center">
                     Open

@@ -649,3 +649,26 @@ body.cal-dragging.cal-copying * {
     outline-offset: -1px;
   }
 }
+
+/* Rolling money figures (components/rolling.tsx): each digit is a 0–9 wheel that slides. */
+.roll {
+  white-space: nowrap;
+}
+.roll-cell {
+  position: relative;
+  display: inline-block;
+  clip-path: inset(0);
+}
+.roll-wheel {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1000%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  transition: transform calc(0.7s / var(--speed)) var(--ease);
+}
+.roll-wheel > span {
+  display: block;
+  flex: 1 1 0;
+}
