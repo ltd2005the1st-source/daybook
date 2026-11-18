@@ -99,7 +99,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <MusicProvider>
     <div className="min-h-dvh md:flex">
       {/* Sidebar (desktop) */}
-      <aside className="no-print hidden md:flex w-[232px] shrink-0 flex-col border-r border-line bg-sunken sticky top-0 h-[calc(100dvh-var(--dock,0px))] px-2.5 py-3 transition-[height] duration-300 ease-in-out">
+      <aside className="no-print hidden md:flex w-[186px] shrink-0 flex-col border-r border-line bg-sunken sticky top-0 h-[calc(100dvh-var(--dock,0px))] px-2.5 py-3 transition-[height] duration-300 ease-in-out">
         <Link href="/" className="flex items-center gap-2 px-2 py-1.5 mb-3">
           <img src="/icon.svg" alt="" className="h-6 w-6 rounded-[6px]" />
           <span className="display text-[17px] font-semibold">Daybook</span>
