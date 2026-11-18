@@ -204,7 +204,7 @@ export default function CalendarPage() {
       const nav = document.querySelector<HTMLElement>("[data-bottom-nav]");
       const navH = nav && getComputedStyle(nav).display !== "none" ? nav.offsetHeight : 0;
       const dock = document.querySelector<HTMLElement>("[data-music-dock]");
-      const dockH = dock && !desktopNow() ? dock.offsetHeight + 8 : 0;
+      const dockH = dock ? dock.offsetHeight : 0;
       const bottomGap = mobile ? 10 : 16;
       setGridH(Math.max(200, window.innerHeight - sc.getBoundingClientRect().top - navH - dockH - bottomGap));
     };
