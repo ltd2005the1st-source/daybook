@@ -61,6 +61,8 @@ export default function SettingsPage() {
   const [name, setName] = useState("");
   const [push, setPush] = useState<"unsupported" | "off" | "on" | "denied">("off");
   const [busy, setBusy] = useState(false);
+  // What happened the last time you turned reminders on or sent a test, kept on screen (a pop-up is too easy to miss).
+  const [pushNote, setPushNote] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
     try {
@@ -70,37 +72,110 @@ export default function SettingsPage() {
       setPush("unsupported");
       return;
     }
-    if (Notification.permission === "denied") setPush("denied");
-    navigator.serviceWorker.ready.then((r) => r.pushManager.getSubscription()).then((s) => s && setPush("on"));
+    if (Notification.permission === "denied") {
+      setPush("denied");
+      return;
+    }
+    navigator.serviceWorker.ready
+      .then((r) => r.pushManager.getSubscription())
+      .then((s) => s && Notification.permission === "granted" && setPush("on"))
+      .catch(() => {});
   }, []);
 
   const authHeaders = { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` };
 
-  async function enablePush() {
+  /** The service worker that shows notifications. Gives up after a few seconds instead of waiting forever. */
+  async function worker() {
+    const reg = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<null>((r) => setTimeout(() => r(null), 6000)),
+    ]);
+    if (!reg) throw new Error("The background helper that shows notifications didn’t start. Close Daybook completely, open it again and retry.");
+    return reg;
+  }
+
+  /** Subscribes this device (with the server's current key) and saves it on the server. */
+  async function subscribe() {
     const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-    if (!key) return toast("Add NEXT_PUBLIC_VAPID_PUBLIC_KEY to the server settings first.");
+    if (!key) throw new Error("The app is missing its push key (NEXT_PUBLIC_VAPID_PUBLIC_KEY) on Netlify.");
+    const reg = await worker();
+    const want = b64ToUint8(key);
+    let sub = await reg.pushManager.getSubscription();
+    // A subscription made with an older key can never receive anything, so replace it.
+    const have = sub?.options.applicationServerKey ? new Uint8Array(sub.options.applicationServerKey) : null;
+    if (sub && (!have || have.length !== want.length || have.some((v, i) => v !== want[i]))) {
+      await sub.unsubscribe().catch(() => {});
+      sub = null;
+    }
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: want });
+    const res = await fetch("/api/push", { method: "POST", headers: authHeaders, body: JSON.stringify({ subscription: sub.toJSON() }) });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `The server said ${res.status}.`);
+    return sub;
+  }
+
+  async function enablePush() {
     setBusy(true);
+    setPushNote(null);
     try {
       const perm = await Notification.requestPermission();
       if (perm !== "granted") {
         setPush("denied");
         return;
       }
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToUint8(key) });
-      const res = await fetch("/api/push", { method: "POST", headers: authHeaders, body: JSON.stringify({ subscription: sub.toJSON() }) });
-      if (!res.ok) throw new Error((await res.json()).error);
+      await subscribe();
       setPush("on");
-      toast("Reminders are on for this device");
+      setPushNote({ ok: true, text: "Reminders are on for this device. Send a test to check." });
     } catch (e) {
-      toast(`Couldn’t turn on reminders: ${(e as Error).message}`);
+      setPushNote({ ok: false, text: `Couldn’t turn on reminders: ${(e as Error).message}` });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendTest() {
+    setBusy(true);
+    setPushNote(null);
+    try {
+      if (Notification.permission !== "granted") {
+        setPush("denied");
+        return;
+      }
+      // Make sure this exact device is saved on the server (and re-save it if it went missing), then send to it.
+      const sub = await subscribe();
+      const res = await fetch("/api/push", { method: "PUT", headers: authHeaders, body: JSON.stringify({ endpoint: sub.endpoint }) });
+      const out = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        registered?: boolean;
+        results?: { ok: boolean; status?: number; error?: string }[];
+      };
+      if (!res.ok) throw new Error(out.error ?? `The server said ${res.status}.`);
+      if (out.registered === false) throw new Error("This device isn’t saved on the server. Turn reminders off and on again.");
+      const r = out.results?.[0];
+      if (!out.ok) {
+        const why =
+          r?.status === 403 || r?.status === 401
+            ? "the push service rejected the server’s keys (VAPID). The keys on Netlify don’t match each other."
+            : r?.status === 404 || r?.status === 410
+              ? "this device’s registration expired. Tap Turn on reminders again."
+              : `${r?.status ? `error ${r.status}: ` : ""}${r?.error ?? "unknown error"}`;
+        throw new Error(`The test couldn’t be delivered: ${why}`);
+      }
+      setPushNote({
+        ok: true,
+        text: "Test sent. It should appear within a few seconds. If it doesn’t, notifications for Daybook are switched off in your phone’s settings (see below).",
+      });
+    } catch (e) {
+      setPushNote({ ok: false, text: (e as Error).message });
     } finally {
       setBusy(false);
     }
   }
 
   async function disablePush() {
-    const reg = await navigator.serviceWorker.ready;
+    setPushNote(null);
+    const reg = await worker().catch(() => null);
+    if (!reg) return setPush("off");
     const sub = await reg.pushManager.getSubscription();
     if (sub) {
       await fetch("/api/push", { method: "DELETE", headers: authHeaders, body: JSON.stringify({ endpoint: sub.endpoint }) });
@@ -144,14 +219,17 @@ export default function SettingsPage() {
             This browser can’t receive push reminders. On iPhone, open Daybook in Safari, tap Share → Add to Home Screen, then open it from the home screen and come back here.
           </p>
         ) : push === "denied" ? (
-          <p className="text-[13.5px] text-pen">Notifications are blocked for this site. Allow them in the browser’s site settings, then reload.</p>
+          <p className="text-[13.5px] text-pen">
+            Notifications are blocked. In the Android app: phone Settings → Apps → Daybook → Notifications → allow. In a browser: the site’s settings →
+            Notifications → Allow. Then close and reopen Daybook.
+          </p>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
             {push === "on" ? (
               <>
                 <span className="text-[13.5px] text-good">On for this device.</span>
-                <button className="btn btn-line" onClick={() => fetch("/api/push", { method: "PUT", headers: authHeaders }).then(() => toast("Test sent"))}>
-                  <Bell size={15} /> Send a test
+                <button className="btn btn-line" disabled={busy} onClick={sendTest}>
+                  <Bell size={15} /> {busy ? "Sending…" : "Send a test"}
                 </button>
                 <button className="btn btn-ghost" onClick={disablePush}>
                   Turn off
@@ -163,6 +241,17 @@ export default function SettingsPage() {
               </button>
             )}
           </div>
+        )}
+        {pushNote && (
+          <p role="status" className={cx("mt-2 rounded-md px-2.5 py-1.5 text-[13px]", pushNote.ok ? "bg-hover text-ink-2" : "bg-pen-soft text-pen")}>
+            {pushNote.text}
+          </p>
+        )}
+        {online && push !== "unsupported" && (
+          <p className="mt-2 text-[12px] text-muted">
+            Nothing arriving on Android? Open your phone’s Settings → Apps → Daybook → Notifications and make sure they’re allowed (in the browser, it’s the
+            site’s notification setting).
+          </p>
         )}
         <div className="mt-4">
           <div className="label mb-1.5">Today’s reminders</div>
