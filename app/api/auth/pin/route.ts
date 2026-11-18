@@ -15,7 +15,7 @@ import {
   usernameOf,
 } from "@/lib/pin-auth";
 import { userFromRequest } from "@/lib/server";
-import { isShowcase, ownerOf, refreshShowcase } from "@/lib/showcase";
+import { isShowcase, ownerOf, refreshShowcase, SHOWCASE_VERSION } from "@/lib/showcase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -165,7 +165,7 @@ async function change(req: Request, body: Record<string, unknown>) {
 
 /**
  * The owner makes (or refreshes) the public "tester" account with a copy of their data.
- * mode "ensure" only makes it when it doesn't exist yet; "refresh" always replaces its copy.
+ * mode "ensure" only makes it when it doesn't exist yet (or is from an older version); "refresh" always replaces its copy.
  */
 async function showcase(req: Request, body: Record<string, unknown>) {
   const auth = await userFromRequest(req);
@@ -173,7 +173,8 @@ async function showcase(req: Request, body: Record<string, unknown>) {
   const users = await allUsers();
   const owner = await ownerOf(users);
   if (!owner || owner.id !== auth.user.id) return no("Only the owner can do this.", 403);
-  if (body.mode === "ensure" && users.some(isShowcase)) return NextResponse.json({ ok: true, made: false });
+  const current = users.find(isShowcase);
+  if (body.mode === "ensure" && current && Number(current.app_metadata?.showcase_version ?? 1) >= SHOWCASE_VERSION) return NextResponse.json({ ok: true, made: false });
   const counts = await refreshShowcase(owner.id);
   return NextResponse.json({ ok: true, made: true, counts });
 }
