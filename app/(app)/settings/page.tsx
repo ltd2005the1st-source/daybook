@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Bell, Download, Upload } from "lucide-react";
 import { ChangePin } from "@/components/change-pin";
+import { Showcase } from "@/components/showcase";
 import { useData } from "@/components/data";
 import { ConfirmButton, Field, Page, PageHeader, Section } from "@/components/ui";
 import { remindersFor, fmtAt } from "@/lib/reminders";
@@ -222,9 +223,14 @@ export default function SettingsPage() {
         </Field>
         {online && session && (
           <Field label={`Signed in as ${(session.user.app_metadata?.username as string | undefined) ?? session.user.email}`}>
-            <ChangePin />
+            {session.user.app_metadata?.showcase ? (
+              <p className="text-[13px] text-muted">This is the public showcase account. Its PIN stays 0000.</p>
+            ) : (
+              <ChangePin />
+            )}
           </Field>
         )}
+        {online && session && !session.user.app_metadata?.showcase && <Showcase />}
       </Section>
 
       <Section title="Reminders on this device">

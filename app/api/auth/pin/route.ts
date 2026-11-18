@@ -15,6 +15,7 @@ import {
   usernameOf,
 } from "@/lib/pin-auth";
 import { userFromRequest } from "@/lib/server";
+import { isShowcase, ownerOf, refreshShowcase } from "@/lib/showcase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,6 +51,8 @@ export async function POST(req: Request) {
         return await convert(body);
       case "change":
         return await change(req, body);
+      case "showcase":
+        return await showcase(req, body);
       default:
         return no("Unknown action.");
     }
@@ -68,11 +71,13 @@ async function signIn(body: Record<string, unknown>) {
     await slow();
     return no("Wrong username or PIN.", 401);
   }
-  const locked = lockedFor(user);
+  const demo = isShowcase(user); // the public "tester" account: PIN is no secret, so no lockout
+  const locked = demo ? 0 : lockedFor(user);
   if (locked) return no(lockMessage(locked), 429);
   const session = await sessionFor(user.email, pinPassword(user.id, pin));
   if (!session) {
     await slow();
+    if (demo) return no("Wrong username or PIN.", 401);
     const { left, lockedMin } = await recordMiss(user);
     if (lockedMin) return no(lockMessage(lockedMin), 429);
     return no(left <= 2 ? `Wrong username or PIN. ${left} ${left === 1 ? "try" : "tries"} left before a short lock.` : "Wrong username or PIN.", 401);
@@ -142,6 +147,7 @@ async function change(req: Request, body: Record<string, unknown>) {
   const { data } = await admin().auth.admin.getUserById(auth.user.id);
   const user = data.user;
   if (!user?.email) return no("Account not found.", 404);
+  if (isShowcase(user)) return no("The tester account’s PIN stays 0000 so anyone can open it.", 403);
   const locked = lockedFor(user);
   if (locked) return no(lockMessage(locked), 429);
   if (!(await sessionFor(user.email, pinPassword(user.id, current)))) {
@@ -155,4 +161,19 @@ async function change(req: Request, body: Record<string, unknown>) {
   });
   if (error) return no(error.message, 500);
   return NextResponse.json({ ok: true });
+}
+
+/**
+ * The owner makes (or refreshes) the public "tester" account with a copy of their data.
+ * mode "ensure" only makes it when it doesn't exist yet; "refresh" always replaces its copy.
+ */
+async function showcase(req: Request, body: Record<string, unknown>) {
+  const auth = await userFromRequest(req);
+  if (!auth) return no("Sign in first.", 401);
+  const users = await allUsers();
+  const owner = await ownerOf(users);
+  if (!owner || owner.id !== auth.user.id) return no("Only the owner can do this.", 403);
+  if (body.mode === "ensure" && users.some(isShowcase)) return NextResponse.json({ ok: true, made: false });
+  const counts = await refreshShowcase(owner.id);
+  return NextResponse.json({ ok: true, made: true, counts });
 }
