@@ -31,6 +31,29 @@ const isBar = (o: Pick<Occurrence, "kind">) => o.kind === "check" || o.kind === 
 
 type View = "week" | "month" | "year";
 
+/** The how-to, tucked behind a small "?" instead of taking room under the calendar. */
+function CalendarHelp() {
+  return (
+    <span className="group relative inline-flex">
+      <button
+        type="button"
+        aria-label="How the calendar works"
+        className="press inline-flex h-5 w-5 items-center justify-center rounded-full border border-line text-[11px] font-semibold text-muted hover:text-ink focus-visible:text-ink"
+      >
+        ?
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute left-0 top-full z-30 mt-2 w-[300px] translate-y-1 rounded-lg border border-line bg-surface p-3 text-[12.5px] leading-relaxed text-ink-2 opacity-0 shadow-pop transition-[opacity,transform] duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+      >
+        Drag an event to move it, or drag its bottom edge to change the length. Right-click (long-press on a phone) to change the colour. Drag across empty
+        space to add an event. Slim bars are tasks and homework checks; drag them to another time. Point at an event and press ⌘C, then ⌘V where you want a
+        copy.
+      </span>
+    </span>
+  );
+}
+
 function useIsMobile() {
   const [m, setM] = useState(false);
   useEffect(() => {
@@ -165,7 +188,7 @@ export default function CalendarPage() {
   }, []);
 
   // In the week view the header never moves: the page itself doesn't scroll, only the time grid does.
-  const caption = useRef<HTMLParagraphElement>(null);
+  const header = useRef<HTMLDivElement>(null);
   const [gridH, setGridH] = useState<number | null>(null);
   useLayoutEffect(() => {
     if (view !== "week") return;
@@ -180,15 +203,14 @@ export default function CalendarPage() {
       if (!sc) return;
       const nav = document.querySelector<HTMLElement>("[data-bottom-nav]");
       const navH = nav && getComputedStyle(nav).display !== "none" ? nav.offsetHeight : 0;
-      const capH = caption.current ? caption.current.offsetHeight + 8 : 0;
       const dock = document.querySelector<HTMLElement>("[data-music-dock]");
       const dockH = dock && !desktopNow() ? dock.offsetHeight + 8 : 0;
-      const bottomGap = mobile ? 10 : 24;
-      setGridH(Math.max(200, window.innerHeight - sc.getBoundingClientRect().top - capH - navH - dockH - bottomGap));
+      const bottomGap = mobile ? 10 : 16;
+      setGridH(Math.max(200, window.innerHeight - sc.getBoundingClientRect().top - navH - dockH - bottomGap));
     };
     fit();
     const ro = new ResizeObserver(fit);
-    if (caption.current) ro.observe(caption.current);
+    if (header.current) ro.observe(header.current);
     window.addEventListener("resize", fit);
     window.addEventListener("daybook:dock", fit);
     window.visualViewport?.addEventListener("resize", fit);
@@ -499,13 +521,16 @@ export default function CalendarPage() {
   };
 
   return (
-    <Page wide>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <div className="label mb-1">Calendar</div>
-          <h1 className="display text-[30px] md:text-[38px] font-semibold leading-[1.05]">{title}</h1>
+    <Page wide tight>
+      {/* One compact row, so the calendar itself gets the height. */}
+      <div ref={header} className="mb-2.5 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
+        <div className="flex flex-1 items-center gap-2 md:flex-none">
+          <h1 className="display text-[22px] md:text-[24px] font-semibold leading-none">{title}</h1>
+          <CalendarHelp />
         </div>
-        <div className="flex flex-wrap items-center gap-1">
+        {/* On a phone: title and day arrows on one row, view switch and actions on the next. */}
+        <div className="contents md:flex md:flex-wrap md:items-center md:gap-1">
+          <div aria-hidden className="order-2 h-0 basis-full md:hidden" />
           <Segmented
             value={view}
             onChange={setView}
@@ -514,10 +539,10 @@ export default function CalendarPage() {
               { value: "month", label: "Month" },
               { value: "year", label: "Year" },
             ]}
-            className="mr-1"
+            className="order-3 mr-1 md:order-none"
           />
           <button
-            className="btn btn-line disabled:opacity-40"
+            className="btn btn-line order-3 disabled:opacity-40 md:order-none"
             disabled={openCount === 0}
             aria-label="Mark all done"
             onClick={() => markAll(true)}
@@ -526,7 +551,7 @@ export default function CalendarPage() {
             <CheckCheck size={15} /> <span className="hidden md:inline">Mark all done</span>
           </button>
           <button
-            className="btn btn-line mr-1 disabled:opacity-40"
+            className="btn btn-line order-3 mr-1 disabled:opacity-40 md:order-none"
             disabled={doneCount === 0}
             aria-label="Mark all not done"
             onClick={() => markAll(false)}
@@ -534,16 +559,16 @@ export default function CalendarPage() {
           >
             <RotateCcw size={14} /> <span className="hidden md:inline">Mark all not done</span>
           </button>
-          <button aria-label="Previous" className="btn btn-ghost px-1.5" onClick={() => step(-1)}>
+          <button aria-label="Previous" className="btn btn-ghost order-1 px-1.5 md:order-none" onClick={() => step(-1)}>
             <ChevronLeft size={17} />
           </button>
-          <button className="btn btn-line" onClick={() => setAnchor(t)}>
+          <button className="btn btn-line order-1 md:order-none" onClick={() => setAnchor(t)}>
             Today
           </button>
-          <button aria-label="Next" className="btn btn-ghost px-1.5" onClick={() => step(1)}>
+          <button aria-label="Next" className="btn btn-ghost order-1 px-1.5 md:order-none" onClick={() => step(1)}>
             <ChevronRight size={17} />
           </button>
-          <button className="btn btn-primary ml-1" onClick={() => setNewAt({ date: anchor, start: "09:00" })}>
+          <button className="btn btn-primary order-3 ml-auto md:order-none md:ml-1" onClick={() => setNewAt({ date: anchor, start: "09:00" })}>
             <Plus size={15} /> Event
           </button>
         </div>
@@ -692,10 +717,6 @@ export default function CalendarPage() {
               </div>
             </div>
           </div>
-          <p ref={caption} className="mt-2 hidden text-[12px] text-muted md:block">
-            Drag an event to move it, drag its bottom edge to change the length, right-click to change the colour. Drag across empty space to add an event. Slim bars
-            are tasks and homework checks; drag them to another time. Point at an event and press ⌘C, then ⌘V where you want a copy.
-          </p>
         </>
       )}
 

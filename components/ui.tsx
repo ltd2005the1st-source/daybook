@@ -4,8 +4,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 import { cx } from "@/lib/format";
 
-export function Page({ children, wide }: { children: React.ReactNode; wide?: boolean }) {
-  return <div className={cx("mx-auto px-4 md:px-10 pt-5 md:pt-10", wide ? "max-w-[1240px]" : "max-w-[980px]")}>{children}</div>;
+export function Page({ children, wide, tight }: { children: React.ReactNode; wide?: boolean; tight?: boolean }) {
+  return (
+    <div className={cx("mx-auto px-4 md:px-10", tight ? "pt-3 md:pt-5" : "pt-5 md:pt-10", wide ? "max-w-[1240px]" : "max-w-[980px]")}>{children}</div>
+  );
 }
 
 export function PageHeader({
