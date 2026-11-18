@@ -1,0 +1,52 @@
+# Builds the Daybook Android app (a Trusted Web Activity that opens the live site).
+# Outputs are unsigned; they are signed offline with the private upload key,
+# which is never stored in this repository.
+name: Android app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, "claude/**"]
+    paths:
+      - "android/**"
+      - ".github/workflows/android.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build release APK and App Bundle
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease bundleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: daybook-android-unsigned
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+      # Unsigned files are also attached to a rolling pre-release so they can be
+      # fetched and signed offline. They cannot be installed until signed.
+      - name: Publish unsigned build to the android-unsigned pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/release/app-release-unsigned.apk dist/daybook-unsigned.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab dist/daybook-unsigned.aab
+          gh release delete android-unsigned --yes --cleanup-tag || true
+          gh release create android-unsigned dist/* --prerelease --target "$GITHUB_SHA" \
+            --title "Android build (unsigned, ${GITHUB_SHA::7})" \
+            --notes "Unsigned build from ${GITHUB_SHA}. Not installable until signed with the Daybook upload key."
