@@ -1,5 +1,8 @@
 "use client";
-import type { SVGProps } from "react";
+import { useEffect, useState, type SVGProps } from "react";
+import { ExternalLink } from "lucide-react";
+import { useData } from "./data";
+import { native } from "@/lib/native";
 
 /*
  * Shortcuts to the other apps Đạt lives in. These sites refuse to load inside another page, so
@@ -120,11 +123,41 @@ export const APPS: { id: string; label: string; href: string; icon: Icon }[] = [
   { id: "netlify", label: "Netlify", href: "https://app.netlify.com/teams/ltd2005the1st/projects", icon: Netlify },
 ];
 
+/**
+ * Opens every app, each in its own new tab. Browsers let one click open only one pop-up unless
+ * the site is allowed to open more, so we count the tabs that didn't open and say how to fix it.
+ * Hidden in the Android app, where every link leaves for another app and only one can.
+ */
+function useOpenAll() {
+  const { toast } = useData();
+  const [can, setCan] = useState(false);
+  useEffect(() => setCan(!native()), []);
+  const openAll = () => {
+    let blocked = 0;
+    for (const a of APPS) {
+      const w = window.open(a.href, "_blank");
+      if (w) w.opener = null;
+      else blocked++;
+    }
+    if (blocked === APPS.length) toast("Your browser blocked the new tabs. Allow pop-ups for Daybook (icon at the end of the address bar), then try again.");
+    else if (blocked) toast(`${blocked} of ${APPS.length} tabs were blocked. Allow pop-ups for Daybook, then try again.`);
+  };
+  return can ? openAll : null;
+}
+
 /** Sidebar list: same rows as the section menu, each opening its app in a new tab. */
 export function AppLinks() {
+  const openAll = useOpenAll();
   return (
     <div className="mt-4">
-      <div className="px-2.5 pb-1 text-[11.5px] font-medium text-muted">Apps</div>
+      <div className="flex items-center justify-between px-2.5 pb-1 text-[11.5px] font-medium text-muted">
+        <span>Apps</span>
+        {openAll && (
+          <button onClick={openAll} title="Open every app in its own tab" className="press rounded-md px-1.5 py-0.5 -mr-1.5 hover:bg-hover hover:text-ink">
+            Open all
+          </button>
+        )}
+      </div>
       <div className="flex flex-col gap-px">
         {APPS.map((a) => (
           <a
@@ -145,7 +178,9 @@ export function AppLinks() {
 
 /** Phone sheet: a grid of app tiles. Tapping one opens it and closes the sheet. */
 export function AppGrid({ onPick }: { onPick?: () => void }) {
+  const openAll = useOpenAll();
   return (
+    <>
     <div className="grid grid-cols-4 gap-x-2 gap-y-4 pt-2 pb-1">
       {APPS.map((a) => (
         <a
@@ -163,5 +198,17 @@ export function AppGrid({ onPick }: { onPick?: () => void }) {
         </a>
       ))}
     </div>
+    {openAll && (
+      <button
+        onClick={() => {
+          openAll();
+          onPick?.();
+        }}
+        className="btn btn-line mt-4 w-full justify-center"
+      >
+        <ExternalLink size={16} strokeWidth={1.8} /> Open all
+      </button>
+    )}
+    </>
   );
 }
