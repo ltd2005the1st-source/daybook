@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { CheckSquare, CornerDownLeft } from "lucide-react";
 import { useData } from "./data";
-import { NAV } from "./nav";
+import { NAV, sectionOf } from "./nav";
+import { scrollToSection } from "./scroll-spy";
 import { today } from "@/lib/dates";
 import { cx, fold } from "@/lib/format";
 import { describeTask, duplicateTask } from "@/lib/dupes";
@@ -28,7 +29,10 @@ export function Palette({ open, onClose }: { open: boolean; onClose: () => void 
   }, [open]);
 
   const go = (href: string) => () => {
-    router.push(href);
+    // On the dashboard, sections are a glide away; anything else is its own page.
+    const id = sectionOf(href);
+    if (id && document.querySelector("[data-dashboard]")) scrollToSection(id);
+    else router.push(href);
     onClose();
   };
   const nav: Item[] = [

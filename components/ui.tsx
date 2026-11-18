@@ -1,11 +1,24 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 import { cx } from "@/lib/format";
 import { sec } from "@/lib/motion";
 
+/** True inside the one-page dashboard, where every section shares the same left edge. */
+export const InDashboard = createContext(false);
+
 export function Page({ children, wide, tight }: { children: React.ReactNode; wide?: boolean; tight?: boolean }) {
+  const stacked = useContext(InDashboard);
+  if (stacked) {
+    // Same outer width for every section so the left edge never jumps as you scroll;
+    // narrower sections keep their comfortable line length inside it.
+    return (
+      <div className={cx("mx-auto max-w-[1240px] px-4 md:px-10", tight ? "pt-3 md:pt-5" : "pt-5 md:pt-8")}>
+        <div className={wide ? undefined : "max-w-[900px]"}>{children}</div>
+      </div>
+    );
+  }
   return (
     <div className={cx("mx-auto px-4 md:px-10", tight ? "pt-3 md:pt-5" : "pt-5 md:pt-10", wide ? "max-w-[1240px]" : "max-w-[980px]")}>{children}</div>
   );

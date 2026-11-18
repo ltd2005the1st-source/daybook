@@ -625,3 +625,25 @@ body.cal-dragging * {
     border-color: var(--line-strong);
   }
 }
+
+/* One-page dashboard: each section is a page-sized block with a hairline between them,
+   lined up with the content edge. */
+.dash-section {
+  padding-bottom: 2.75rem;
+}
+.dash-section + .dash-section::before {
+  content: "";
+  display: block;
+  height: 1px;
+  max-width: calc(1240px - 5rem);
+  margin-inline: 1rem;
+  background: var(--line);
+}
+@media (min-width: 768px) {
+  .dash-section {
+    padding-bottom: 3.5rem;
+  }
+  .dash-section + .dash-section::before {
+    margin-inline: max(2.5rem, calc((100% - 1240px) / 2 + 2.5rem));
+  }
+}
