@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Daybook mark: a white D with a dot, one colour for Android 13+ themed icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:pathData="M37,42v32h8a16,16 0,0 0,0 -32z"
+        android:strokeColor="#FFFFFF" android:strokeWidth="8.5" android:strokeLineJoin="round" />
+    <path android:pathData="M61,37a7,7 0,1 0,14 0a7,7 0,1 0,-14 0z" android:fillColor="#FFFFFF" />
+</vector>
