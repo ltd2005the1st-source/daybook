@@ -72,7 +72,7 @@ export function PinInput({
               key={i}
               className={cx(
                 "flex h-14 items-center justify-center rounded-lg border bg-surface transition-colors duration-200",
-                current ? "border-accent ring-2 ring-accent/20" : "border-line-strong",
+                current ? "border-ink-2" : "border-line-strong",
               )}
             >
               {filled && (
