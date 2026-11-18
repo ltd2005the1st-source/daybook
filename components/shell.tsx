@@ -45,6 +45,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { ready, needsLogin, online, toasts, dismissToast, signOut, session } = useData();
   const path = usePathname();
   const { theme, toggle } = useTheme();
+  // Which tab is open, and where the notch sits (it stays where it was while no tab is open).
+  const activeIdx = NAV.findIndex((n) => (n.href === "/" ? path === "/" : path.startsWith(n.href)));
+  const lastNotch = useRef(((Math.max(activeIdx, 0) + 0.5) / NAV.length) * 100);
+  if (activeIdx >= 0) lastNotch.current = ((activeIdx + 0.5) / NAV.length) * 100;
+  const notchAt = lastNotch.current;
   useSmoothWheel();
   const [paletteOpen, setPaletteOpen] = useState(false);
   // The top bar only shows its edge once the page has scrolled under it.
@@ -166,39 +171,60 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="min-w-0 flex-1 pb-[calc(7rem+var(--dock,0px))] md:pb-[calc(2.5rem+var(--dock,0px))]">
+      <main className="min-w-0 flex-1 pb-[calc(9rem+var(--dock,0px))] md:pb-[calc(2.5rem+var(--dock,0px))]">
         {ready ? children : <Loading />}
       </main>
 
-      {/* Mobile tab bar */}
-      <nav data-bottom-nav className="no-print md:hidden fixed inset-x-0 bottom-0 z-30 material-thick edge-top pb-[env(safe-area-inset-bottom)]">
-        <div className="grid" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
-          {NAV.map((n) => {
-            const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
-            return (
-              <Link
+      {/* Mobile tab bar: a floating pill. The active tab is a raised circle sitting in a round notch
+          cut into the bar; the circle and the notch glide together to whichever tab you pick. */}
+      <nav
+        data-bottom-nav
+        aria-label="Main"
+        className="no-print md:hidden pointer-events-none fixed inset-x-0 bottom-0 z-30 px-3 pt-[26px] pb-[max(env(safe-area-inset-bottom),12px)]"
+      >
+        <div
+          className="tabbar pointer-events-auto relative mx-auto h-16 max-w-[440px]"
+          style={{ ["--notch" as string]: `${notchAt}%`, ["--notch-r" as string]: activeIdx >= 0 ? "34px" : "0px" }}
+        >
+          <div className="tabbar-pill absolute inset-0 rounded-[26px] border border-line dark:border-[var(--hairline)] bg-surface" />
+          <div
+            aria-hidden
+            className={cx("tabbar-dot absolute left-0 top-[48px] h-1 w-1 rounded-full bg-accent", activeIdx < 0 && "opacity-0")}
+          />
+          <div className="relative grid h-full" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
+            {NAV.map((n, i) => {
+              const active = i === activeIdx;
+              return (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  aria-label={n.label}
+                  title={n.label}
+                  aria-current={active ? "page" : undefined}
+                  className="press flex min-w-0 items-center justify-center rounded-2xl"
+                >
+                  <n.icon
+                    size={22}
+                    strokeWidth={1.7}
+                    className={cx("tabbar-icon", active ? "scale-50 opacity-0" : "text-muted")}
+                  />
+                </Link>
+              );
+            })}
+          </div>
+          <div
+            aria-hidden
+            className={cx("tabbar-circle pointer-events-none absolute top-[-22px] h-[52px] w-[52px] rounded-full bg-accent text-surface", activeIdx < 0 && "scale-50 opacity-0")}
+          >
+            {NAV.map((n, i) => (
+              <n.icon
                 key={n.href}
-                href={n.href}
-                aria-current={active ? "page" : undefined}
-                className={cx(
-                  "press flex min-w-0 flex-col items-center gap-[3px] pt-2 pb-1.5 text-[10px] tracking-[0.01em]",
-                  active ? "text-ink font-semibold" : "text-muted",
-                )}
-              >
-                <span className="relative flex h-7 w-12 max-w-full items-center justify-center">
-                  {active && (
-                    <motion.span
-                      layoutId="tab-active"
-                      className="absolute inset-0 rounded-full bg-accent-soft"
-                      transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }}
-                    />
-                  )}
-                  <n.icon size={20} strokeWidth={active ? 2.1 : 1.7} className={cx("relative", active && "text-accent")} />
-                </span>
-                <span className="max-w-full truncate">{n.label}</span>
-              </Link>
-            );
-          })}
+                size={23}
+                strokeWidth={2}
+                className={cx("tabbar-glyph absolute left-1/2 top-1/2 -ml-[11.5px] -mt-[11.5px]", i === activeIdx ? "opacity-100" : "scale-50 opacity-0")}
+              />
+            ))}
+          </div>
         </div>
       </nav>
 
