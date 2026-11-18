@@ -70,3 +70,21 @@ From then on, every change pushed to GitHub redeploys the site by itself in a mi
 - All times are Vietnam time (UTC+7). Money is whole VND; "200k", "1.5tr" and "1,200,000" all work.
 - Makeups left are a number you set yourself with −/+ on each student. The app never changes it.
 - Google Calendar sync is not in v1. Daybook keeps its own calendar.
+
+## Android app
+
+`android/` is a Trusted Web Activity: a small Android app that opens the live site
+(https://mydeardaybook.netlify.app) full screen, with no browser bar. It uses Chrome
+underneath, so sign-in, offline cache and push reminders work the same as the website.
+App changes ship by deploying the website; the Android app only needs a new build
+when its icon, name, colours or package settings change.
+
+- Package name: `app.netlify.mydeardaybook`
+- Build: the **Android app** GitHub Action builds unsigned `.apk` and `.aab` files.
+- Signing: done offline with the upload key, which is kept out of git
+  (project files, `daybook-android-key/`). Never commit a keystore.
+- `public/.well-known/assetlinks.json` must list the SHA-256 fingerprint of every key
+  that signs an installed copy: the upload key (sideloaded APK) and, once on Google
+  Play, the "App signing key" from Play Console → Test and release → App integrity.
+- To change version: bump `versionCode` / `versionName` in `android/app/build.gradle`
+  and `appVersionCode` / `appVersionName` in `android/twa-manifest.json`.
