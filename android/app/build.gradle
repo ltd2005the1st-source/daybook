@@ -55,7 +55,7 @@ android {
     namespace "app.netlify.mydeardaybook"
     defaultConfig {
         applicationId "app.netlify.mydeardaybook"
-        minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 36
         versionCode 1
         versionName "1.0.0"

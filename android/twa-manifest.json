@@ -35,7 +35,7 @@
   "isChromeOSOnly": false,
   "isMetaQuest": false,
   "fullScopeUrl": "https://mydeardaybook.netlify.app/",
-  "minSdkVersion": 21,
+  "minSdkVersion": 26,
   "orientation": "default",
   "fingerprints": [
     {
