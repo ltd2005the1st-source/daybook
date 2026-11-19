@@ -1,13 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque } from "next/font/google";
+import { Paytone_One, Work_Sans } from "next/font/google";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
-  subsets: ["latin", "vietnamese"],
-  variable: "--font-bricolage",
-  // Variable font with the optical-size axis, so big titles get the display cut and small text the text cut.
-  axes: ["opsz"],
-});
+// Retro print pairing: a fat rounded display face for titles and big numbers, a plain humanist sans for
+// everything you read. Both cover Vietnamese, so student names and task titles never fall back mid-word.
+const paytone = Paytone_One({ subsets: ["latin", "vietnamese"], weight: "400", variable: "--font-paytone" });
+const work = Work_Sans({ subsets: ["latin", "vietnamese"], variable: "--font-work" });
 
 export const metadata: Metadata = {
   title: "Daybook",
@@ -22,8 +20,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fbfbfa" },
-    { media: "(prefers-color-scheme: dark)", color: "#191918" },
+    { media: "(prefers-color-scheme: light)", color: "#f4ead5" },
+    { media: "(prefers-color-scheme: dark)", color: "#22150d" },
   ],
 };
 
@@ -32,7 +30,7 @@ const themeScript = `(function(){try{var t=localStorage.getItem('daybook.theme')
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={bricolage.variable} suppressHydrationWarning>
+    <html lang="en" className={`${paytone.variable} ${work.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

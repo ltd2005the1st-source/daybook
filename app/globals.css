@@ -3,37 +3,51 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* ---------------------------------------------------------------
-   Daybook tokens. Paper-and-ink neutrals (Notion's page grey, not cream),
-   graphite text, one ink-blue accent, and the red marking pen reserved
-   for things that need checking. Each student carries their own color,
-   lifted from your Google Calendar.
+   Daybook, retro print edition (early 1970s). Warm paper, chocolate
+   ink, burnt orange for the one thing to do next, harvest gold for
+   "you are here", avocado for done. Flat colour fields, chunky pills,
+   a four-colour stripe used sparingly. Each student keeps their own
+   colour from your Google Calendar.
 ---------------------------------------------------------------- */
 :root {
-  --bg: #fbfbfa;
-  --surface: #ffffff;
-  --sunken: #f4f4f2;
-  --hover: rgba(55, 53, 47, 0.06);
-  --ink: #26251f;
-  --ink-2: #57554d;
-  --muted: #8a877e;
-  --line: #e9e8e4;
-  --line-strong: #d9d7d1;
-  --accent: #2f4fb5;
-  --accent-soft: rgba(47, 79, 181, 0.09);
-  --pen: #c8412b;
-  --pen-soft: rgba(200, 65, 43, 0.09);
-  --good: #2e7a55;
-  --good-soft: rgba(46, 122, 85, 0.1);
-  /* Depth: a hairline contact shadow plus a soft ambient one. Bigger surfaces cast deeper shadows. */
-  --shadow: 0 0 0 0.5px rgba(15, 15, 10, 0.04), 0 1px 2px rgba(15, 15, 10, 0.05), 0 6px 16px -10px rgba(15, 15, 10, 0.14);
-  --shadow-pop: 0 0 0 0.5px rgba(15, 15, 10, 0.06), 0 4px 12px -2px rgba(15, 15, 10, 0.08), 0 32px 64px -20px rgba(15, 15, 10, 0.3);
-  /* Translucent material for floating chrome (bars, toasts). Content scrolls underneath. */
-  --material: rgba(251, 251, 250, 0.8);
-  --material-thick: rgba(251, 251, 250, 0.86);
-  --material-edge: rgba(255, 255, 255, 0.7);
-  --hairline: rgba(15, 15, 10, 0.08);
-  --scrim: rgba(20, 20, 15, 0.22);
-  --ring: color-mix(in oklab, var(--accent) 28%, transparent);
+  --bg: #f4ead5;
+  --surface: #fcf7ec;
+  --sunken: #eddfc4;
+  --hover: rgba(59, 35, 22, 0.07);
+  --ink: #3b2316;
+  --ink-2: #6b4a35;
+  --muted: #74553f;
+  --line: #e2d2b0;
+  --line-strong: #c9b28a;
+  --field-edge: #9c7f58;
+  --accent: #b23f17;
+  --accent-soft: rgba(178, 63, 23, 0.12);
+  --accent-lip: #7e2a0c;
+  --on-accent: #fcf7ec;
+  --pen: #a12b22;
+  --pen-soft: rgba(161, 43, 34, 0.1);
+  --good: #566819;
+  --good-soft: rgba(86, 104, 25, 0.13);
+  --gold: #e8a317;
+  --gold-soft: rgba(232, 163, 23, 0.22);
+  --stripe-1: #d9541e;
+  --stripe-2: #e8a317;
+  --stripe-3: #7a8a2a;
+  --stripe-4: #3b2316;
+  /* Chocolate panel used by the sidebar and the phone tab bar */
+  --panel: #3b2316;
+  --panel-2: #4a2e1d;
+  --panel-ink: #f4ead5;
+  --panel-muted: #c9b08c;
+  /* Flat print: no soft floating shadows, just a warm contact edge. Overlays get one deeper drop. */
+  --shadow: 0 1px 0 rgba(59, 35, 22, 0.08);
+  --shadow-pop: 0 2px 0 rgba(59, 35, 22, 0.12), 0 24px 48px -18px rgba(59, 35, 22, 0.45);
+  --material: var(--bg);
+  --material-thick: var(--surface);
+  --material-edge: transparent;
+  --hairline: rgba(59, 35, 22, 0.14);
+  --scrim: rgba(43, 25, 14, 0.42);
+  --ring: color-mix(in oklab, var(--accent) 35%, transparent);
   --ease: cubic-bezier(0.65, 0, 0.35, 1);
   /* How fast everything moves; 1 = original pace. Same value as SPEED in lib/motion.ts. */
   --speed: 1.5;
@@ -41,28 +55,38 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #191918;
-  --surface: #202020;
-  --sunken: #1d1d1c;
-  --hover: rgba(255, 255, 255, 0.055);
-  --ink: #ebe9e4;
-  --ink-2: #b9b6ad;
-  --muted: #8d897f;
-  --line: #2d2c2a;
-  --line-strong: #3a3936;
-  --accent: #8fa6f2;
-  --accent-soft: rgba(143, 166, 242, 0.12);
-  --pen: #f07a64;
-  --pen-soft: rgba(240, 122, 100, 0.12);
-  --good: #6cc597;
-  --good-soft: rgba(108, 197, 151, 0.12);
-  --shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 20px -12px rgba(0, 0, 0, 0.6);
-  --shadow-pop: 0 0 0 0.5px rgba(255, 255, 255, 0.07), 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 32px 64px -20px rgba(0, 0, 0, 0.75);
-  --material: rgba(25, 25, 24, 0.78);
-  --material-thick: rgba(30, 30, 29, 0.86);
-  --material-edge: rgba(255, 255, 255, 0.06);
-  --hairline: rgba(255, 255, 255, 0.08);
-  --scrim: rgba(0, 0, 0, 0.5);
+  --bg: #22150d;
+  --surface: #2e1d12;
+  --sunken: #1a0f08;
+  --hover: rgba(244, 234, 213, 0.07);
+  --ink: #f4ead5;
+  --ink-2: #d8c3a0;
+  --muted: #ae9576;
+  --line: #3e2a1c;
+  --line-strong: #5a4130;
+  --field-edge: #8a7055;
+  --accent: #f0874a;
+  --accent-soft: rgba(240, 135, 74, 0.14);
+  --accent-lip: #b5531c;
+  --on-accent: #22150d;
+  --pen: #f07a68;
+  --pen-soft: rgba(240, 122, 104, 0.13);
+  --good: #afc46a;
+  --good-soft: rgba(175, 196, 106, 0.13);
+  --gold: #edb040;
+  --gold-soft: rgba(237, 176, 64, 0.18);
+  --stripe-1: #d9541e;
+  --stripe-2: #e8a317;
+  --stripe-3: #8a9a33;
+  --stripe-4: #f4ead5;
+  --panel: #3a2415;
+  --panel-2: #4d311e;
+  --panel-ink: #f4ead5;
+  --panel-muted: #ae9576;
+  --shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  --shadow-pop: 0 2px 0 rgba(0, 0, 0, 0.35), 0 24px 48px -18px rgba(0, 0, 0, 0.8);
+  --hairline: rgba(244, 234, 213, 0.1);
+  --scrim: rgba(10, 5, 2, 0.6);
   color-scheme: dark;
 }
 
@@ -87,9 +111,14 @@
   --color-pen-soft: var(--pen-soft);
   --color-good: var(--good);
   --color-good-soft: var(--good-soft);
-  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-on-accent: var(--on-accent);
+  --color-panel: var(--panel);
+  --color-panel-ink: var(--panel-ink);
+  --font-display: var(--font-paytone), "Paytone One", ui-rounded, system-ui, sans-serif;
+  --font-sans: var(--font-work), "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-work), "Work Sans", ui-sans-serif, system-ui, sans-serif;
   --shadow-card: var(--shadow);
   --shadow-pop: var(--shadow-pop);
 }
@@ -102,11 +131,10 @@ body {
 
 body {
   font-family: var(--font-sans);
-  font-size: 14.5px;
+  font-size: 15px;
   line-height: 1.5;
-  /* Small text gets a touch of air; display sizes tighten (see .display). */
-  letter-spacing: 0.003em;
-  font-optical-sizing: auto;
+  letter-spacing: 0;
+  font-feature-settings: "ss01" off;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -114,7 +142,7 @@ body {
 }
 
 ::selection {
-  background: var(--accent-soft);
+  background: var(--gold-soft);
 }
 
 /* No glow or outer box around focused things: it gets clipped by sheets and scroll areas.
@@ -124,7 +152,7 @@ body {
   outline: none;
 }
 :is(a, button, [role="button"], [role="tab"], [role="checkbox"], summary):focus-visible {
-  box-shadow: inset 0 0 0 1.5px var(--ink-2);
+  box-shadow: inset 0 0 0 2px var(--accent);
 }
 input:focus-visible,
 textarea:focus-visible,
@@ -138,34 +166,35 @@ select:focus-visible {
   letter-spacing: 0;
 }
 
+/* Paytone One has one weight. Never let the browser fake a bold on top of it. */
 .display {
   font-family: var(--font-display);
-  font-optical-sizing: auto;
-  letter-spacing: -0.02em;
+  font-weight: 400 !important;
+  font-synthesis: none;
+  letter-spacing: 0;
 }
-/* Page titles: the largest type, so the tightest tracking and leading. */
+/* Page titles: big, tight, and given room above for Vietnamese marks. */
 .title {
-  letter-spacing: -0.028em;
-  line-height: 1.02;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
   text-wrap: balance;
 }
 
-/* Small caps label used for section eyebrows */
+/* Small label over a field or a group: plain sentence case, a little heavier than body. */
 .label {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--muted);
+  letter-spacing: 0;
+  color: var(--ink-2);
 }
 
 /* Inputs: quiet until focused, like Notion properties */
 .field {
   width: 100%;
   background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 7px 10px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 7px 11px;
   color: var(--ink);
   transition: border-color calc(0.15s / var(--speed)) var(--ease), background calc(0.15s / var(--speed)) var(--ease), box-shadow calc(0.2s / var(--speed)) var(--ease);
 }
@@ -174,7 +203,7 @@ select:focus-visible {
 }
 .field:focus {
   outline: none;
-  border-color: var(--ink-2);
+  border-color: var(--accent);
   background: var(--surface);
 }
 .field::placeholder {
@@ -185,33 +214,37 @@ select:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border-radius: 8px;
-  padding: 6px 11px;
-  font-weight: 500;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-weight: 600;
   font-size: 13.5px;
-  letter-spacing: 0.005em;
+  letter-spacing: 0;
   /* Release eases back; the press itself is instant (below). */
   transition: background calc(0.15s / var(--speed)) var(--ease), transform calc(0.22s / var(--speed)) var(--ease), color calc(0.15s / var(--speed)) var(--ease), box-shadow calc(0.15s / var(--speed)) var(--ease);
   white-space: nowrap;
   touch-action: manipulation;
 }
-/* Feedback on press, not on release: shrink a little the moment it's touched. */
+/* Feedback on press, not on release: the button drops 2px onto its lip the moment it's touched. */
 .btn:active,
 .press:active {
-  transform: scale(0.96);
-  transition-duration: calc(0.06s / var(--speed));
+  transform: translateY(2px);
+  transition-duration: calc(0.04s / var(--speed));
 }
 .press {
   transition: transform calc(0.22s / var(--speed)) var(--ease), background-color calc(0.15s / var(--speed)) var(--ease), border-color calc(0.15s / var(--speed)) var(--ease), color calc(0.15s / var(--speed)) var(--ease);
   touch-action: manipulation;
 }
+/* The chunky burnt-orange pill sitting on a darker 2px lip. Pressing sinks it onto the lip. */
 .btn-primary {
-  background: var(--ink);
-  color: var(--bg);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(15, 15, 10, 0.18);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 2px 0 var(--accent-lip);
 }
 .btn-primary:hover {
-  background: color-mix(in oklab, var(--ink) 85%, var(--accent));
+  background: color-mix(in oklab, var(--accent) 88%, black);
+}
+.btn-primary:active {
+  box-shadow: 0 0 0 var(--accent-lip);
 }
 .btn-ghost {
   color: var(--ink-2);
@@ -221,7 +254,7 @@ select:focus-visible {
   color: var(--ink);
 }
 .btn-line {
-  border: 1px solid var(--line-strong);
+  border: 1.5px solid var(--ink);
   color: var(--ink);
 }
 .btn-line:hover {
@@ -230,8 +263,8 @@ select:focus-visible {
 
 .card {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
 }
 /* Layered so a shadow utility on a card (e.g. shadow-pop) still wins. */
 @layer components {
@@ -240,20 +273,16 @@ select:focus-visible {
   }
 }
 :root[data-theme="dark"] .card {
-  border-color: var(--hairline);
+  border-color: var(--line);
 }
 
 /* Translucent chrome: blurs and lifts what scrolls beneath it. A bright top edge catches the light. */
+/* Print has no frosted glass: chrome is solid paper. */
 .material {
   background: var(--material);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
 }
 .material-thick {
   background: var(--material-thick);
-  -webkit-backdrop-filter: blur(30px) saturate(190%);
-  backdrop-filter: blur(30px) saturate(190%);
-  box-shadow: inset 0 1px 0 var(--material-edge);
 }
 /* Scroll edge: a hairline only once content is actually passing underneath. */
 .edge-bottom {
@@ -261,7 +290,7 @@ select:focus-visible {
   transition: box-shadow calc(0.25s / var(--speed)) var(--ease);
 }
 .edge-bottom[data-scrolled] {
-  box-shadow: 0 0.5px 0 var(--hairline), 0 8px 16px -14px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 0 var(--hairline);
 }
 .edge-top {
   box-shadow: 0 -0.5px 0 var(--hairline), inset 0 0.5px 0 var(--material-edge);
@@ -483,18 +512,14 @@ body.cal-dragging.cal-copying * {
    Draggable calendar pieces are left alone so a drag never shrinks. */
 /* Kept at low specificity so .btn and .press keep their deeper 0.96 press. */
 :where(a, button, [role="button"]):where(:not(:disabled, .cal-block, [class*="cursor-grab"])):active {
-  transform: scale(0.98);
+  transform: translateY(1px);
   transition-duration: calc(0.06s / var(--speed));
 }
 
 @media (hover: hover) and (pointer: fine) {
   /* Buttons: primary lifts with a deeper shadow; outlined firms up its edge; icons grow slightly. */
-  .btn-primary:hover:not(:active) {
-    transform: translateY(-1px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 6px 14px -6px rgba(15, 15, 10, 0.35);
-  }
   .btn-line:hover {
-    border-color: var(--ink-2);
+    background: var(--gold-soft);
   }
   .btn:hover:not(:active) svg.lucide,
   .nav-item:hover svg.lucide {
@@ -518,8 +543,7 @@ body.cal-dragging.cal-copying * {
 
   /* Clickable cards float up. */
   :is(a, button).card:hover:not(:active) {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-pop);
+    border-color: var(--ink-2);
   }
 
   /* Sidebar rows slide their label a hair toward the content. */
@@ -587,7 +611,7 @@ body.cal-dragging.cal-copying * {
   container-type: inline-size;
   --glide: calc(0.42s / var(--speed));
   /* One soft shadow for the whole shape, notch included (a drop-shadow follows the cut-out). */
-  filter: drop-shadow(0 1px 2px rgba(15, 15, 10, 0.08)) drop-shadow(0 12px 22px rgba(15, 15, 10, 0.16));
+  filter: drop-shadow(0 10px 18px rgba(59, 35, 22, 0.28));
 }
 :root[data-theme="dark"] .tabbar {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55));
@@ -602,10 +626,10 @@ body.cal-dragging.cal-copying * {
 .tabbar-flat {
   width: 100cqw;
   flex: none;
-  background: var(--surface);
+  background: var(--panel);
 }
 .tabbar-fill {
-  fill: var(--surface);
+  fill: var(--panel);
   /* The path runs 2px past each side to overlap the flat pieces (hides the subpixel seam). */
   overflow: visible;
 }
@@ -624,7 +648,9 @@ body.cal-dragging.cal-copying * {
   will-change: transform;
 }
 .tabbar-circle {
-  box-shadow: 0 8px 16px -6px color-mix(in oklab, var(--accent) 60%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background: var(--gold);
+  color: #3b2316;
+  box-shadow: 0 3px 0 #a8730c;
   transition: opacity calc(0.25s / var(--speed)) var(--ease), transform calc(0.3s / var(--speed)) var(--ease);
 }
 .tabbar-dot {
@@ -634,9 +660,15 @@ body.cal-dragging.cal-copying * {
 .tabbar-glyph {
   transition: opacity calc(0.25s / var(--speed)) var(--ease), transform calc(0.3s / var(--speed)) var(--ease), color calc(0.2s / var(--speed)) var(--ease);
 }
+.tabbar .tabbar-icon {
+  color: var(--panel-muted);
+}
+.tabbar .tabbar-dot {
+  background: var(--gold);
+}
 @media (hover: hover) and (pointer: fine) {
   .tabbar a:hover .tabbar-icon:not(.opacity-0) {
-    color: var(--ink);
+    color: var(--panel-ink);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -673,4 +705,83 @@ body.cal-dragging.cal-copying * {
 .roll-wheel > span {
   display: block;
   flex: 1 1 0;
+}
+
+
+/* ---------------------------------------------------------------
+   Retro pieces
+---------------------------------------------------------------- */
+@layer components {
+/* The four-colour stripe band (orange, gold, avocado, chocolate). Used twice: the sidebar
+   masthead and the phone top bar. Nowhere else, so it stays a signature, not wallpaper. */
+.stripes {
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  height: 14px;
+  background: linear-gradient(
+    to bottom,
+    var(--stripe-1) 0 25%,
+    var(--stripe-2) 25% 50%,
+    var(--stripe-3) 50% 75%,
+    var(--stripe-4) 75% 100%
+  );
+}
+.stripes-v {
+  width: 14px;
+  background: linear-gradient(
+    to right,
+    var(--stripe-1) 0 25%,
+    var(--stripe-2) 25% 50%,
+    var(--stripe-3) 50% 75%,
+    var(--stripe-4) 75% 100%
+  );
+}
+}
+
+/* Sidebar: a chocolate panel, cream type, the open page sits in a harvest-gold pill. */
+.side {
+  background: var(--panel);
+  color: var(--panel-ink);
+}
+.side .nav-item {
+  color: var(--panel-muted);
+}
+.side .nav-item:hover {
+  background: var(--panel-2);
+  color: var(--panel-ink);
+}
+.side .nav-item[aria-current="true"] {
+  color: #3b2316;
+}
+.side :is(.text-muted, .text-ink-2) {
+  color: var(--panel-muted);
+}
+.side .text-ink {
+  color: var(--panel-ink);
+}
+.side .border-line {
+  border-color: var(--panel-2);
+}
+.side .bg-hover {
+  background: var(--panel-2);
+}
+.side :is(a, button):hover .text-muted {
+  color: var(--panel-ink);
+}
+.side :is(a, button, [role="button"]):focus-visible {
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+@layer components {
+/* A round sticker for "now" and other single live markers. */
+.sticker {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #3b2316;
+  font-weight: 700;
+  font-size: 10.5px;
+  padding: 1px 7px;
+}
 }

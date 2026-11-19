@@ -123,7 +123,7 @@ export function FoodSection({ month }: { month: string }) {
         {periods.map((days, i) => (
           <div
             key={i}
-            className={cx("rounded-lg border px-2.5 pb-2 pt-2.5 transition-colors duration-300", i === current ? "border-accent/50 bg-accent-soft" : "border-line")}
+            className={cx("rounded-2xl border-[1.5px] px-3 pb-2 pt-2.5 transition-colors duration-300", i === current ? "border-gold bg-gold-soft" : "border-line")}
           >
             <div className="label !text-[10.5px]">{periodLabel(days)}</div>
             <div className="num mt-0.5 text-[15px] md:text-[19px] font-semibold leading-tight"><Money value={totals[i]} compact /></div>
@@ -141,7 +141,7 @@ export function FoodSection({ month }: { month: string }) {
                     className="group relative flex h-full flex-1 items-end"
                   >
                     <motion.span
-                      className={cx("block w-full rounded-[2px]", d === t ? "bg-pen" : "bg-[#5B6FB5] group-hover:brightness-110")}
+                      className={cx("block w-full rounded-[2px]", d === t ? "bg-accent" : "bg-ink-2 group-hover:bg-ink")}
                       initial={false}
                       animate={{ height: v ? `${Math.max(8, (v / maxDay) * 100)}%` : "2px" }}
                       transition={{ duration: sec(0.4), ease: EASE }}
