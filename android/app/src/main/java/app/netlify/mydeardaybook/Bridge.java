@@ -91,6 +91,12 @@ public class Bridge {
         activity.runOnUiThread(() -> activity.applyBars(dark));
     }
 
+    /** The page says whether a swipe down from the top may reload (see MainActivity.PULL_JS). */
+    @JavascriptInterface
+    public void pullAllowed(boolean ok) {
+        activity.pullAllowed(ok);
+    }
+
     @JavascriptInterface
     public void reload() {
         activity.runOnUiThread(activity::reload);

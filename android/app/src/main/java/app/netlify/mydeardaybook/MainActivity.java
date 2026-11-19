@@ -33,6 +33,7 @@ public class MainActivity extends Activity {
     static final String EXTRA_PATH = "path";
 
     private WebView web;
+    private PullRefresh pull;
     private FrameLayout root;
     private ValueCallback<Uri[]> pendingFiles;
     private boolean dark;
@@ -45,7 +46,9 @@ public class MainActivity extends Activity {
 
         root = new FrameLayout(this);
         web = new WebView(this);
-        root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        pull = new PullRefresh(this, web);
+        pull.setListener(this::refresh);
+        root.addView(pull, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
         applyBars(dark);
 
@@ -136,6 +139,7 @@ public class MainActivity extends Activity {
     /** Matches the system bars to the page's light or dark theme. */
     void applyBars(boolean isDark) {
         dark = isDark;
+        if (pull != null) pull.setDark(isDark);
         int page = isDark ? Color.parseColor("#191918") : Color.parseColor("#FBFBFA");
         root.setBackgroundColor(page);
         getWindow().getDecorView().setBackgroundColor(page);
@@ -157,6 +161,36 @@ public class MainActivity extends Activity {
     void reload() {
         web.loadUrl(BuildConfig.SITE + "/");
     }
+
+    /** Swipe down from the top: reload the page you're on (or Daybook's home from the offline page). */
+    private void refresh() {
+        String url = web.getUrl();
+        if (url == null || url.startsWith(BuildConfig.SITE + "/offline")) reload();
+        else web.reload();
+        // Never leave the spinner going if the page hangs.
+        web.removeCallbacks(stopPull);
+        web.postDelayed(stopPull, 15000);
+    }
+
+    private final Runnable stopPull = () -> pull.done();
+
+    void pullAllowed(boolean ok) {
+        pull.setPageAllows(ok);
+    }
+
+    // On each touch the page says whether a pull may start: only when the page is at the top, no
+    // sheet or pop-up is open, no calendar drag is going on, and the finger isn't on a panel that
+    // is itself scrolled down.
+    private static final String PULL_JS =
+        "(function(){if(window.__dbPull||!window.DaybookAndroid)return;window.__dbPull=1;" +
+        "function ok(t){var d=document.scrollingElement||document.documentElement;if(d.scrollTop>0)return false;" +
+        "var b=document.body;if(!b||b.classList.contains('cal-dragging'))return false;" +
+        "if(document.querySelector('[data-scroll-contain],.fixed.inset-0'))return false;" +
+        "for(var el=t instanceof Element?t:null;el&&el!==b&&el!==document.documentElement;el=el.parentElement){" +
+        "if(el.scrollTop>0){var oy=getComputedStyle(el).overflowY;if(oy==='auto'||oy==='scroll')return false;}}return true;}" +
+        "addEventListener('touchstart',function(e){DaybookAndroid.pullAllowed(e.touches.length===1&&ok(e.target))},{capture:true,passive:true});" +
+        "new MutationObserver(function(){if(document.body.classList.contains('cal-dragging'))DaybookAndroid.pullAllowed(false)})" +
+        ".observe(document.body,{attributes:true,attributeFilter:['class']});})()";
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
@@ -184,7 +218,14 @@ public class MainActivity extends Activity {
         }
 
         @Override
+        public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+            pull.resetPage();
+        }
+
+        @Override
         public void onPageFinished(WebView view, String url) {
+            pull.done();
+            view.evaluateJavascript(PULL_JS, null);
             // Follow the page's light/dark switch so the status bar always matches.
             view.evaluateJavascript(
                 "(function(){var h=document.documentElement;var f=function(){window.DaybookAndroid&&DaybookAndroid.setDark(h.dataset.theme==='dark')};" +
