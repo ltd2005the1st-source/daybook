@@ -166,17 +166,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <AppLinks />
         </div>
         <div className="mt-auto flex flex-col gap-px">
-          <button onClick={() => setAskOpen(true)} className="btn btn-ghost justify-between">
-            <span className="flex items-center gap-2.5">
-              <Sparkles size={16} strokeWidth={1.8} /> Ask Claude
-            </span>
+          <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+            <Sparkles size={16} strokeWidth={1.8} />
+            <span className="flex-1 text-left">Ask Claude</span>
             <kbd className="num text-[10.5px] text-muted">⌘J</kbd>
           </button>
-          <button onClick={toggle} className="btn btn-ghost">
+          <button onClick={toggle} className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             {theme === "dark" ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}
             {theme === "dark" ? "Light mode" : "Dark mode"}
           </button>
-          <Link href="/settings" className="btn btn-ghost">
+          <Link href="/settings" className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <PanelRightOpen size={16} strokeWidth={1.8} /> Settings
           </Link>
           <div className="px-2.5 pt-2 text-[11.5px] text-muted leading-snug">
