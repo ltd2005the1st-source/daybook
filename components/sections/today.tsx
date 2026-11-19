@@ -13,7 +13,7 @@ import { useMarkLesson } from "@/components/register";
 import { Dot, Page, Section, Tick } from "@/components/ui";
 import { addDays, fmtDay, minutes, MONTHS, monthOf, parseDate, startOfWeek, today, WD_LONG } from "@/lib/dates";
 import { cx } from "@/lib/format";
-import { agendaOn, checkTasksOn, makeupsOwed, taughtIn, type Occurrence } from "@/lib/teaching";
+import { agendaOn, checkTasksOn, makeupsOwed, mergeChecks, taughtIn, type Occurrence } from "@/lib/teaching";
 import type { Task } from "@/lib/types";
 import { sec } from "@/lib/motion";
 import { Money } from "@/components/rolling";
@@ -69,7 +69,7 @@ export default function TodayPage() {
   const tomorrow = agendaOn(store, addDays(t, 1)).filter((o) => o.kind === "lesson");
   const checks = agenda.filter((o) => o.kind === "check");
   const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
-  const checkTasks = checkTasksOn(store, t).filter((c) => !c.done);
+  const checkTasks = mergeChecks(checkTasksOn(store, t).filter((c) => !c.done));
   // Show a repeated check note only on the soonest check for that student.
   const sameNote = repeatedNotes(checkTasks);
   const tasks = store.tasks.filter((x) => !x.done && !x.student_id && x.due_on && x.due_on <= t).sort((a, b) => Number(b.priority) - Number(a.priority));

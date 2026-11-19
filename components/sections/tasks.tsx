@@ -12,7 +12,7 @@ import { addDays, relDay, today, weekday } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import { sec } from "@/lib/motion";
 import { describeTask, duplicateTask } from "@/lib/dupes";
-import { checkTasksBetween, type CheckTask } from "@/lib/teaching";
+import { checkTasksThisWeek, mergeChecks, type CheckTask } from "@/lib/teaching";
 import type { Task } from "@/lib/types";
 
 /** A time at the end of the text: "3pm", "9:30am", "15:00", "15h", "15h30", optionally after "at". */
@@ -99,7 +99,8 @@ export default function TasksPage() {
   const folds = useFolds();
 
   const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
-  const checks = checkTasksBetween(store, t, 8).filter((c) => !c.done);
+  // Only this week's checks, and one item per student however many classes it covers.
+  const checks = mergeChecks(checkTasksThisWeek(store, t).filter((c) => !c.done));
   const lists = useMemo(
     () => ["All", ...Array.from(new Set(["Personal", "Work", ...store.tasks.map((x) => x.list), ...(checks.length ? ["Teaching"] : [])]))],
     [store.tasks, checks.length],

@@ -10,7 +10,7 @@ import { MakeupStepper, StudentSheet, STUDENT_COLORS } from "@/components/studen
 import { Dot, Field, Page, PageHeader, Section, Segmented, Sheet, Tick } from "@/components/ui";
 import { fmtMonth, monthOf, relDay, shiftMonth, today } from "@/lib/dates";
 import { parseAmount, vnd } from "@/lib/format";
-import { checkTasksBetween, makeupsOwed, nextLesson, taughtIn } from "@/lib/teaching";
+import { checkTasksThisWeek, makeupsOwed, mergeChecks, nextLesson, taughtIn } from "@/lib/teaching";
 import type { Student } from "@/lib/types";
 import { Money } from "@/components/rolling";
 
@@ -36,7 +36,7 @@ export default function TeachingPage() {
     .filter((x) => x.items.length)
     .sort((a, b) => (a.next?.date ?? "9").localeCompare(b.next?.date ?? "9"));
 
-  const checks = checkTasksBetween(store, t, 7).filter((c) => !c.done);
+  const checks = mergeChecks(checkTasksThisWeek(store, t).filter((c) => !c.done));
   // Show a repeated check note only on the soonest check for that student.
   const sameNote = repeatedNotes(checks);
   const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
@@ -89,7 +89,7 @@ export default function TeachingPage() {
 
         <aside>
           <Section title="Homework checks">
-            {checks.length === 0 && <p className="text-[13.5px] text-muted">No classes in the next week, so no checks.</p>}
+            {checks.length === 0 && <p className="text-[13.5px] text-muted">No checks left this week.</p>}
             <div className="row-list flex flex-col overflow-x-clip">
               <AnimatePresence initial={false}>
                 {checks.map((c) => (

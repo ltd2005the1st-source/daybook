@@ -115,6 +115,12 @@ const nightLabel = (date: string) => {
 const tidyNote = (text: string | null | undefined) =>
   text?.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim()).join("\n") || "";
 
+/** "tomorrow", "sat 21 nov & sun 22 nov": the classes a (merged) check covers. */
+const classLabel = (dates: string[]) => {
+  const ds = dates.map((d) => relDay(d).toLowerCase().replace(",", ""));
+  return ds.length > 1 ? `${ds.slice(0, -1).join(", ")} & ${ds[ds.length - 1]}` : ds[0];
+};
+
 /**
  * Checks in a list whose note just repeats one shown earlier for the same student.
  * The soonest check keeps the note; later ones show only title and date.
@@ -138,7 +144,8 @@ export function repeatedNotes(checks: CheckTask[]): Set<string> {
 export function CheckRow({ c, onOpen, compact, hideNote }: { c: CheckTask; onOpen: () => void; compact?: boolean; hideNote?: boolean }) {
   const { setDone } = useCheckActions();
   const task = { id: c.key, title: `Check ${c.student.name}`, done: c.done };
-  const done = useCompleteTask(task, (v) => setDone(c, v));
+  const all = [c, ...(c.also ?? [])];
+  const done = useCompleteTask(task, (v) => all.forEach((x) => setDone(x, v)));
   const note = hideNote ? "" : tidyNote(c.contents);
   return (
     <motion.div
@@ -163,7 +170,7 @@ export function CheckRow({ c, onOpen, compact, hideNote }: { c: CheckTask; onOpe
             <span>
               {nightLabel(c.date)} · <span className="num">{c.time}</span>
             </span>
-            <span>class {relDay(c.classDate).toLowerCase()}</span>
+            <span>class {classLabel(all.map((x) => x.classDate))}</span>
             {c.homework.length > 0 && <span className="text-pen">{c.homework.length} homework open</span>}
           </div>
         </div>
