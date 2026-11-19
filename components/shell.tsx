@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useData } from "./data";
-import { AppGrid, AppLinks } from "./apps";
+import { AppGrid, AppLinks, AppsEditor } from "./apps";
 import { Sheet } from "./ui";
 import { Login } from "./login";
 import { Palette } from "./palette";
@@ -64,6 +64,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [askOpen, setAskOpen] = useState(false);
   const [appsOpen, setAppsOpen] = useState(false);
+  const [editApps, setEditApps] = useState(false);
   const [askSeed, setAskSeed] = useState<string | null>(null);
   const toggleAsk = useCallback(() => setAskOpen((v) => !v), []);
   useAssistantShortcut(toggleAsk);
@@ -163,7 +164,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <AppLinks />
+        <AppLinks onEdit={() => setEditApps(true)} />
         </div>
         <div className="mt-auto flex flex-col gap-px">
           <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
@@ -295,8 +296,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
         }}
       />
       <Sheet open={appsOpen} onClose={() => setAppsOpen(false)} title="Apps" width={420}>
-        <AppGrid onPick={() => setAppsOpen(false)} />
+        <AppGrid
+          onPick={() => setAppsOpen(false)}
+          onEdit={() => {
+            setAppsOpen(false);
+            setEditApps(true);
+          }}
+        />
       </Sheet>
+      <AppsEditor open={editApps} onClose={() => setEditApps(false)} />
       <Assistant open={askOpen} onClose={() => setAskOpen(false)} seed={askSeed} onSeedUsed={() => setAskSeed(null)} />
       <MusicDock />
 
