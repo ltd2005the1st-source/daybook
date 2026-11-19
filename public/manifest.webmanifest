@@ -3,8 +3,8 @@
   "short_name": "Daybook",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fbfbfa",
-  "theme_color": "#26251f",
+  "background_color": "#f4ead5",
+  "theme_color": "#3b2316",
   "icons": [
     {
       "src": "/icon.svg",
