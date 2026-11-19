@@ -1,4 +1,4 @@
-import { addDays, daysInMonth, minutes, parseDate, weekday } from "./dates";
+import { addDays, daysInMonth, minutes, parseDate, startOfWeek, weekday } from "./dates";
 import type { CalEvent, Homework, Lesson, Store, Student, Task } from "./types";
 
 export type DayMark = "taught" | "missed_owe" | "cancelled" | "planned" | "none";
@@ -113,6 +113,8 @@ export type CheckTask = {
   contents: string | null;
   done: boolean;
   homework: Homework[];
+  /** Later checks for the same student folded into this one by mergeChecks. */
+  also?: CheckTask[];
 };
 
 /** A check's own text if you changed just this one, otherwise the student's usual text. */
@@ -162,6 +164,32 @@ export function checkTasksOn(store: Store, date: string): CheckTask[] {
 /** Check tasks from `from` for `days` days. */
 export function checkTasksBetween(store: Store, from: string, days: number): CheckTask[] {
   return Array.from({ length: days }, (_, i) => checkTasksOn(store, addDays(from, i))).flat();
+}
+
+/** Check tasks from `from` to the end of its week (Sunday). */
+export function checkTasksThisWeek(store: Store, from: string): CheckTask[] {
+  return checkTasksBetween(store, from, daysBetween(from, addDays(startOfWeek(from), 6)) + 1);
+}
+
+/**
+ * One item per student: the soonest check carries the later ones in `also`,
+ * so "Check Weekend Class" shows once with every class it covers.
+ */
+export function mergeChecks(checks: CheckTask[]): CheckTask[] {
+  const byStudent = new Map<string, CheckTask>();
+  const out: CheckTask[] = [];
+  [...checks]
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+    .forEach((c) => {
+      const first = byStudent.get(c.student.id);
+      if (first) first.also!.push(c);
+      else {
+        const head = { ...c, also: [] };
+        byStudent.set(c.student.id, head);
+        out.push(head);
+      }
+    });
+  return out;
 }
 
 /** Checks as calendar items: slim blocks at their time. */
