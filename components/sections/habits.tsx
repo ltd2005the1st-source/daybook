@@ -196,7 +196,7 @@ function Sleep({ h }: { h: Habit }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-hover px-2 py-2">
+    <div className="rounded-xl bg-hover px-2 py-2">
       <div className="num text-[16px] font-semibold">{value}</div>
       <div className="text-[11px] text-muted">{label}</div>
     </div>
@@ -306,7 +306,7 @@ function Exercise({ h }: { h: Habit }) {
                 type="button"
                 key={a}
                 onClick={() => setActivity(a)}
-                className={cx("rounded-full border px-2.5 py-0.5 text-[12.5px]", activity === a ? "border-ink bg-ink text-bg" : "border-line text-ink-2 hover:bg-hover")}
+                className={cx("rounded-xl border px-2.5 py-0.5 text-[12.5px]", activity === a ? "border-ink bg-ink text-bg" : "border-line text-ink-2 hover:bg-hover")}
               >
                 {a}
               </button>

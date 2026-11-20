@@ -123,7 +123,7 @@ export function FoodSection({ month }: { month: string }) {
         {periods.map((days, i) => (
           <div
             key={i}
-            className={cx("rounded-lg border px-2.5 pb-2 pt-2.5 transition-colors duration-300", i === current ? "border-accent/50 bg-accent-soft" : "border-line")}
+            className={cx("rounded-xl border px-2.5 pb-2 pt-2.5 transition-colors duration-300", i === current ? "border-accent/50 bg-accent-soft" : "border-line")}
           >
             <div className="label !text-[10.5px]">{periodLabel(days)}</div>
             <div className="num mt-0.5 text-[15px] md:text-[19px] font-semibold leading-tight"><Money value={totals[i]} compact /></div>

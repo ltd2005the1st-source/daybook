@@ -106,7 +106,7 @@ export function Sheet({
             exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
             transition={{ duration: sec(0.34), ease: [0.65, 0, 0.35, 1] }}
             style={{ maxWidth: width, transformOrigin: "50% 100%" }}
-            className="relative w-full max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-[28px] md:rounded-[26px] glass-thick pb-[env(safe-area-inset-bottom)]"
+            className="relative w-full max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-xl md:rounded-xl glass-thick pb-[env(safe-area-inset-bottom)]"
           >
             <div className="sticky top-0 z-10 flex items-center justify-between px-5 pt-4 pb-2">
               <h3 className="display text-[20px] font-semibold">{title}</h3>
@@ -227,19 +227,19 @@ export function Segmented<T extends string>({
   // One id per control, so two copies of the same options on screen never share (and hide) one pill.
   const pillId = useId();
   return (
-    <div className={cx("inline-flex rounded-full bg-hover p-[3px]", className)}>
+    <div className={cx("inline-flex rounded-xl bg-hover p-[3px]", className)}>
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
           className={cx(
-            "press relative rounded-full px-3 py-1 text-[13px]",
+            "press relative rounded-xl px-3 py-1 text-[13px]",
             value === o.value ? "text-ink font-medium" : "text-muted hover:text-ink",
           )}
         >
           {value === o.value && (
-            <motion.span layoutId={`seg-${pillId}`} className="absolute inset-0 rounded-full glass-pill" transition={{ duration: sec(0.32), ease: [0.65, 0, 0.35, 1] }} />
+            <motion.span layoutId={`seg-${pillId}`} className="absolute inset-0 rounded-xl glass-pill" transition={{ duration: sec(0.32), ease: [0.65, 0, 0.35, 1] }} />
           )}
           <span className="relative">{o.label}</span>
         </button>

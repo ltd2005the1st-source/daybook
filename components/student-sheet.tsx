@@ -201,7 +201,7 @@ function ScheduleTab({ s }: { s: Student }) {
                           update("students", s.id, { availability: cur });
                         }}
                         className={cx(
-                          "h-8 w-full min-w-9 rounded-md border text-[11px] transition-colors",
+                          "h-8 w-full min-w-9 rounded-xl border text-[11px] transition-colors",
                           free && !meBusy && "bg-good-soft border-good/40 text-good font-semibold",
                           free && meBusy && "bg-hover border-line text-muted line-through",
                           !free && "border-line hover:bg-hover",
@@ -320,7 +320,7 @@ export function MakeupStepper({ s, compact }: { s: Student; compact?: boolean })
     update("students", s.id, { makeup_baseline: Math.max(0, Math.max(0, cur) + d) });
   };
   return (
-    <div className={cx("inline-flex items-center rounded-md border border-line", compact && "text-[12px]")} onClick={(e) => e.stopPropagation()}>
+    <div className={cx("inline-flex items-center rounded-xl border border-line", compact && "text-[12px]")} onClick={(e) => e.stopPropagation()}>
       <button type="button" aria-label="One fewer makeup" className={cx("text-ink-2 hover:bg-hover", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => step(-1)}>
         −
       </button>

@@ -53,7 +53,7 @@ function CalendarHelp() {
       </button>
       <span
         role="tooltip"
-        className="pointer-events-none absolute left-1/2 top-full z-30 mt-2 w-[min(300px,calc(100vw-2rem))] -translate-x-1/2 translate-y-1 rounded-[16px] glass-thick p-3 text-[12.5px] leading-relaxed text-ink-2 opacity-0 shadow-pop transition-[opacity,transform] duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+        className="pointer-events-none absolute left-1/2 top-full z-30 mt-2 w-[min(300px,calc(100vw-2rem))] -translate-x-1/2 translate-y-1 rounded-xl glass-thick p-3 text-[12.5px] leading-relaxed text-ink-2 opacity-0 shadow-pop transition-[opacity,transform] duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
       >
         Drag an event to move it, or drag its bottom edge to change the length. Right-click (long-press on a phone) to change the colour. Drag across empty
         space to add an event. Slim bars are tasks and homework checks; drag them to another time. Point at an event and press ⌘C, then ⌘V where you want a
@@ -614,7 +614,7 @@ export default function CalendarPage() {
             transition={{ duration: sec(0.3), ease: EASE }}
             className="overflow-hidden"
           >
-            <div className="mb-3 flex items-center gap-2 rounded-lg border border-accent/40 bg-accent-soft px-3 py-2 text-[13px]">
+            <div className="mb-3 flex items-center gap-2 rounded-xl border border-accent/40 bg-accent-soft px-3 py-2 text-[13px]">
               <ClipboardPaste size={15} className="text-accent" />
               <span className="min-w-0 flex-1">
                 Pasting <b>{clip.e.title}</b>. {view === "week" ? (mobile ? "Tap a time." : "Click a time.") : "Pick a day."}
@@ -644,7 +644,7 @@ export default function CalendarPage() {
                 const sel = d === anchor;
                 const n = agendaOn(store, d).length;
                 return (
-                  <button key={d} onClick={() => setAnchor(d)} className={cx("flex flex-col items-center rounded-lg py-1.5", sel ? "bg-ink text-bg" : "hover:bg-hover")}>
+                  <button key={d} onClick={() => setAnchor(d)} className={cx("flex flex-col items-center rounded-xl py-1.5", sel ? "bg-ink text-bg" : "hover:bg-hover")}>
                     <span className={cx("text-[10.5px]", sel ? "opacity-80" : "text-muted")}>{WD_SHORT[parseDate(d).getDay()]}</span>
                     <span className={cx("num text-[15px] font-semibold", d === t && !sel && "text-accent")}>{parseDate(d).getDate()}</span>
                     <span className={cx("mt-0.5 h-1 w-1 rounded-full", n ? (sel ? "bg-bg" : "bg-muted") : "bg-transparent")} />
@@ -762,7 +762,7 @@ export default function CalendarPage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: sec(0.3), ease: EASE }}
-              className="relative w-full max-w-[340px] rounded-[24px] glass-thick p-4"
+              className="relative w-full max-w-[340px] rounded-xl glass-thick p-4"
             >
               <div className="display mb-1 text-[17px] font-semibold">{scopeText(pending.o).head}</div>
               <p className="mb-3 text-[13px] text-ink-2">
@@ -792,7 +792,7 @@ export default function CalendarPage() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: sec(0.12) }}
-            className="absolute w-[236px] rounded-[20px] glass-thick p-3"
+            className="absolute w-[236px] rounded-xl glass-thick p-3"
             style={{ left: Math.min(colorMenu.x, window.innerWidth - 248), top: Math.min(colorMenu.y, window.innerHeight - 190) }}
             onClick={(e) => e.stopPropagation()}
           >

@@ -71,7 +71,7 @@ export function PinInput({
             <div
               key={i}
               className={cx(
-                "flex h-14 items-center justify-center rounded-lg border bg-surface transition-colors duration-200",
+                "flex h-14 items-center justify-center rounded-xl border bg-surface transition-colors duration-200",
                 current ? "border-ink-2" : "border-line-strong",
               )}
             >

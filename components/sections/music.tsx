@@ -69,7 +69,7 @@ export default function MusicPage() {
       </PageHeader>
 
       <form onSubmit={add} className="mb-2">
-        <div className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-1 focus-within:border-ink-2">
+        <div className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-1 focus-within:border-ink-2">
           <Plus size={17} className="text-muted" />
           <input
             className="min-w-0 flex-1 bg-transparent py-2 text-[15px] outline-none focus-visible:outline-none placeholder:text-muted"
@@ -120,7 +120,7 @@ function Card({ m, playing, onPlay }: { m: MusicItem; playing: boolean; onPlay: 
       transition={{ duration: sec(0.3), ease: EASE }}
       className="group min-w-0"
     >
-      <button type="button" onClick={onPlay} className="relative block aspect-square w-full overflow-hidden rounded-lg bg-sunken text-left" aria-label={`Play ${m.title}`}>
+      <button type="button" onClick={onPlay} className="relative block aspect-square w-full overflow-hidden rounded-xl bg-sunken text-left" aria-label={`Play ${m.title}`}>
         {m.image ? (
           <img src={m.image} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
         ) : (
@@ -151,7 +151,7 @@ function Card({ m, playing, onPlay }: { m: MusicItem; playing: boolean; onPlay: 
               else if (v !== m.title) update("music", m.id, { title: v });
             }}
             className={cx(
-              "-mx-1 w-full truncate rounded px-1 text-[14px] font-semibold leading-snug outline-none transition-colors duration-200 hover:bg-hover focus:bg-hover bg-transparent",
+              "-mx-1 w-full truncate rounded-xl px-1 text-[14px] font-semibold leading-snug outline-none transition-colors duration-200 hover:bg-hover focus:bg-hover bg-transparent",
               playing && "text-accent",
             )}
           />
@@ -162,14 +162,14 @@ function Card({ m, playing, onPlay }: { m: MusicItem; playing: boolean; onPlay: 
           target="_blank"
           rel="noreferrer"
           aria-label="Open in Spotify"
-          className="rounded-md p-1 text-muted opacity-0 transition-opacity duration-200 hover:text-ink group-hover:opacity-100 max-md:opacity-60"
+          className="rounded-xl p-1 text-muted opacity-0 transition-opacity duration-200 hover:text-ink group-hover:opacity-100 max-md:opacity-60"
         >
           <ExternalLink size={14} />
         </a>
         <button
           type="button"
           aria-label={`Remove ${m.title}`}
-          className="rounded-md p-1 text-muted opacity-0 transition-opacity duration-200 hover:text-pen group-hover:opacity-100 max-md:opacity-60"
+          className="rounded-xl p-1 text-muted opacity-0 transition-opacity duration-200 hover:text-pen group-hover:opacity-100 max-md:opacity-60"
           onClick={() => {
             if (current?.id === m.id) stop();
             remove("music", m.id);

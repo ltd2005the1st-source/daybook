@@ -330,7 +330,7 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
       <div className="flex items-center gap-1 px-2.5 pb-1 text-[11.5px] font-medium text-muted">
         <span className="flex-1">Apps</span>
         {openAll && (
-          <button onClick={openAll} title="Open every app in its own tab" className="press rounded-md px-1.5 py-0.5 hover:bg-hover hover:text-ink">
+          <button onClick={openAll} title="Open every app in its own tab" className="press rounded-xl px-1.5 py-0.5 hover:bg-hover hover:text-ink">
             Open all
           </button>
         )}
@@ -338,7 +338,7 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
           onClick={onEdit}
           aria-label="Edit apps"
           title="Edit apps"
-          className="press -mr-1.5 inline-flex h-[22px] w-[22px] items-center justify-center rounded-md opacity-60 hover:bg-hover hover:text-ink hover:opacity-100 group-hover/apps:opacity-100 focus-visible:opacity-100"
+          className="press -mr-1.5 inline-flex h-[22px] w-[22px] items-center justify-center rounded-xl opacity-60 hover:bg-hover hover:text-ink hover:opacity-100 group-hover/apps:opacity-100 focus-visible:opacity-100"
         >
           <Pencil size={12} strokeWidth={2} />
         </button>
@@ -352,7 +352,7 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
               href={a.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink"
+              className="press nav-item flex items-center gap-2.5 rounded-xl px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink"
             >
               <Ico size={16} />
               <span className="truncate">{a.label}</span>
@@ -360,7 +360,7 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
           );
         })}
         {list.length === 0 && (
-          <button onClick={onEdit} className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-muted hover:bg-hover hover:text-ink">
+          <button onClick={onEdit} className="press nav-item flex items-center gap-2.5 rounded-xl px-2.5 py-[6px] text-[13.5px] text-muted hover:bg-hover hover:text-ink">
             <Plus size={16} strokeWidth={1.8} />
             <span>Add an app</span>
           </button>
@@ -389,7 +389,7 @@ export function AppGrid({ onPick, onEdit }: { onPick?: () => void; onEdit: () =>
                 onClick={onPick}
                 className="press flex min-w-0 flex-col items-center gap-1.5 text-[12px] text-ink-2"
               >
-                <span className="inline-flex h-14 w-14 items-center justify-center rounded-[16px] border border-line bg-sunken text-ink">
+                <span className="inline-flex h-14 w-14 items-center justify-center rounded-xl border border-line bg-sunken text-ink">
                   <Ico size={24} strokeWidth={1.7} />
                 </span>
                 <span className="max-w-full truncate">{a.label}</span>
@@ -530,11 +530,11 @@ function EditRow({
           e.preventDefault();
           controls.start(e);
         }}
-        className="inline-flex h-9 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted hover:text-ink active:cursor-grabbing"
+        className="inline-flex h-9 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-xl text-muted hover:text-ink active:cursor-grabbing"
       >
         <GripVertical size={16} strokeWidth={1.8} />
       </button>
-      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-line bg-sunken text-ink">
+      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-sunken text-ink">
         <Ico size={18} />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
