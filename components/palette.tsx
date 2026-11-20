@@ -87,7 +87,7 @@ export function Palette({ open, onClose, onAsk }: { open: boolean; onClose: () =
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: sec(0.26), ease: [0.65, 0, 0.35, 1] }}
-            className="relative w-full max-w-[540px] overflow-hidden rounded-2xl border border-line dark:border-[var(--hairline)] bg-surface shadow-pop"
+            className="relative w-full max-w-[540px] overflow-hidden rounded-[26px] glass-thick"
           >
             <input
               ref={ref}

@@ -90,7 +90,7 @@ export function Register({ month, students, onPickStudent }: { month: string; st
     <div className="card min-w-0 max-w-full" style={{ overflow: "clip" }}>
       <div
         ref={head}
-        className="sticky z-20 overflow-hidden rounded-t-[10px] bg-surface border-b border-line-strong shadow-[0_6px_12px_-10px_rgb(0_0_0/0.25)]"
+        className="sticky z-20 overflow-hidden rounded-t-[20px] bg-surface border-b border-line-strong shadow-[0_6px_12px_-10px_rgb(0_0_0/0.25)]"
         style={{ top: "var(--topbar, 0px)" }}
       >
           <div className="grid" style={{ gridTemplateColumns: cols, minWidth }}>

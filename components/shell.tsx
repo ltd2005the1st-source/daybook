@@ -123,19 +123,19 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <MotionConfig transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }} reducedMotion="user">
     <MusicProvider>
     <NativeSync />
-    <div className="min-h-dvh md:flex">
+    <div className="min-h-dvh md:flex md:gap-3 md:p-3">
       {/* Sidebar (desktop) */}
-      <aside className="no-print hidden md:flex w-[186px] shrink-0 flex-col border-r border-line bg-sunken sticky top-0 h-[calc(100dvh-var(--dock,0px))] px-2.5 py-3 transition-[height] duration-300 ease-in-out">
+      <aside className="no-print hidden md:flex w-[196px] shrink-0 flex-col glass rounded-[26px] sticky top-3 h-[calc(100dvh-24px-var(--dock,0px))] px-2.5 py-3 transition-[height] duration-300 ease-in-out">
         <Link href="/" className="flex items-center gap-2 px-2 py-1.5 mb-3">
           <img src="/icon.svg" alt="" className="h-6 w-6 rounded-[6px]" />
           <span className="display text-[17px] font-semibold">Daybook</span>
         </Link>
         <button
           onClick={() => setPaletteOpen(true)}
-          className="press mb-3 flex items-center justify-between rounded-lg border border-line bg-surface px-2.5 py-1.5 text-[13px] text-muted shadow-card hover:text-ink"
+          className="press mb-3 flex items-center justify-between rounded-full glass-pill px-3 py-1.5 text-[13px] text-muted hover:text-ink"
         >
           <span>Jump or add…</span>
-          <kbd className="num rounded-[5px] border border-line px-1 text-[10.5px] leading-[16px]">⌘K</kbd>
+          <kbd className="num rounded-full border border-line px-1.5 text-[10.5px] leading-[16px]">⌘K</kbd>
         </button>
         <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-3 [mask-image:linear-gradient(to_bottom,black_calc(100%-20px),transparent)]">
         <nav className="flex flex-col gap-px">
@@ -147,14 +147,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 href={n.href}
                 aria-current={active ? "true" : undefined}
                 className={cx(
-                  "press nav-item relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[14px]",
+                  "press nav-item relative flex items-center gap-2.5 rounded-[14px] px-2.5 py-[7px] text-[14px]",
                   active ? "text-ink font-medium" : "text-ink-2 hover:bg-hover hover:text-ink",
                 )}
               >
                 {active && (
                   <motion.span
                     layoutId="nav-active"
-                    className="absolute inset-0 rounded-lg bg-surface shadow-card"
+                    className="absolute inset-0 rounded-[14px] glass-pill"
                     transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }}
                   />
                 )}
@@ -167,16 +167,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <AppLinks onEdit={() => setEditApps(true)} />
         </div>
         <div className="mt-auto flex flex-col gap-px">
-          <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+          <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-[14px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <Sparkles size={16} strokeWidth={1.8} />
             <span className="flex-1 text-left">Ask Claude</span>
             <kbd className="num text-[10.5px] text-muted">⌘J</kbd>
           </button>
-          <button onClick={toggle} className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+          <button onClick={toggle} className="press nav-item flex items-center gap-2.5 rounded-[14px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             {theme === "dark" ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}
             {theme === "dark" ? "Light mode" : "Dark mode"}
           </button>
-          <Link href="/settings" className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+          <Link href="/settings" className="press nav-item flex items-center gap-2.5 rounded-[14px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <PanelRightOpen size={16} strokeWidth={1.8} /> Settings
           </Link>
           <div className="px-2.5 pt-2 text-[11.5px] text-muted leading-snug">
@@ -216,7 +216,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="min-w-0 flex-1 pb-[calc(9rem+var(--dock,0px))] md:pb-[calc(2.5rem+var(--dock,0px))]">
+      <main className="app-pane pane min-w-0 flex-1 pb-[calc(9rem+var(--dock,0px))] md:pb-[calc(2.5rem+var(--dock,0px))]">
         {ready ? children : <Loading />}
       </main>
 
@@ -231,27 +231,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
           className="tabbar pointer-events-auto relative mx-auto h-16 max-w-[440px]"
           style={{ ["--i" as string]: slotAt, ["--n" as string]: NAV.length }}
         >
-          {/* The bar's surface. A strip wider than the bar slides sideways (a GPU transform, no
-              repainting): flat surface, then a 100px piece with the round notch and softly rounded
-              shoulders, then more flat surface. The pill clips it to the bar's rounded shape. The notch
-              piece bleeds 2px over both flat pieces, so no hairline seam shows at fractional pixels. */}
+          {/* The bar's glass. A strip wider than the bar slides sideways (a GPU transform, no
+              repainting) and a fixed mask cuts the round notch with softly rounded shoulders into it
+              (see .tabbar-strip). The pill clips it to the bar's rounded shape. The patch fills the
+              notch with the same glass when no tab is open. */}
           <div className="tabbar-pill absolute inset-0 overflow-hidden rounded-[26px]" aria-hidden>
-            <div className="tabbar-strip absolute inset-y-0 left-0 flex">
-              <div className="tabbar-flat" />
-              <div className="relative h-full w-[100px] shrink-0">
-                <svg className="tabbar-fill absolute inset-0" width="100" height="64" viewBox="0 0 100 64">
-                  <path d="M-2 0H8.19A8 8 0 0 1 16.15 7.24A34 34 0 0 0 83.85 7.24A8 8 0 0 1 91.81 0H102V64H-2Z" />
-                </svg>
-                <svg className={cx("tabbar-fill tabbar-patch absolute inset-0", activeIdx < 0 && "is-on")} width="100" height="64" viewBox="0 0 100 64">
-                  <rect x="-2" width="104" height="64" />
-                </svg>
-              </div>
-              <div className="tabbar-flat" />
-            </div>
+            <div className="tabbar-strip absolute inset-y-0 left-0" />
+            <div className={cx("tabbar-patch absolute inset-y-0 left-0", activeIdx < 0 && "is-on")} />
           </div>
           {/* Circle and dot ride one slot-wide carrier that slides to the open tab. */}
           <div aria-hidden className="tabbar-carrier pointer-events-none absolute left-0 top-[-22px] h-[86px]">
-            <div className={cx("tabbar-circle relative mx-auto h-[52px] w-[52px] rounded-full bg-accent text-surface", activeIdx < 0 && "scale-50 opacity-0")}>
+            <div className={cx("tabbar-circle relative mx-auto h-[52px] w-[52px] rounded-full", activeIdx < 0 && "scale-50 opacity-0")}>
               {NAV.map((n, i) => (
                 <n.icon
                   key={n.href}
@@ -320,7 +310,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               animate={{ opacity: 1, y: 0, transition: { duration: sec(0.34), ease: [0.65, 0, 0.35, 1] } }}
               exit={{ opacity: 0, y: 28, transition: { duration: sec(0.3), ease: [0.65, 0, 0.35, 1] } }}
               transition={{ layout: { duration: sec(0.3), ease: [0.65, 0, 0.35, 1] } }}
-              className="flex items-center gap-3 rounded-full bg-ink/90 py-2 pl-4 pr-3 text-[13.5px] text-bg shadow-pop backdrop-blur-xl"
+              className="glass-thick flex items-center gap-3 rounded-full py-2 pl-4 pr-3 text-[13.5px] text-ink"
             >
               {t.text}
               {t.undo && (
