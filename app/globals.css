@@ -267,15 +267,15 @@ select:focus-visible {
   transition: transform calc(0.22s / var(--speed)) var(--ease), background-color calc(0.15s / var(--speed)) var(--ease), border-color calc(0.15s / var(--speed)) var(--ease), color calc(0.15s / var(--speed)) var(--ease);
   touch-action: manipulation;
 }
-/* The one tinted piece of glass on a screen: ink-blue, white label (7.2:1). */
+/* Flat ink-blue fill, white label (7.2:1). No shine, no shading. */
 .btn-primary {
-  background: var(--spec), color-mix(in oklab, #2f4fb5 94%, transparent);
+  background: #2f4fb5;
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.12), 0 1px 2px rgba(30, 45, 120, 0.25), 0 6px 14px -8px rgba(47, 79, 181, 0.6);
+  box-shadow: none;
 }
 :root[data-theme="dark"] .btn-primary {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 45%), color-mix(in oklab, #3d5bc4 94%, transparent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 14px -8px rgba(61, 91, 196, 0.8);
+  background: #3d5bc4;
+  box-shadow: none;
 }
 .btn-primary:hover {
   background-color: #2a46a3;
@@ -288,17 +288,17 @@ select:focus-visible {
   background: var(--hover);
   color: var(--ink);
 }
-/* Secondary: clear glass with a rim. */
+/* Secondary: flat surface with a rim. */
 .btn-line {
-  background: var(--spec), var(--surface);
+  background: var(--surface);
   border: 1px solid var(--rim);
   color: var(--ink);
-  box-shadow: var(--glass-edge), 0 1px 2px var(--rim-low);
+  box-shadow: none;
   -webkit-backdrop-filter: blur(12px) saturate(170%);
   backdrop-filter: blur(12px) saturate(170%);
 }
 .btn-line:hover {
-  background: var(--spec), var(--glass-pill);
+  background: var(--glass-pill);
 }
 
 /* Cards: a raised piece of glass inside the pane, with a lit top edge. */
@@ -651,7 +651,6 @@ body.cal-dragging.cal-copying * {
   /* Buttons: primary lifts with a deeper shadow; outlined firms up its edge; icons grow slightly. */
   .btn-primary:hover:not(:active) {
     transform: translateY(-1px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 20px -8px rgba(47, 79, 181, 0.55);
   }
   .btn-line:hover {
     border-color: var(--ink-2);
