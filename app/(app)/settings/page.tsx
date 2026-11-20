@@ -281,7 +281,7 @@ export default function SettingsPage() {
           </div>
         )}
         {pushNote && (
-          <p role="status" className={cx("mt-2 rounded-md px-2.5 py-1.5 text-[13px]", pushNote.ok ? "bg-hover text-ink-2" : "bg-pen-soft text-pen")}>
+          <p role="status" className={cx("mt-2 rounded-xl px-2.5 py-1.5 text-[13px]", pushNote.ok ? "bg-hover text-ink-2" : "bg-pen-soft text-pen")}>
             {pushNote.text}
           </p>
         )}

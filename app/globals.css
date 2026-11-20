@@ -242,12 +242,12 @@ select:focus-visible {
   color: var(--muted);
 }
 
-/* Buttons are capsules, like every Liquid Glass control. */
+/* Buttons share the app's one corner radius (12px, same as the Came in card). */
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border-radius: 999px;
+  border-radius: 12px;
   padding: 6px 13px;
   font-weight: 500;
   font-size: 13.5px;
@@ -305,7 +305,7 @@ select:focus-visible {
 .card {
   background: var(--spec), var(--surface);
   border: 1px solid var(--rim);
-  border-radius: 20px;
+  border-radius: 12px;
 }
 /* Layered so a shadow utility on a card (e.g. shadow-pop) still wins. */
 @layer components {
@@ -344,13 +344,13 @@ select:focus-visible {
 }
 /* The reading pane: floats beside the sidebar on desktop, inset under the top bar on phones. */
 .app-pane {
-  border-radius: 26px 26px 0 0;
+  border-radius: 12px 12px 0 0;
   margin: 6px 8px 0;
   min-height: calc(100dvh - var(--topbar, 56px) - 6px);
 }
 @media (min-width: 768px) {
   .app-pane {
-    border-radius: 28px;
+    border-radius: 12px;
     margin: 0;
     min-height: calc(100dvh - 24px);
   }

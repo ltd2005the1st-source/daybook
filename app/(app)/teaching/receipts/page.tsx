@@ -124,7 +124,7 @@ export default function ReceiptsPage() {
                   <button
                     onClick={() => update("receipts", r.id, r.status === "paid" ? { status: "issued", paid_on: null } : { status: "paid", paid_on: today() })}
                     className={cx(
-                      "rounded-full px-2.5 py-0.5 text-[12px] font-semibold",
+                      "rounded-xl px-2.5 py-0.5 text-[12px] font-semibold",
                       r.status === "paid" ? "bg-good-soft text-good" : "bg-pen-soft text-pen",
                     )}
                   >

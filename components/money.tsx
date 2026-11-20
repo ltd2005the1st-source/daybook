@@ -84,7 +84,7 @@ export function QuickAdd({ compact }: { compact?: boolean }) {
             key={c}
             onClick={() => setCat(c)}
             className={cx(
-              "rounded-full border px-2.5 py-0.5 text-[12.5px] transition-colors",
+              "rounded-xl border px-2.5 py-0.5 text-[12.5px] transition-colors",
               cat === c ? "border-ink bg-ink text-bg" : "border-line text-ink-2 hover:bg-hover",
             )}
           >

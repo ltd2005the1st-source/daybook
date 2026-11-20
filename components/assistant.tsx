@@ -256,7 +256,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
             exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
             transition={{ duration: sec(0.34), ease: EASE }}
             style={{ transformOrigin: "50% 100%" }}
-            className="relative flex h-[86dvh] w-full flex-col overflow-hidden rounded-t-[28px] glass-thick md:m-3 md:h-auto md:w-[400px] md:rounded-[26px] md:mb-[calc(0.75rem+var(--dock,0px))]"
+            className="relative flex h-[86dvh] w-full flex-col overflow-hidden rounded-t-xl glass-thick md:m-3 md:h-auto md:w-[400px] md:rounded-xl md:mb-[calc(0.75rem+var(--dock,0px))]"
           >
             <header className="flex items-center justify-between gap-2 px-5 pt-4 pb-3 edge-bottom" data-scrolled>
               <div className="flex items-center gap-2.5">
@@ -286,7 +286,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
                   <p className="mb-3 text-[14px] text-ink-2">Tell me what happened, or ask about anything in your daybook. English or Vietnamese both work.</p>
                   <div className="flex flex-wrap gap-1.5">
                     {SUGGESTIONS.map((s) => (
-                      <button key={s} onClick={() => send(s)} className="press rounded-full border border-line px-3 py-1.5 text-left text-[13px] text-ink-2 hover:bg-hover hover:text-ink">
+                      <button key={s} onClick={() => send(s)} className="press rounded-xl border border-line px-3 py-1.5 text-left text-[13px] text-ink-2 hover:bg-hover hover:text-ink">
                         {s}
                       </button>
                     ))}
@@ -302,13 +302,13 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
                     transition={{ duration: sec(0.26), ease: EASE }}
                     className={cx(
                       "max-w-[88%] text-[14.5px] leading-relaxed",
-                      m.role === "user" ? "self-end rounded-[16px] rounded-br-[6px] bg-accent px-3.5 py-2 text-white" : "self-start",
+                      m.role === "user" ? "self-end rounded-xl bg-accent px-3.5 py-2 text-white" : "self-start",
                     )}
                   >
                     {m.role === "assistant" && m.actions.length > 0 && (
                       <div className="mb-1.5 flex flex-col items-start gap-1">
                         {m.actions.map((a, i) => (
-                          <span key={i} className="inline-flex items-start gap-1.5 rounded-[8px] bg-good-soft px-2 py-1 text-[12.5px] text-good">
+                          <span key={i} className="inline-flex items-start gap-1.5 rounded-xl bg-good-soft px-2 py-1 text-[12.5px] text-good">
                             <svg width="12" height="12" viewBox="0 0 16 16" className="mt-[3px] shrink-0" aria-hidden>
                               <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
@@ -318,7 +318,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
                       </div>
                     )}
                     {"error" in m && m.error ? (
-                      <p className="rounded-[8px] bg-pen-soft px-3 py-2 text-[13.5px] text-pen">{m.text}</p>
+                      <p className="rounded-xl bg-pen-soft px-3 py-2 text-[13.5px] text-pen">{m.text}</p>
                     ) : m.text ? (
                       <Md text={m.text} />
                     ) : null}
@@ -335,7 +335,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
                 send(input);
               }}
             >
-              <div className="flex items-end gap-2 rounded-[20px] border border-line bg-surface px-3 py-2 focus-within:border-ink-2">
+              <div className="flex items-end gap-2 rounded-xl border border-line bg-surface px-3 py-2 focus-within:border-ink-2">
                 <textarea
                   ref={inputRef}
                   rows={1}

@@ -296,7 +296,7 @@ export function HomeworkEditor({ studentId, name }: { studentId: string; name: s
                 <Tick checked={false} color="var(--pen)" label="Checked" onChange={() => update("homework", h.id, { status: "checked", checked_on: today() })} />
                 <input
                   aria-label="Homework"
-                  className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1.5 py-1 text-[14px] outline-none transition-colors duration-200 hover:border-line focus:border-ink-2"
+                  className="min-w-0 flex-1 rounded-xl border border-transparent bg-transparent px-1.5 py-1 text-[14px] outline-none transition-colors duration-200 hover:border-line focus:border-ink-2"
                   defaultValue={h.title}
                   onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
                   onBlur={(e) => {
@@ -308,7 +308,7 @@ export function HomeworkEditor({ studentId, name }: { studentId: string; name: s
                 <button
                   type="button"
                   aria-label={`Remove ${h.title}`}
-                  className="rounded-md p-1 text-muted opacity-60 transition-opacity duration-200 hover:text-pen group-hover:opacity-100"
+                  className="rounded-xl p-1 text-muted opacity-60 transition-opacity duration-200 hover:text-pen group-hover:opacity-100"
                   onClick={() => remove("homework", h.id)}
                 >
                   <X size={15} />

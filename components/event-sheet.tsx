@@ -168,7 +168,7 @@ export function EventSheet({
         {clash && (
           <p
             role="alert"
-            className="mb-3 -mt-1 rounded-md bg-pen-soft px-2.5 py-1.5 text-[13px] text-pen"
+            className="mb-3 -mt-1 rounded-xl bg-pen-soft px-2.5 py-1.5 text-[13px] text-pen"
           >
             {describeEvent(clash)} Change the name or the time to add it.
           </p>
@@ -235,7 +235,7 @@ export function EventSheet({
                         })
                       }
                       className={cx(
-                        "rounded-md border px-2.5 py-1 text-[13px]",
+                        "rounded-xl border px-2.5 py-1 text-[13px]",
                         on
                           ? "border-ink bg-ink text-bg"
                           : "border-line text-ink-2 hover:bg-hover",
@@ -318,7 +318,7 @@ export function EventSheet({
 
           <div className="min-w-0 flex flex-col">
         {existing?.student_id && (
-              <div className="mb-4 rounded-lg border border-line p-3">
+              <div className="mb-4 rounded-xl border border-line p-3">
                 <div className="label mb-2">
                   This class, {fmtDay(occurrenceDate, { weekday: true })}
                 </div>

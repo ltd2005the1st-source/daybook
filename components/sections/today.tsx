@@ -216,12 +216,12 @@ export default function TodayPage() {
 
           <Section title="Body">
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/habits" className="rounded-lg border border-line p-3 hover:bg-hover">
+              <Link href="/habits" className="rounded-xl border border-line p-3 hover:bg-hover">
                 <div className="label">Sleep</div>
                 <div className="mt-1 text-[14px]">{sleptLogged ? "Logged ✓" : "Log last night"}</div>
                 <div className="text-[12px] text-muted">Bed by {sleep?.target_bedtime ?? "–"}</div>
               </Link>
-              <Link href="/habits" className="rounded-lg border border-line p-3 hover:bg-hover">
+              <Link href="/habits" className="rounded-xl border border-line p-3 hover:bg-hover">
                 <div className="label">Exercise</div>
                 <div className="num mt-1 text-[14px]">
                   {exDays}/{exercise?.weekly_target ?? 4} this week

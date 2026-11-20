@@ -87,7 +87,7 @@ export function Palette({ open, onClose, onAsk }: { open: boolean; onClose: () =
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: sec(0.26), ease: [0.65, 0, 0.35, 1] }}
-            className="relative w-full max-w-[540px] overflow-hidden rounded-[26px] glass-thick"
+            className="relative w-full max-w-[540px] overflow-hidden rounded-xl glass-thick"
           >
             <input
               ref={ref}
@@ -117,7 +117,7 @@ export function Palette({ open, onClose, onAsk }: { open: boolean; onClose: () =
                   <button
                     onMouseEnter={() => setI(k)}
                     onClick={it.run}
-                    className={cx("flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left text-[14px]", k === i && "bg-hover")}
+                    className={cx("flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[14px]", k === i && "bg-hover")}
                   >
                     <it.icon size={16} />
                     <span className="flex-1 truncate">{it.label}</span>

@@ -206,9 +206,9 @@ export function MusicDock() {
 
           <div className="mx-auto flex h-[58px] max-w-[1400px] items-center gap-3 px-3 md:px-5">
             {current.image ? (
-              <img src={current.image} alt="" className="h-10 w-10 shrink-0 rounded-md object-cover shadow-card" />
+              <img src={current.image} alt="" className="h-10 w-10 shrink-0 rounded-xl object-cover shadow-card" />
             ) : (
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-hover">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-hover">
                 <Bars playing={!pb.paused} />
               </span>
             )}
