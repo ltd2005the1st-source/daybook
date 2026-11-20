@@ -124,15 +124,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <MusicProvider>
     <NativeSync />
     <div className="min-h-dvh md:flex md:gap-3 md:p-3">
-      {/* Sidebar (desktop) */}
-      <aside className="no-print hidden md:flex w-[196px] shrink-0 flex-col glass rounded-xl sticky top-3 h-[calc(100dvh-24px-var(--dock,0px))] px-2.5 py-3 transition-[height] duration-300 ease-in-out">
+      {/* Sidebar (desktop). Concentric corners: 12px panel, 6px padding, so the rows inside are 12 - 6 = 6px. */}
+      <aside className="no-print hidden md:flex w-[196px] shrink-0 flex-col glass rounded-xl sticky top-3 h-[calc(100dvh-24px-var(--dock,0px))] px-1.5 py-3 transition-[height] duration-300 ease-in-out">
         <Link href="/" className="flex items-center gap-2 px-2 py-1.5 mb-3">
           <img src="/icon.svg" alt="" className="h-6 w-6 rounded-[6px]" />
           <span className="display text-[17px] font-semibold">Daybook</span>
         </Link>
         <button
           onClick={() => setPaletteOpen(true)}
-          className="press mb-3 flex items-center justify-between rounded-xl glass-pill px-3 py-1.5 text-[13px] text-muted hover:text-ink"
+          className="press mb-3 flex items-center justify-between rounded-[6px] glass-pill px-3 py-1.5 text-[13px] text-muted hover:text-ink"
         >
           <span>Jump or add…</span>
           <kbd className="num rounded-full border border-line px-1.5 text-[10.5px] leading-[16px]">⌘K</kbd>
@@ -147,14 +147,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 href={n.href}
                 aria-current={active ? "true" : undefined}
                 className={cx(
-                  "press nav-item relative flex items-center gap-2.5 rounded-xl px-2.5 py-[7px] text-[14px]",
+                  "press nav-item relative flex items-center gap-2.5 rounded-[6px] px-2.5 py-[7px] text-[14px]",
                   active ? "text-ink font-medium" : "text-ink-2 hover:bg-hover hover:text-ink",
                 )}
               >
                 {active && (
                   <motion.span
                     layoutId="nav-active"
-                    className="absolute inset-0 rounded-xl glass-pill"
+                    className="absolute inset-0 rounded-[6px] glass-pill"
                     transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }}
                   />
                 )}
@@ -167,16 +167,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <AppLinks onEdit={() => setEditApps(true)} />
         </div>
         <div className="mt-auto flex flex-col gap-px">
-          <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-xl px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+          <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <Sparkles size={16} strokeWidth={1.8} />
             <span className="flex-1 text-left">Ask Claude</span>
             <kbd className="num text-[10.5px] text-muted">⌘J</kbd>
           </button>
-          <button onClick={toggle} className="press nav-item flex items-center gap-2.5 rounded-xl px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+          <button onClick={toggle} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             {theme === "dark" ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}
             {theme === "dark" ? "Light mode" : "Dark mode"}
           </button>
-          <Link href="/settings" className="press nav-item flex items-center gap-2.5 rounded-xl px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+          <Link href="/settings" className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <PanelRightOpen size={16} strokeWidth={1.8} /> Settings
           </Link>
           <div className="px-2.5 pt-2 text-[11.5px] text-muted leading-snug">
