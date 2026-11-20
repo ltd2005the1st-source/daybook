@@ -352,7 +352,7 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
               href={a.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="press nav-item flex items-center gap-2.5 rounded-xl px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink"
+              className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink"
             >
               <Ico size={16} />
               <span className="truncate">{a.label}</span>
@@ -360,7 +360,7 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
           );
         })}
         {list.length === 0 && (
-          <button onClick={onEdit} className="press nav-item flex items-center gap-2.5 rounded-xl px-2.5 py-[6px] text-[13.5px] text-muted hover:bg-hover hover:text-ink">
+          <button onClick={onEdit} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-muted hover:bg-hover hover:text-ink">
             <Plus size={16} strokeWidth={1.8} />
             <span>Add an app</span>
           </button>
