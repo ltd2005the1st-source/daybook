@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Blue background, white "Orbit" ring with round ends around a yellow dot. The monochrome layer is used by Android 13+ themed icons. -->
+<!-- Blue background, white "Orbit" ring with softly cut ends around a yellow dot. The monochrome layer is used by Android 13+ themed icons. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
     <foreground android:drawable="@drawable/ic_launcher_foreground" />

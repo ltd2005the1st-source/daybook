@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Daybook mark "Orbit": a white ring with round ends around a yellow "today" dot, on the 108dp adaptive grid (safe zone r=33). -->
+<!-- Daybook mark "Orbit": a white ring with softly cut ends around a yellow "today" dot, on the 108dp adaptive grid (safe zone r=33). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:pathData="M53.27 33.01A21 21 0 1 0 74.99 54.73"
-        android:strokeColor="#FFFFFF" android:strokeWidth="8" android:strokeLineCap="round" />
+    <path android:pathData="M78.88 51.52A25 25 0 1 1 56.48 29.12A1.6 1.6 0 0 1 57.65 31.61A13.5 13.5 0 0 0 55.77 35.80A1.6 1.6 0 0 1 54.20 37.00A17 17 0 1 0 71.00 53.80A1.6 1.6 0 0 1 72.20 52.23A13.5 13.5 0 0 0 76.39 50.35A1.6 1.6 0 0 1 78.88 51.52Z"
+        android:fillColor="#FFFFFF" />
     <path android:pathData="M59.35,39.15a9.5,9.5 0,1 0,19 0a9.5,9.5 0,1 0,-19 0z" android:fillColor="#FFD23F" />
 </vector>
