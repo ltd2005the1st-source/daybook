@@ -140,7 +140,7 @@ public class MainActivity extends Activity {
     void applyBars(boolean isDark) {
         dark = isDark;
         if (pull != null) pull.setDark(isDark);
-        int page = isDark ? Color.parseColor("#191918") : Color.parseColor("#FBFBFA");
+        int page = isDark ? Color.parseColor("#0C0F15") : Color.parseColor("#E6EBF3");
         root.setBackgroundColor(page);
         getWindow().getDecorView().setBackgroundColor(page);
         if (Build.VERSION.SDK_INT >= 30) {
@@ -236,14 +236,14 @@ public class MainActivity extends Activity {
         @Override
         public void onReceivedError(WebView view, WebResourceRequest req, WebResourceError err) {
             if (!req.isForMainFrame()) return;
-            String bg = dark ? "#191918" : "#FBFBFA";
-            String fg = dark ? "#EDEDEA" : "#26251F";
+            String bg = dark ? "#0C0F15" : "#E6EBF3";
+            String fg = dark ? "#ECEEF3" : "#181C25";
             String html = "<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>" +
                 "<body style=\"margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;" +
                 "font-family:sans-serif;background:" + bg + ";color:" + fg + ";text-align:center;padding:24px;box-sizing:border-box\">" +
                 "<p style='font-size:18px;font-weight:600;margin:0 0 8px'>You're offline</p>" +
                 "<p style='opacity:.7;margin:0 0 20px'>Daybook needs the internet to load. Your reminders still work.</p>" +
-                "<button onclick='DaybookAndroid.reload()' style='font:inherit;padding:10px 18px;border-radius:10px;border:0;background:#E0583F;color:#fff'>Try again</button></body>";
+                "<button onclick='DaybookAndroid.reload()' style='font:inherit;padding:10px 20px;border-radius:999px;border:0;background:#2F4FB5;color:#fff'>Try again</button></body>";
             view.loadDataWithBaseURL(BuildConfig.SITE + "/offline", html, "text/html", "utf-8", null);
         }
     }

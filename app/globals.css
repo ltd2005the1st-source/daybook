@@ -799,11 +799,11 @@ body.cal-dragging.cal-copying * {
   transition: transform var(--glide) var(--ease);
   will-change: transform;
 }
-/* The open tab: a drop of tinted glass. */
+/* The open tab: a flat accent disc (no shine), with a soft shadow under it. */
 .tabbar-circle {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 50%), #2f4fb5;
+  background: #2f4fb5;
   color: #fff;
-  box-shadow: 0 8px 18px -6px rgba(47, 79, 181, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -2px 4px rgba(10, 20, 60, 0.25);
+  box-shadow: 0 8px 18px -6px rgba(47, 79, 181, 0.65);
   transition: opacity calc(0.25s / var(--speed)) var(--ease), transform calc(0.3s / var(--speed)) var(--ease);
 }
 .tabbar-dot {
@@ -826,8 +826,8 @@ body.cal-dragging.cal-copying * {
   }
 }
 :root[data-theme="dark"] .tabbar-circle {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 50%), #3d5bc4;
-  box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+  background: #3d5bc4;
+  box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.7);
 }
 @media (prefers-contrast: more) {
   .tabbar-pill {
