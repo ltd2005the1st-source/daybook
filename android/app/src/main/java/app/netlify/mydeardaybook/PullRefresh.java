@@ -41,7 +41,7 @@ class PullRefresh extends FrameLayout {
     private float offset; // how far the indicator has come down, in px
     private float spin;
     private ValueAnimator settle;
-    private int accent = Color.parseColor("#E0583F"), surface = Color.WHITE;
+    private int accent = Color.parseColor("#2F4FB5"), surface = Color.WHITE;
 
     PullRefresh(Context ctx, View web) {
         super(ctx);
@@ -59,7 +59,8 @@ class PullRefresh extends FrameLayout {
     void setListener(Listener l) { listener = l; }
 
     void setDark(boolean dark) {
-        surface = dark ? Color.parseColor("#2A2A28") : Color.WHITE;
+        surface = dark ? Color.parseColor("#1D2129") : Color.WHITE;
+        accent = dark ? Color.parseColor("#9CB0F5") : Color.parseColor("#2F4FB5");
         disc.setColor(surface);
         shade.setColor(dark ? 0x55000000 : 0x22000000);
         invalidate();

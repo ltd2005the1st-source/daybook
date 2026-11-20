@@ -104,7 +104,7 @@ final class Reminders {
         String first = body == null ? "" : body.split("\n", 2)[0];
         Notification n = new Notification.Builder(c, CHANNEL)
             .setSmallIcon(R.drawable.ic_notification_icon)
-            .setColor(0xFFE0583F)
+            .setColor(0xFF2E5BFF)
             .setContentTitle(title)
             .setContentText(first)
             .setStyle(new Notification.BigTextStyle().bigText(body))
