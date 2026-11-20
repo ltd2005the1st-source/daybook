@@ -256,7 +256,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
             exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
             transition={{ duration: sec(0.34), ease: EASE }}
             style={{ transformOrigin: "50% 100%" }}
-            className="relative flex h-[86dvh] w-full flex-col overflow-hidden rounded-t-[22px] border border-line bg-surface shadow-pop dark:border-[var(--hairline)] md:m-3 md:h-auto md:w-[400px] md:rounded-[18px] md:mb-[calc(0.75rem+var(--dock,0px))]"
+            className="relative flex h-[86dvh] w-full flex-col overflow-hidden rounded-t-[28px] glass-thick md:m-3 md:h-auto md:w-[400px] md:rounded-[26px] md:mb-[calc(0.75rem+var(--dock,0px))]"
           >
             <header className="flex items-center justify-between gap-2 px-5 pt-4 pb-3 edge-bottom" data-scrolled>
               <div className="flex items-center gap-2.5">
@@ -302,7 +302,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
                     transition={{ duration: sec(0.26), ease: EASE }}
                     className={cx(
                       "max-w-[88%] text-[14.5px] leading-relaxed",
-                      m.role === "user" ? "self-end rounded-[16px] rounded-br-[6px] bg-accent px-3.5 py-2 text-surface" : "self-start",
+                      m.role === "user" ? "self-end rounded-[16px] rounded-br-[6px] bg-accent px-3.5 py-2 text-white" : "self-start",
                     )}
                   >
                     {m.role === "assistant" && m.actions.length > 0 && (
@@ -335,7 +335,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
                 send(input);
               }}
             >
-              <div className="flex items-end gap-2 rounded-[14px] border border-line bg-bg px-3 py-2 focus-within:border-ink-2">
+              <div className="flex items-end gap-2 rounded-[20px] border border-line bg-surface px-3 py-2 focus-within:border-ink-2">
                 <textarea
                   ref={inputRef}
                   rows={1}
@@ -357,7 +357,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
                 <button
                   aria-label="Send"
                   disabled={busy || !input.trim()}
-                  className={cx("press flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-surface transition-opacity", (busy || !input.trim()) && "opacity-30")}
+                  className={cx("press flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-white transition-opacity", (busy || !input.trim()) && "opacity-30")}
                 >
                   <ArrowUp size={16} strokeWidth={2.2} />
                 </button>

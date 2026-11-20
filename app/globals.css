@@ -3,36 +3,65 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* ---------------------------------------------------------------
-   Daybook tokens. Paper-and-ink neutrals (Notion's page grey, not cream),
-   graphite text, one ink-blue accent, and the red marking pen reserved
-   for things that need checking. Each student carries their own color,
-   lifted from your Google Calendar.
+   Daybook tokens: liquid glass.
+   A soft wallpaper (the icon's ink blue and yellow dot, washed out) sits behind everything.
+   Floating chrome (sidebar, bars, tab bar, sheets, menus, toasts) is clear glass that blurs
+   and lifts what passes beneath it; the reading surface is a calmer, more opaque pane so text
+   always clears AA. Ink-blue accent, the red marking pen for things that need checking.
+   Each student carries their own color, lifted from your Google Calendar.
 ---------------------------------------------------------------- */
 :root {
-  --bg: #fbfbfa;
-  --surface: #ffffff;
-  --sunken: #f4f4f2;
-  --hover: rgba(55, 53, 47, 0.06);
-  --ink: #26251f;
-  --ink-2: #57554d;
-  --muted: #8a877e;
-  --line: #e9e8e4;
-  --line-strong: #d9d7d1;
-  --accent: #2f4fb5;
-  --accent-soft: rgba(47, 79, 181, 0.09);
-  --pen: #c8412b;
-  --pen-soft: rgba(200, 65, 43, 0.09);
-  --good: #2e7a55;
-  --good-soft: rgba(46, 122, 85, 0.1);
-  /* Depth: a hairline contact shadow plus a soft ambient one. Bigger surfaces cast deeper shadows. */
-  --shadow: 0 0 0 0.5px rgba(15, 15, 10, 0.04), 0 1px 2px rgba(15, 15, 10, 0.05), 0 6px 16px -10px rgba(15, 15, 10, 0.14);
-  --shadow-pop: 0 0 0 0.5px rgba(15, 15, 10, 0.06), 0 4px 12px -2px rgba(15, 15, 10, 0.08), 0 32px 64px -20px rgba(15, 15, 10, 0.3);
+  --bg: #e6ebf3;
+  /* Translucent surfaces. --surface is a raised piece of glass inside a pane (cards, fields, pills). */
+  --surface: rgba(255, 255, 255, 0.6);
+  --sunken: rgba(30, 45, 80, 0.045);
+  /* Opaque paper, for things that must print or stay solid (receipts). */
+  --paper: #ffffff;
+  --hover: rgba(30, 45, 80, 0.065);
+  --ink: #181c25;
+  --ink-2: #3e4555;
+  --muted: #525a6b;
+  --line: rgba(30, 45, 80, 0.1);
+  --line-strong: rgba(30, 45, 80, 0.17);
+  --accent: #2a47a6;
+  --accent-soft: rgba(47, 79, 181, 0.12);
+  --pen: #a5311a;
+  --pen-soft: rgba(181, 55, 31, 0.11);
+  --good: #1f5e3e;
+  --good-soft: rgba(39, 107, 74, 0.12);
+
+  /* Wallpaper behind the glass. Broad, still washes; nothing moves. */
+  --wall:
+    radial-gradient(ellipse 80% 70% at 0% 0%, rgba(47, 79, 181, 0.55), transparent 72%),
+    radial-gradient(ellipse 60% 55% at 100% 0%, rgba(52, 150, 196, 0.38), transparent 72%),
+    radial-gradient(ellipse 70% 65% at 100% 100%, rgba(244, 176, 36, 0.5), transparent 74%),
+    radial-gradient(ellipse 60% 55% at 0% 100%, rgba(96, 128, 220, 0.32), transparent 72%),
+    linear-gradient(165deg, #d6deed, #e8ecf3 55%, #efe9dc);
+
+  /* Glass. pane = the big reading surface; glass = floating chrome; thick = sheets and menus. */
+  --pane: rgba(255, 255, 255, 0.62);
+  --glass: rgba(255, 255, 255, 0.52);
+  --glass-thick: rgba(248, 250, 253, 0.78);
+  /* The phone tab bar sits over the white pane, so its glass carries a little cool tint to stand apart. */
+  --glass-bar: rgba(232, 237, 247, 0.86);
+  --glass-pill: rgba(255, 255, 255, 0.82);
+  --glass-blur: blur(22px) saturate(185%);
+  --glass-blur-thick: blur(34px) saturate(190%);
+  /* The rim: a bright inner edge catching the light on top, a faint darker one underneath. */
+  --rim: rgba(255, 255, 255, 0.75);
+  --rim-low: rgba(30, 45, 80, 0.07);
+  --spec: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 42%);
+  --glass-edge: 0 0 0 0.5px rgba(30, 45, 80, 0.1);
+
+  /* Depth: a hairline contact shadow plus a soft ambient one, tinted toward the wallpaper's blue. */
+  --shadow: 0 0 0 0.5px rgba(30, 45, 80, 0.06), 0 1px 2px rgba(30, 45, 80, 0.06), 0 8px 20px -12px rgba(30, 45, 80, 0.2);
+  --shadow-pop: 0 0 0 0.5px rgba(30, 45, 80, 0.08), 0 6px 16px -4px rgba(30, 45, 80, 0.12), 0 36px 72px -24px rgba(30, 45, 80, 0.38);
   /* Translucent material for floating chrome (bars, toasts). Content scrolls underneath. */
-  --material: rgba(251, 251, 250, 0.8);
-  --material-thick: rgba(251, 251, 250, 0.86);
-  --material-edge: rgba(255, 255, 255, 0.7);
-  --hairline: rgba(15, 15, 10, 0.08);
-  --scrim: rgba(20, 20, 15, 0.22);
+  --material: rgba(240, 244, 250, 0.62);
+  --material-thick: rgba(244, 247, 251, 0.7);
+  --material-edge: rgba(255, 255, 255, 0.8);
+  --hairline: rgba(30, 45, 80, 0.1);
+  --scrim: rgba(20, 30, 55, 0.2);
   --ring: color-mix(in oklab, var(--accent) 28%, transparent);
   --ease: cubic-bezier(0.65, 0, 0.35, 1);
   /* How fast everything moves; 1 = original pace. Same value as SPEED in lib/motion.ts. */
@@ -41,28 +70,44 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #191918;
-  --surface: #202020;
-  --sunken: #1d1d1c;
-  --hover: rgba(255, 255, 255, 0.055);
-  --ink: #ebe9e4;
-  --ink-2: #b9b6ad;
-  --muted: #8d897f;
-  --line: #2d2c2a;
-  --line-strong: #3a3936;
-  --accent: #8fa6f2;
-  --accent-soft: rgba(143, 166, 242, 0.12);
-  --pen: #f07a64;
-  --pen-soft: rgba(240, 122, 100, 0.12);
-  --good: #6cc597;
-  --good-soft: rgba(108, 197, 151, 0.12);
-  --shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 20px -12px rgba(0, 0, 0, 0.6);
-  --shadow-pop: 0 0 0 0.5px rgba(255, 255, 255, 0.07), 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 32px 64px -20px rgba(0, 0, 0, 0.75);
-  --material: rgba(25, 25, 24, 0.78);
-  --material-thick: rgba(30, 30, 29, 0.86);
-  --material-edge: rgba(255, 255, 255, 0.06);
-  --hairline: rgba(255, 255, 255, 0.08);
-  --scrim: rgba(0, 0, 0, 0.5);
+  --bg: #0c0f15;
+  --surface: rgba(255, 255, 255, 0.06);
+  --sunken: rgba(0, 0, 0, 0.16);
+  --paper: #1d2129;
+  --hover: rgba(255, 255, 255, 0.07);
+  --ink: #eceef3;
+  --ink-2: #bcc2cf;
+  --muted: #9aa1b0;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --accent: #9cb0f5;
+  --accent-soft: rgba(156, 176, 245, 0.14);
+  --pen: #f2876f;
+  --pen-soft: rgba(242, 135, 111, 0.13);
+  --good: #72cc9d;
+  --good-soft: rgba(114, 204, 157, 0.13);
+  --wall:
+    radial-gradient(ellipse 80% 70% at 0% 0%, rgba(80, 110, 230, 0.5), transparent 72%),
+    radial-gradient(ellipse 60% 55% at 100% 0%, rgba(40, 130, 170, 0.3), transparent 72%),
+    radial-gradient(ellipse 70% 65% at 100% 100%, rgba(210, 145, 30, 0.3), transparent 74%),
+    radial-gradient(ellipse 60% 55% at 0% 100%, rgba(70, 90, 190, 0.25), transparent 72%),
+    linear-gradient(165deg, #121828, #0e121c 60%, #14110c);
+  --pane: rgba(20, 23, 31, 0.6);
+  --glass: rgba(40, 45, 58, 0.42);
+  --glass-thick: rgba(30, 34, 43, 0.8);
+  --glass-bar: rgba(44, 49, 63, 0.84);
+  --glass-pill: rgba(255, 255, 255, 0.13);
+  --rim: rgba(255, 255, 255, 0.12);
+  --rim-low: rgba(0, 0, 0, 0.3);
+  --spec: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 40%);
+  --glass-edge: 0 0 0 0.5px rgba(0, 0, 0, 0.5);
+  --shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 20px -12px rgba(0, 0, 0, 0.6);
+  --shadow-pop: 0 0 0 0.5px rgba(0, 0, 0, 0.5), 0 6px 16px -4px rgba(0, 0, 0, 0.4), 0 36px 72px -24px rgba(0, 0, 0, 0.8);
+  --material: rgba(22, 25, 32, 0.6);
+  --material-thick: rgba(24, 27, 34, 0.72);
+  --material-edge: rgba(255, 255, 255, 0.1);
+  --hairline: rgba(255, 255, 255, 0.09);
+  --scrim: rgba(0, 0, 0, 0.45);
   color-scheme: dark;
 }
 
@@ -87,6 +132,7 @@
   --color-pen-soft: var(--pen-soft);
   --color-good: var(--good);
   --color-good-soft: var(--good-soft);
+  --color-paper: var(--paper);
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
@@ -94,10 +140,23 @@
   --shadow-pop: var(--shadow-pop);
 }
 
-html,
-body {
+html {
   background: var(--bg);
   color: var(--ink);
+}
+/* Transparent, or its own background would paint over the wallpaper below. */
+body {
+  background: transparent;
+  color: var(--ink);
+}
+/* The wallpaper, pinned to the window so the glass always has something to bend. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--wall);
 }
 
 body {
@@ -159,34 +218,37 @@ select:focus-visible {
   color: var(--muted);
 }
 
-/* Inputs: quiet until focused, like Notion properties */
+/* Inputs: a shallow well of glass, firming up when focused */
 .field {
   width: 100%;
-  background: transparent;
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 7px 10px;
+  border-radius: 12px;
+  padding: 7px 11px;
   color: var(--ink);
+  box-shadow: inset 0 1px 1px var(--rim-low);
   transition: border-color calc(0.15s / var(--speed)) var(--ease), background calc(0.15s / var(--speed)) var(--ease), box-shadow calc(0.2s / var(--speed)) var(--ease);
 }
 .field:hover {
-  background: var(--hover);
+  background: var(--surface);
 }
 .field:focus {
   outline: none;
-  border-color: var(--ink-2);
-  background: var(--surface);
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--line-strong));
+  background: var(--glass-pill);
+  box-shadow: inset 0 1px 1px var(--rim-low), 0 0 0 3px var(--accent-soft);
 }
 .field::placeholder {
   color: var(--muted);
 }
 
+/* Buttons are capsules, like every Liquid Glass control. */
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border-radius: 8px;
-  padding: 6px 11px;
+  border-radius: 999px;
+  padding: 6px 13px;
   font-weight: 500;
   font-size: 13.5px;
   letter-spacing: 0.005em;
@@ -205,13 +267,19 @@ select:focus-visible {
   transition: transform calc(0.22s / var(--speed)) var(--ease), background-color calc(0.15s / var(--speed)) var(--ease), border-color calc(0.15s / var(--speed)) var(--ease), color calc(0.15s / var(--speed)) var(--ease);
   touch-action: manipulation;
 }
+/* The one tinted piece of glass on a screen: ink-blue, white label (7.2:1). */
 .btn-primary {
-  background: var(--ink);
-  color: var(--bg);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(15, 15, 10, 0.18);
+  background: var(--spec), color-mix(in oklab, #2f4fb5 94%, transparent);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.12), 0 1px 2px rgba(30, 45, 120, 0.25), 0 6px 14px -8px rgba(47, 79, 181, 0.6);
+}
+:root[data-theme="dark"] .btn-primary {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 45%), color-mix(in oklab, #3d5bc4 94%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 14px -8px rgba(61, 91, 196, 0.8);
 }
 .btn-primary:hover {
-  background: color-mix(in oklab, var(--ink) 85%, var(--accent));
+  background-color: #2a46a3;
+  filter: brightness(1.06);
 }
 .btn-ghost {
   color: var(--ink-2);
@@ -220,48 +288,101 @@ select:focus-visible {
   background: var(--hover);
   color: var(--ink);
 }
+/* Secondary: clear glass with a rim. */
 .btn-line {
-  border: 1px solid var(--line-strong);
+  background: var(--spec), var(--surface);
+  border: 1px solid var(--rim);
   color: var(--ink);
+  box-shadow: var(--glass-edge), 0 1px 2px var(--rim-low);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
+  backdrop-filter: blur(12px) saturate(170%);
 }
 .btn-line:hover {
-  background: var(--hover);
+  background: var(--spec), var(--glass-pill);
 }
 
+/* Cards: a raised piece of glass inside the pane, with a lit top edge. */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 14px;
+  background: var(--spec), var(--surface);
+  border: 1px solid var(--rim);
+  border-radius: 20px;
 }
 /* Layered so a shadow utility on a card (e.g. shadow-pop) still wins. */
 @layer components {
   .card {
-    box-shadow: var(--shadow);
+    box-shadow: var(--glass-edge), var(--shadow);
   }
 }
-:root[data-theme="dark"] .card {
-  border-color: var(--hairline);
+
+/* ---------------------------------------------------------------
+   Glass. Three thicknesses:
+   .pane         the big reading surface (no blur: the wallpaper is smooth, so blurring it
+                 would cost a lot and change nothing you can see)
+   .glass        floating chrome (sidebar, bars, tab bar, dock): clear, blurs what passes under
+   .glass-thick  sheets, menus, the palette: more opaque so forms read like paper
+   .glass-pill   the selected thing in a group (sidebar row, segmented control)
+---------------------------------------------------------------- */
+.pane {
+  background: var(--spec), var(--pane);
+  box-shadow: inset 0 1px 0 var(--rim), inset 0 0 0 1px color-mix(in oklab, var(--rim) 50%, transparent), var(--glass-edge), var(--shadow);
+}
+.glass {
+  background: var(--spec), var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 1px 0 var(--rim), inset 0 0 0 1px color-mix(in oklab, var(--rim) 55%, transparent), var(--glass-edge), var(--shadow);
+}
+.glass-thick {
+  background: var(--spec), var(--glass-thick);
+  -webkit-backdrop-filter: var(--glass-blur-thick);
+  backdrop-filter: var(--glass-blur-thick);
+  box-shadow: inset 0 1px 0 var(--rim), inset 0 0 0 1px color-mix(in oklab, var(--rim) 55%, transparent), var(--glass-edge), var(--shadow-pop);
+}
+.glass-pill {
+  background: var(--spec), var(--glass-pill);
+  box-shadow: inset 0 1px 0 var(--rim), var(--glass-edge), 0 1px 2px var(--rim-low), 0 4px 10px -6px rgba(30, 45, 80, 0.25);
+}
+/* The reading pane: floats beside the sidebar on desktop, inset under the top bar on phones. */
+.app-pane {
+  border-radius: 26px 26px 0 0;
+  margin: 6px 8px 0;
+  min-height: calc(100dvh - var(--topbar, 56px) - 6px);
+}
+@media (min-width: 768px) {
+  .app-pane {
+    border-radius: 28px;
+    margin: 0;
+    min-height: calc(100dvh - 24px);
+  }
 }
 
-/* Translucent chrome: blurs and lifts what scrolls beneath it. A bright top edge catches the light. */
+/* Sticky headers inside the pane blur whatever scrolls beneath them. */
+.sticky[class*="bg-surface"],
+.sticky[class*="bg-bg"],
+.sticky[class*="bg-sunken"] {
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+}
+
+/* Translucent chrome: blurs and lifts what scrolls beneath it. A bright edge catches the light. */
 .material {
-  background: var(--material);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
+  background: var(--spec), var(--material);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 .material-thick {
-  background: var(--material-thick);
-  -webkit-backdrop-filter: blur(30px) saturate(190%);
-  backdrop-filter: blur(30px) saturate(190%);
+  background: var(--spec), var(--material-thick);
+  -webkit-backdrop-filter: var(--glass-blur-thick);
+  backdrop-filter: var(--glass-blur-thick);
   box-shadow: inset 0 1px 0 var(--material-edge);
 }
 /* Scroll edge: a hairline only once content is actually passing underneath. */
 .edge-bottom {
-  box-shadow: 0 0.5px 0 transparent;
+  box-shadow: inset 0 -1px 0 transparent;
   transition: box-shadow calc(0.25s / var(--speed)) var(--ease);
 }
 .edge-bottom[data-scrolled] {
-  box-shadow: 0 0.5px 0 var(--hairline), 0 8px 16px -14px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 -0.5px 0 var(--material-edge), 0 0.5px 0 var(--hairline), 0 10px 20px -16px rgba(20, 30, 60, 0.35);
 }
 .edge-top {
   box-shadow: 0 -0.5px 0 var(--hairline), inset 0 0.5px 0 var(--material-edge);
@@ -280,24 +401,63 @@ select:focus-visible {
     stroke calc(0.35s / var(--speed)) var(--ease) !important;
 }
 
+/* Solid fallback when the system asks for less transparency or more contrast. */
 @media (prefers-reduced-transparency: reduce) {
+  :root {
+    --surface: #ffffff;
+    --pane: #f7f8fb;
+    --glass: #f3f5f9;
+    --glass-thick: #f7f8fb;
+    --glass-bar: #e6ebf3;
+    --glass-pill: #ffffff;
+    --material: #f3f5f9;
+    --material-thick: #f3f5f9;
+  }
+  :root[data-theme="dark"] {
+    --surface: #262a33;
+    --pane: #1b1e25;
+    --glass: #1f232b;
+    --glass-thick: #1f232b;
+    --glass-bar: #2a2f3a;
+    --glass-pill: #2c313b;
+    --material: #1f232b;
+    --material-thick: #1f232b;
+  }
   .material,
-  .material-thick {
-    background: var(--bg);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+  .material-thick,
+  .glass,
+  .glass-thick,
+  .btn-line,
+  .tabbar-strip,
+  .tabbar-patch {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
 }
 @media (prefers-contrast: more) {
   :root {
-    --line: #c9c7c0;
-    --muted: #6a675f;
+    --line: rgba(30, 45, 80, 0.3);
+    --muted: #4c5466;
     --hairline: rgba(15, 15, 10, 0.3);
   }
   :root[data-theme="dark"] {
-    --line: #4a4946;
-    --muted: #aaa69c;
+    --line: rgba(255, 255, 255, 0.25);
+    --muted: #b3b9c6;
     --hairline: rgba(255, 255, 255, 0.3);
+  }
+  :root {
+    --pane: rgba(255, 255, 255, 0.94);
+    --glass: rgba(250, 251, 253, 0.96);
+    --glass-thick: rgba(250, 251, 253, 0.98);
+    --surface: rgba(255, 255, 255, 0.95);
+    --rim: rgba(30, 45, 80, 0.35);
+  }
+  :root[data-theme="dark"] {
+    --pane: rgba(22, 25, 32, 0.96);
+    --glass: rgba(26, 29, 37, 0.97);
+    --glass-thick: rgba(26, 29, 37, 0.98);
+    --surface: rgba(40, 44, 54, 0.96);
+    --rim: rgba(255, 255, 255, 0.35);
   }
   .material,
   .material-thick {
@@ -491,7 +651,7 @@ body.cal-dragging.cal-copying * {
   /* Buttons: primary lifts with a deeper shadow; outlined firms up its edge; icons grow slightly. */
   .btn-primary:hover:not(:active) {
     transform: translateY(-1px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 6px 14px -6px rgba(15, 15, 10, 0.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 20px -8px rgba(47, 79, 181, 0.55);
   }
   .btn-line:hover {
     border-color: var(--ink-2);
@@ -562,7 +722,7 @@ body.cal-dragging.cal-copying * {
   .row {
     margin-inline: -10px;
     padding-inline: 10px;
-    border-radius: 10px;
+    border-radius: 12px;
   }
   .row-list {
     margin-inline: -10px;
@@ -586,33 +746,50 @@ body.cal-dragging.cal-copying * {
 .tabbar {
   container-type: inline-size;
   --glide: calc(0.42s / var(--speed));
-  /* One soft shadow for the whole shape, notch included (a drop-shadow follows the cut-out). */
-  filter: drop-shadow(0 1px 2px rgba(15, 15, 10, 0.08)) drop-shadow(0 12px 22px rgba(15, 15, 10, 0.16));
 }
-:root[data-theme="dark"] .tabbar {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55));
+/* The pill only clips and casts the shadow. It has no filter: a filter here would stop the
+   glass inside from seeing (and blurring) the page behind the bar. */
+.tabbar-pill {
+  /* Negative spread keeps the shadow off the top edge, where it would draw across the notch. */
+  box-shadow: 0 14px 26px -12px rgba(30, 45, 80, 0.42);
 }
+:root[data-theme="dark"] .tabbar-pill {
+  box-shadow: 0 14px 26px -12px rgba(0, 0, 0, 0.85);
+}
+/* The glass itself: one strip, two bar-widths plus the 100px notch piece, cut to shape by a
+   mask that never changes (the strip slides, the mask rides along with it). */
 .tabbar-strip {
-  /* Two bar-widths of flat surface plus the 100px notch piece; centre the notch on slot --i. */
   width: calc(200cqw + 100px);
   transform: translate3d(calc((var(--i) + 0.5) * 100cqw / var(--n) - 100cqw - 50px), 0, 0);
   transition: transform var(--glide) var(--ease);
-  will-change: transform;
+  /* Fairly opaque glass: Chrome can drop the backdrop blur on a masked layer once it has slid,
+     so the tint alone must keep what passes beneath quiet. No will-change, which makes that worse. */
+  background: var(--spec), var(--glass-bar);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 1px 0 var(--rim), inset 0 -1px 0 var(--rim-low);
+  --notch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='64' viewBox='0 0 100 64'%3E%3Cpath d='M0 0H8.19A8 8 0 0 1 16.15 7.24A34 34 0 0 0 83.85 7.24A8 8 0 0 1 91.81 0H100V64H0Z'/%3E%3C/svg%3E");
+  -webkit-mask-image: linear-gradient(#000, #000), var(--notch), linear-gradient(#000, #000);
+  mask-image: linear-gradient(#000, #000), var(--notch), linear-gradient(#000, #000);
+  -webkit-mask-size: calc(100cqw + 1px) 100%, 100px 100%, calc(100cqw + 1px) 100%;
+  mask-size: calc(100cqw + 1px) 100%, 100px 100%, calc(100cqw + 1px) 100%;
+  -webkit-mask-position: 0 0, 100cqw 0, calc(100cqw + 99px) 0;
+  mask-position: 0 0, 100cqw 0, calc(100cqw + 99px) 0;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
-.tabbar-flat {
-  width: 100cqw;
-  flex: none;
-  background: var(--surface);
-}
-.tabbar-fill {
-  fill: var(--surface);
-  /* The path runs 2px past each side to overlap the flat pieces (hides the subpixel seam). */
-  overflow: visible;
-}
-/* Fills the notch in when no tab is open (Settings), instead of the notch sliding away. */
+/* Fills the notch in when no tab is open (Settings): exactly the hole's shape, same glass,
+   fading in where the notch sits. */
 .tabbar-patch {
+  width: 100px;
+  transform: translate3d(calc((var(--i) + 0.5) * 100cqw / var(--n) - 50px), 0, 0);
+  transition: transform var(--glide) var(--ease), opacity calc(0.25s / var(--speed)) var(--ease);
+  background: var(--spec), var(--glass-bar);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='64' viewBox='0 0 100 64'%3E%3Cpath d='M8.19 0A8 8 0 0 1 16.15 7.24A34 34 0 0 0 83.85 7.24A8 8 0 0 1 91.81 0Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100px 100%;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='64' viewBox='0 0 100 64'%3E%3Cpath d='M8.19 0A8 8 0 0 1 16.15 7.24A34 34 0 0 0 83.85 7.24A8 8 0 0 1 91.81 0Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100px 100%;
   opacity: 0;
-  transition: opacity calc(0.25s / var(--speed)) var(--ease);
 }
 .tabbar-patch.is-on {
   opacity: 1;
@@ -623,8 +800,11 @@ body.cal-dragging.cal-copying * {
   transition: transform var(--glide) var(--ease);
   will-change: transform;
 }
+/* The open tab: a drop of tinted glass. */
 .tabbar-circle {
-  box-shadow: 0 8px 16px -6px color-mix(in oklab, var(--accent) 60%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 50%), #2f4fb5;
+  color: #fff;
+  box-shadow: 0 8px 18px -6px rgba(47, 79, 181, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -2px 4px rgba(10, 20, 60, 0.25);
   transition: opacity calc(0.25s / var(--speed)) var(--ease), transform calc(0.3s / var(--speed)) var(--ease);
 }
 .tabbar-dot {
@@ -641,9 +821,14 @@ body.cal-dragging.cal-copying * {
 }
 @media (prefers-reduced-motion: reduce) {
   .tabbar-strip,
+  .tabbar-patch,
   .tabbar-carrier {
     transition-duration: 0.01ms;
   }
+}
+:root[data-theme="dark"] .tabbar-circle {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 50%), #3d5bc4;
+  box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.3);
 }
 @media (prefers-contrast: more) {
   .tabbar-pill {

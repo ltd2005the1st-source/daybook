@@ -194,7 +194,7 @@ export function MusicDock() {
           exit={{ y: "100%" }}
           transition={{ duration: sec(0.34), ease: EASE }}
           style={{ bottom: navH }}
-          className="no-print fixed inset-x-0 z-40 border-t border-line bg-surface shadow-[0_-6px_24px_rgba(0,0,0,0.06)]"
+          className="no-print fixed inset-x-0 z-40 glass"
           aria-label="Music player"
         >
           {/* Timeline: a thin line along the top edge; click to jump. */}

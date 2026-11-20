@@ -106,11 +106,11 @@ export function Sheet({
             exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
             transition={{ duration: sec(0.34), ease: [0.65, 0, 0.35, 1] }}
             style={{ maxWidth: width, transformOrigin: "50% 100%" }}
-            className="relative w-full max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-[22px] md:rounded-[18px] bg-surface border border-line dark:border-[var(--hairline)] shadow-pop pb-[env(safe-area-inset-bottom)]"
+            className="relative w-full max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-[28px] md:rounded-[26px] glass-thick pb-[env(safe-area-inset-bottom)]"
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between bg-surface/80 backdrop-blur-xl px-5 pt-4 pb-2">
+            <div className="sticky top-0 z-10 flex items-center justify-between px-5 pt-4 pb-2">
               <h3 className="display text-[20px] font-semibold">{title}</h3>
-              <button aria-label="Close" onClick={onClose} className="press inline-flex h-8 w-8 items-center justify-center rounded-full bg-hover text-ink-2 hover:text-ink">
+              <button aria-label="Close" onClick={onClose} className="press glass-pill inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-2 hover:text-ink">
                 <X size={17} />
               </button>
             </div>
@@ -196,7 +196,7 @@ export function Tick({
         <svg viewBox="0 0 16 16" width={size - 4} height={size - 4} fill="none">
           <path
             d="M3.5 8.5l3 3 6-7"
-            stroke="var(--surface)"
+            stroke="#fff"
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -227,19 +227,19 @@ export function Segmented<T extends string>({
   // One id per control, so two copies of the same options on screen never share (and hide) one pill.
   const pillId = useId();
   return (
-    <div className={cx("inline-flex rounded-[10px] bg-hover p-[3px]", className)}>
+    <div className={cx("inline-flex rounded-full bg-hover p-[3px]", className)}>
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
           className={cx(
-            "press relative rounded-[7px] px-2.5 py-1 text-[13px]",
+            "press relative rounded-full px-3 py-1 text-[13px]",
             value === o.value ? "text-ink font-medium" : "text-muted hover:text-ink",
           )}
         >
           {value === o.value && (
-            <motion.span layoutId={`seg-${pillId}`} className="absolute inset-0 rounded-[7px] bg-surface shadow-card" transition={{ duration: sec(0.32), ease: [0.65, 0, 0.35, 1] }} />
+            <motion.span layoutId={`seg-${pillId}`} className="absolute inset-0 rounded-full glass-pill" transition={{ duration: sec(0.32), ease: [0.65, 0, 0.35, 1] }} />
           )}
           <span className="relative">{o.label}</span>
         </button>

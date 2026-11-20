@@ -58,7 +58,7 @@ export default function ReceiptView({ params }: { params: Promise<{ id: string }
       </div>
 
       {/* The slip */}
-      <article className="mx-auto max-w-[520px] bg-surface text-ink shadow-pop rise relative" style={{ borderRadius: 4 }}>
+      <article className="mx-auto max-w-[520px] bg-paper text-ink shadow-pop rise relative" style={{ borderRadius: 4 }}>
         <div className="h-2 rounded-t" style={{ background: s?.color ?? "var(--ink)" }} />
         <div className="px-8 pt-7 pb-6">
           <div className="flex items-start justify-between">
@@ -123,7 +123,7 @@ export default function ReceiptView({ params }: { params: Promise<{ id: string }
         <div
           className="h-3"
           style={{
-            background: "radial-gradient(circle at 6px 0, transparent 5px, var(--surface) 5.5px) 0 0/12px 12px repeat-x",
+            background: "radial-gradient(circle at 6px 0, transparent 5px, var(--paper) 5.5px) 0 0/12px 12px repeat-x",
             transform: "translateY(100%)",
             position: "absolute",
             left: 0,
