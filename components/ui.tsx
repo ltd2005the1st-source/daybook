@@ -37,7 +37,7 @@ export function PageHeader({
     <div className="mb-6 md:mb-8 flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0">
         {eyebrow && <div className="label mb-1.5">{eyebrow}</div>}
-        <h1 className="display title text-[34px] md:text-[48px]">{title}</h1>
+        <h1 className="display title text-[32px] md:text-[40px] font-semibold">{title}</h1>
       </div>
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
     </div>
@@ -57,8 +57,8 @@ export function Section({
 }) {
   return (
     <section className={cx("mb-8", className)}>
-      <div className="mb-3 flex items-end justify-between gap-2 border-b-2 border-ink pb-1.5">
-        <h2 className="display text-[19px] leading-tight text-ink">{title}</h2>
+      <div className="mb-2.5 flex items-center justify-between gap-2 border-b border-line pb-1.5">
+        <h2 className="text-[13px] font-semibold text-ink-2">{title}</h2>
         {action}
       </div>
       {children}
@@ -106,11 +106,11 @@ export function Sheet({
             exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
             transition={{ duration: sec(0.34), ease: [0.65, 0, 0.35, 1] }}
             style={{ maxWidth: width, transformOrigin: "50% 100%" }}
-            className="relative w-full max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-[26px] md:rounded-[24px] bg-surface border-[1.5px] border-ink/15 shadow-pop pb-[env(safe-area-inset-bottom)]"
+            className="relative w-full max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-[22px] md:rounded-[18px] bg-surface border border-line dark:border-[var(--hairline)] shadow-pop pb-[env(safe-area-inset-bottom)]"
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between bg-surface px-5 pt-4 pb-2">
-              <h3 className="display text-[22px]">{title}</h3>
-              <button aria-label="Close" onClick={onClose} className="press inline-flex h-9 w-9 items-center justify-center rounded-full bg-hover text-ink-2 hover:text-ink">
+            <div className="sticky top-0 z-10 flex items-center justify-between bg-surface/80 backdrop-blur-xl px-5 pt-4 pb-2">
+              <h3 className="display text-[20px] font-semibold">{title}</h3>
+              <button aria-label="Close" onClick={onClose} className="press inline-flex h-8 w-8 items-center justify-center rounded-full bg-hover text-ink-2 hover:text-ink">
                 <X size={17} />
               </button>
             </div>
@@ -134,7 +134,7 @@ export function Field({ label, children, className }: { label: string; children:
 export function Progress({ value, color, className, height = 6 }: { value: number; color?: string; className?: string; height?: number }) {
   const pct = Math.max(0, Math.min(1, value)) * 100;
   return (
-    <div className={cx("relative w-full overflow-hidden rounded-full bg-[var(--line)]", className)} style={{ height }}>
+    <div className={cx("relative w-full overflow-hidden rounded-full bg-hover", className)} style={{ height }}>
       <motion.div
         className="absolute inset-y-0 left-0 rounded-full"
         style={{ background: color ?? "var(--ink)" }}
@@ -182,13 +182,13 @@ export function Tick({
       }}
       className={cx(
         "press relative shrink-0 inline-flex items-center justify-center border-[1.5px] transition-colors duration-200",
-        round ? "rounded-full" : "rounded-[6px]",
+        round ? "rounded-full" : "rounded-[5px]",
         pop && "tick-pop",
       )}
       style={{
         width: size,
         height: size,
-        borderColor: checked ? color : "var(--field-edge)",
+        borderColor: checked ? color : "var(--line-strong)",
         background: checked ? color : "transparent",
       }}
     >
@@ -227,19 +227,19 @@ export function Segmented<T extends string>({
   // One id per control, so two copies of the same options on screen never share (and hide) one pill.
   const pillId = useId();
   return (
-    <div className={cx("inline-flex rounded-full bg-hover p-[3px]", className)}>
+    <div className={cx("inline-flex rounded-[10px] bg-hover p-[3px]", className)}>
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
           className={cx(
-            "press relative rounded-full px-2.5 py-1 text-[13px] md:px-3",
-            value === o.value ? "text-bg font-semibold" : "text-ink-2 hover:text-ink",
+            "press relative rounded-[7px] px-2.5 py-1 text-[13px]",
+            value === o.value ? "text-ink font-medium" : "text-muted hover:text-ink",
           )}
         >
           {value === o.value && (
-            <motion.span layoutId={`seg-${pillId}`} className="absolute inset-0 rounded-full bg-ink" transition={{ duration: sec(0.32), ease: [0.65, 0, 0.35, 1] }} />
+            <motion.span layoutId={`seg-${pillId}`} className="absolute inset-0 rounded-[7px] bg-surface shadow-card" transition={{ duration: sec(0.32), ease: [0.65, 0, 0.35, 1] }} />
           )}
           <span className="relative">{o.label}</span>
         </button>
@@ -249,7 +249,7 @@ export function Segmented<T extends string>({
 }
 
 export function Empty({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-2xl border-[1.5px] border-dashed border-line-strong px-4 py-6 text-center text-[14px] text-ink-2">{children}</div>;
+  return <div className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-[13.5px] text-muted">{children}</div>;
 }
 
 /** A destructive button that asks for a second tap instead of a browser dialog. */

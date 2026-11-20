@@ -7,7 +7,7 @@ import {
   LayoutGrid,
   Moon,
   PanelRightOpen,
-  MessageCircle,
+  Sparkles,
   Sun,
   X,
 } from "lucide-react";
@@ -125,21 +125,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <NativeSync />
     <div className="min-h-dvh md:flex">
       {/* Sidebar (desktop) */}
-      <aside className="side no-print hidden md:flex w-[200px] shrink-0 flex-col sticky top-0 h-[calc(100dvh-var(--dock,0px))] px-3 pb-3 transition-[height] duration-300 ease-in-out">
-        {/* Masthead: the wordmark over the four-colour stripe, like the top of a 70s planner. */}
-        <Link href="/" className="-mx-3 mb-4 block pt-4">
-          <span className="flex items-center gap-2 px-5 pb-3">
-            <img src="/icon.svg" alt="" className="h-7 w-7 rounded-full" />
-            <span className="display text-[24px] leading-none text-panel-ink">Daybook</span>
-          </span>
-          <span aria-hidden className="stripes block" />
+      <aside className="no-print hidden md:flex w-[186px] shrink-0 flex-col border-r border-line bg-sunken sticky top-0 h-[calc(100dvh-var(--dock,0px))] px-2.5 py-3 transition-[height] duration-300 ease-in-out">
+        <Link href="/" className="flex items-center gap-2 px-2 py-1.5 mb-3">
+          <img src="/icon.svg" alt="" className="h-6 w-6 rounded-[6px]" />
+          <span className="display text-[17px] font-semibold">Daybook</span>
         </Link>
         <button
           onClick={() => setPaletteOpen(true)}
-          className="press mb-4 flex items-center justify-between rounded-full border-[1.5px] border-[var(--panel-muted)]/50 px-3.5 py-1.5 text-[13px] text-muted hover:text-ink"
+          className="press mb-3 flex items-center justify-between rounded-lg border border-line bg-surface px-2.5 py-1.5 text-[13px] text-muted shadow-card hover:text-ink"
         >
           <span>Jump or add…</span>
-          <kbd className="num text-[11px] leading-[16px]">⌘K</kbd>
+          <kbd className="num rounded-[5px] border border-line px-1 text-[10.5px] leading-[16px]">⌘K</kbd>
         </button>
         <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-3 [mask-image:linear-gradient(to_bottom,black_calc(100%-20px),transparent)]">
         <nav className="flex flex-col gap-px">
@@ -151,18 +147,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 href={n.href}
                 aria-current={active ? "true" : undefined}
                 className={cx(
-                  "press nav-item relative flex items-center gap-2.5 rounded-full px-3 py-[7px] text-[14.5px]",
-                  active ? "font-semibold" : "",
+                  "press nav-item relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[14px]",
+                  active ? "text-ink font-medium" : "text-ink-2 hover:bg-hover hover:text-ink",
                 )}
               >
                 {active && (
                   <motion.span
                     layoutId="nav-active"
-                    className="absolute inset-0 rounded-full bg-gold"
+                    className="absolute inset-0 rounded-lg bg-surface shadow-card"
                     transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }}
                   />
                 )}
-                <n.icon size={16} strokeWidth={active ? 2.2 : 1.8} className="relative" />
+                <n.icon size={16} strokeWidth={active ? 2 : 1.8} className={cx("relative", active && "text-accent")} />
                 <span className="relative">{n.label}</span>
               </Link>
             );
@@ -171,19 +167,19 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <AppLinks onEdit={() => setEditApps(true)} />
         </div>
         <div className="mt-auto flex flex-col gap-px">
-          <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-full px-3 py-[6px] text-[13.5px]">
-            <MessageCircle size={16} strokeWidth={1.8} />
+          <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+            <Sparkles size={16} strokeWidth={1.8} />
             <span className="flex-1 text-left">Ask Claude</span>
             <kbd className="num text-[10.5px] text-muted">⌘J</kbd>
           </button>
-          <button onClick={toggle} className="press nav-item flex items-center gap-2.5 rounded-full px-3 py-[6px] text-[13.5px]">
+          <button onClick={toggle} className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             {theme === "dark" ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}
             {theme === "dark" ? "Light mode" : "Dark mode"}
           </button>
-          <Link href="/settings" className="press nav-item flex items-center gap-2.5 rounded-full px-3 py-[6px] text-[13.5px]">
+          <Link href="/settings" className="press nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <PanelRightOpen size={16} strokeWidth={1.8} /> Settings
           </Link>
-          <div className="px-3 pt-2 text-[12px] text-muted leading-snug">
+          <div className="px-2.5 pt-2 text-[11.5px] text-muted leading-snug">
             {online ? (
               <>
                 Synced · {(session?.user.app_metadata?.username as string | undefined) ?? session?.user.email}
@@ -199,17 +195,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Mobile top bar */}
-      <header ref={topbarRef} data-scrolled={scrolled || undefined} className="no-print md:hidden sticky top-0 z-30 flex flex-wrap items-center justify-between material px-4 pt-[max(env(safe-area-inset-top),10px)]">
-        <Link href="/" className="flex items-center gap-2 pb-2">
-          <img src="/icon.svg" alt="" className="h-7 w-7 rounded-full" />
-          <span className="display text-[21px] leading-none">Daybook</span>
+      <header ref={topbarRef} data-scrolled={scrolled || undefined} className="no-print md:hidden sticky top-0 z-30 flex items-center justify-between material edge-bottom px-4 pt-[max(env(safe-area-inset-top),10px)] pb-2.5">
+        <Link href="/" className="flex items-center gap-2">
+          <img src="/icon.svg" alt="" className="h-6 w-6 rounded-[6px]" />
+          <span className="display text-[17px] font-semibold">Daybook</span>
         </Link>
-        <div className="flex items-center gap-1 pb-2">
+        <div className="flex items-center gap-1">
           <button aria-label="Apps" onClick={() => setAppsOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
             <LayoutGrid size={17} />
           </button>
           <button aria-label="Ask Claude" onClick={() => setAskOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-accent hover:bg-hover">
-            <MessageCircle size={17} />
+            <Sparkles size={17} />
           </button>
           <button aria-label="Toggle theme" onClick={toggle} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
             {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
@@ -218,8 +214,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <PanelRightOpen size={17} />
           </Link>
         </div>
-        {/* The stripe band closes the bar off from the page, so it needs no shadow when scrolled. */}
-        <span aria-hidden className="stripes -mx-4 block h-[10px] w-[calc(100%+2rem)]" />
       </header>
 
       <main className="min-w-0 flex-1 pb-[calc(9rem+var(--dock,0px))] md:pb-[calc(2.5rem+var(--dock,0px))]">
@@ -326,7 +320,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               animate={{ opacity: 1, y: 0, transition: { duration: sec(0.34), ease: [0.65, 0, 0.35, 1] } }}
               exit={{ opacity: 0, y: 28, transition: { duration: sec(0.3), ease: [0.65, 0, 0.35, 1] } }}
               transition={{ layout: { duration: sec(0.3), ease: [0.65, 0, 0.35, 1] } }}
-              className="flex items-center gap-3 rounded-full bg-ink py-2 pl-4 pr-3 text-[13.5px] font-medium text-bg shadow-[0_3px_0_var(--accent)]"
+              className="flex items-center gap-3 rounded-full bg-ink/90 py-2 pl-4 pr-3 text-[13.5px] text-bg shadow-pop backdrop-blur-xl"
             >
               {t.text}
               {t.undo && (

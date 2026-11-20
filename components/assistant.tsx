@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUp, Eraser, MessageCircle, X } from "lucide-react";
+import { ArrowUp, Eraser, Sparkles, X } from "lucide-react";
 import type Anthropic from "@anthropic-ai/sdk";
 import { useData } from "./data";
 import { runTool } from "@/lib/assistant-exec";
@@ -261,7 +261,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
             <header className="flex items-center justify-between gap-2 px-5 pt-4 pb-3 edge-bottom" data-scrolled>
               <div className="flex items-center gap-2.5">
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent">
-                  <MessageCircle size={16} strokeWidth={2} />
+                  <Sparkles size={16} strokeWidth={2} />
                 </span>
                 <div>
                   <h3 className="display text-[18px] font-semibold leading-tight">Ask Claude</h3>

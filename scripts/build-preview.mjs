@@ -37,10 +37,10 @@ const html = `<meta charset="utf-8">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Paytone+One&family=Work+Sans:wght@400..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap">
 <script>${theme}</script>
 <style>
-:root{--font-paytone:"Paytone One";--font-work:"Work Sans"}
+:root{--font-bricolage:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark}}
 ${css}
 </style>
