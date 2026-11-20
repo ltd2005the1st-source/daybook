@@ -112,7 +112,7 @@ export default function TodayPage() {
         <div className="label mb-1.5">
           {WD_LONG[d.getDay()]}, {d.getDate()} {MONTHS[d.getMonth()]}
         </div>
-        <h1 className="display text-[34px] md:text-[52px] leading-[1.1]">
+        <h1 className="display text-[34px] md:text-[46px] font-semibold leading-[1.02]">
           {now ? greeting(now.getHours()) : "Hello"}
           {name ? `, ${name}` : ""}.
         </h1>
@@ -151,7 +151,7 @@ export default function TodayPage() {
                         <span className={cx("text-[14.5px] font-medium leading-[22px]", (o.status === "cancelled" || o.status === "missed_owe" || o.done) && "line-through text-muted")}>
                           {o.title}
                         </span>
-                        {live && <span className="sticker">Now</span>}
+                        {live && <span className="rounded bg-pen px-1.5 text-[10.5px] font-bold uppercase tracking-wide text-white">Now</span>}
                       </div>
                       <div className="text-[12px] text-muted">
                         <span className="num">{o.kind !== "check" && o.kind !== "task" && o.start && o.end ? `${o.start}–${o.end}` : ""}</span>

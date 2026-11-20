@@ -71,8 +71,8 @@ export function PinInput({
             <div
               key={i}
               className={cx(
-                "flex h-14 items-center justify-center rounded-2xl border-[1.5px] bg-surface transition-colors duration-200",
-                current ? "border-accent" : "border-line-strong",
+                "flex h-14 items-center justify-center rounded-lg border bg-surface transition-colors duration-200",
+                current ? "border-ink-2" : "border-line-strong",
               )}
             >
               {filled && (
@@ -81,7 +81,7 @@ export function PinInput({
                   initial={{ y: 6, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: sec(0.18), ease: [0.65, 0, 0.35, 1] }}
-                  className="display text-[26px] text-ink"
+                  className="num text-[24px] font-semibold text-ink"
                 >
                   {value[i]}
                 </motion.span>
@@ -169,17 +169,16 @@ export function Login() {
         : "You’ll stay signed in on this device.";
 
   return (
-    <div className="min-h-dvh flex items-center justify-center px-4">
+    <div className="min-h-dvh flex items-center justify-center px-4 ruled">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           submit();
         }}
-        className="card w-full max-w-[360px] overflow-hidden p-6 pt-0 shadow-pop rise"
+        className="card w-full max-w-[340px] p-6 shadow-pop rise"
       >
-        <span aria-hidden className="stripes -mx-6 mb-6 block h-[16px]" />
-        <img src="/icon.svg" alt="" className="h-10 w-10 rounded-full mb-4" />
-        <h1 className="display text-[30px] leading-tight text-balance">{title}</h1>
+        <img src="/icon.svg" alt="" className="h-9 w-9 rounded-lg mb-4" />
+        <h1 className="display text-[26px] font-semibold leading-tight text-balance">{title}</h1>
         <p className="text-ink-2 mt-1 mb-5 text-[13.5px]">{sub}</p>
 
         {screen === "loading" ? (

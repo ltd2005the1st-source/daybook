@@ -555,7 +555,7 @@ export default function CalendarPage() {
       {/* One compact row, so the calendar itself gets the height. */}
       <div ref={header} className="mb-2.5 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
         <div className="flex flex-1 items-center gap-2 md:flex-none">
-          <h1 className="display whitespace-nowrap text-[20px] md:text-[28px] leading-none">{title}</h1>
+          <h1 className="display text-[22px] md:text-[24px] font-semibold leading-none">{title}</h1>
           <CalendarHelp />
         </div>
         {/* On a phone: title and day arrows on one row, view switch and actions on the next. */}
@@ -572,7 +572,7 @@ export default function CalendarPage() {
             className="order-3 mr-1 md:order-none"
           />
           <button
-            className="btn btn-line order-3 !px-3 disabled:opacity-40 md:order-none"
+            className="btn btn-line order-3 disabled:opacity-40 md:order-none"
             disabled={openCount === 0}
             aria-label="Mark all done"
             onClick={() => markAll(true)}
@@ -581,7 +581,7 @@ export default function CalendarPage() {
             <CheckCheck size={15} /> <span className="hidden md:inline">Mark all done</span>
           </button>
           <button
-            className="btn btn-line order-3 mr-1 !px-3 disabled:opacity-40 md:order-none"
+            className="btn btn-line order-3 mr-1 disabled:opacity-40 md:order-none"
             disabled={doneCount === 0}
             aria-label="Mark all not done"
             onClick={() => markAll(false)}
@@ -589,13 +589,13 @@ export default function CalendarPage() {
           >
             <RotateCcw size={14} /> <span className="hidden md:inline">Mark all not done</span>
           </button>
-          <button aria-label="Previous" className="btn btn-ghost order-1 !px-1.5 md:order-none" onClick={() => step(-1)}>
+          <button aria-label="Previous" className="btn btn-ghost order-1 px-1.5 md:order-none" onClick={() => step(-1)}>
             <ChevronLeft size={17} />
           </button>
-          <button className="btn btn-line order-1 !px-3 md:!px-3.5 md:order-none" onClick={() => setAnchor(t)}>
+          <button className="btn btn-line order-1 md:order-none" onClick={() => setAnchor(t)}>
             Today
           </button>
-          <button aria-label="Next" className="btn btn-ghost order-1 !px-1.5 md:order-none" onClick={() => step(1)}>
+          <button aria-label="Next" className="btn btn-ghost order-1 px-1.5 md:order-none" onClick={() => step(1)}>
             <ChevronRight size={17} />
           </button>
           <button className="btn btn-primary order-3 ml-auto md:order-none md:ml-1" onClick={() => setNewAt({ date: anchor, start: "09:00" })}>
@@ -662,7 +662,7 @@ export default function CalendarPage() {
                 {days.map((d) => (
                   <button key={d} onClick={() => setAnchor(d)} className="flex flex-col items-center py-2 hover:bg-hover">
                     <span className="label !text-[10.5px]">{WD_SHORT[parseDate(d).getDay()]}</span>
-                    <span className={cx("num mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-[18px]", d === t ? "bg-accent text-on-accent font-semibold" : "text-ink")}>
+                    <span className={cx("num mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-[18px]", d === t ? "bg-pen text-white font-semibold" : "text-ink")}>
                       {parseDate(d).getDate()}
                     </span>
                   </button>
@@ -737,8 +737,8 @@ export default function CalendarPage() {
                       {ghost && <Ghost drag={ghost} />}
                       {d === t && nowMin >= START_H * 60 && (
                         <div className="pointer-events-none absolute inset-x-0 z-[4] flex items-center" style={{ top: ((nowMin - START_H * 60) / 60) * HOUR }}>
-                          <span className="-ml-1 h-2 w-2 rounded-full bg-accent" />
-                          <span className="h-[2px] flex-1 bg-accent" />
+                          <span className="-ml-1 h-2 w-2 rounded-full bg-pen" />
+                          <span className="h-[1.5px] flex-1 bg-pen" />
                         </div>
                       )}
                     </div>
@@ -1014,7 +1014,7 @@ function MonthView({ month, onDay, onOcc }: { month: string; onDay: (d: string) 
                 <span
                   className={cx(
                     "num flex h-6 w-6 items-center justify-center rounded-full text-[12.5px]",
-                    d === t ? "bg-accent font-semibold text-on-accent" : inMonth ? "text-ink" : "text-muted",
+                    d === t ? "bg-pen font-semibold text-white" : inMonth ? "text-ink" : "text-muted",
                   )}
                 >
                   {parseDate(d).getDate()}
@@ -1090,7 +1090,7 @@ function YearView({ year, onDay }: { year: number; onDay: (d: string) => void })
                     aria-label={fmtDay(d, { weekday: true })}
                     className={cx(
                       "num relative mx-auto flex h-7 w-7 items-center justify-center rounded-full text-[11.5px] transition-colors hover:bg-hover",
-                      d === t && "bg-accent font-semibold text-on-accent hover:bg-accent",
+                      d === t && "bg-pen font-semibold text-white hover:bg-pen",
                     )}
                   >
                     {parseDate(d).getDate()}

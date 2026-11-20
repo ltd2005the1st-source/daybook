@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { CheckSquare, CornerDownLeft, MessageCircle } from "lucide-react";
+import { CheckSquare, CornerDownLeft, Sparkles } from "lucide-react";
 import { useData } from "./data";
 import { NAV, sectionOf } from "./nav";
 import { scrollToSection } from "./scroll-spy";
@@ -50,7 +50,7 @@ export function Palette({ open, onClose, onAsk }: { open: boolean; onClose: () =
               {
                 id: "ask",
                 label: `Ask Claude: “${q}”`,
-                icon: MessageCircle,
+                icon: Sparkles,
                 run: () => {
                   onAsk(q);
                   onClose();

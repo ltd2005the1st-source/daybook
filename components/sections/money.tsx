@@ -121,7 +121,7 @@ export default function MoneyPage() {
             {groups.length === 0 && <p className="text-[13.5px] text-muted">Nothing logged in {fmtMonth(month)} yet.</p>}
             {groups.map(([date, items]) => (
               <div key={date} className="mb-3">
-                <div className="sticky top-[52px] md:top-0 z-[1] bg-bg py-1 text-[12px] font-semibold text-muted">{relDay(date)}</div>
+                <div className="sticky top-[52px] md:top-0 z-[1] bg-bg/90 backdrop-blur py-1 text-[12px] font-semibold text-muted">{relDay(date)}</div>
                 {items.map((t) => (
                   <button
                     key={t.id}

@@ -381,7 +381,7 @@ export function EventSheet({
         </div>
 
         {/* Actions stay in view at the bottom, even when the sheet has to scroll on a phone. */}
-        <div className="sticky bottom-0 z-10 -mx-5 -mb-5 flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface px-5 py-3">
+        <div className="sticky bottom-0 z-10 -mx-5 -mb-5 flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface/85 px-5 py-3 backdrop-blur-xl">
           {existing ? (
             <div className="flex flex-wrap gap-1">
               {onCopy && (
