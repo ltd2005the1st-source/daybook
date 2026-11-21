@@ -289,6 +289,8 @@ function PagedDashboard() {
     const root = document.querySelector<HTMLElement>("[data-dashboard]");
     if (!root) return;
     const html = document.documentElement;
+    const tabbar = () => document.querySelector<HTMLElement>(".tabbar");
+    const curIdx = () => NAV.findIndex((n) => n.id === curRef.current);
     let mode = 0; // 0 idle, 1 undecided, 2 dragging
     let sx = 0, sy = 0, dir = 0, x = 0, vx = 0, lastX = 0, lastT = 0, raf = 0;
     let nb: HTMLElement | null = null;
@@ -311,8 +313,6 @@ function PagedDashboard() {
       el.style.left = `${d * 100}%`;
       // Shown at its top, level with whatever part of this page is on screen.
       el.style.top = `${Math.max(0, window.scrollY)}px`;
-      root.style.overflow = "visible";
-      html.style.overflowX = "clip";
       html.classList.add("paging");
       root.style.willChange = "transform";
     };
@@ -320,8 +320,7 @@ function PagedDashboard() {
       if (nb) {
         nb.style.visibility = nb.style.left = nb.style.top = "";
       }
-      root.style.transform = root.style.transition = root.style.overflow = root.style.willChange = "";
-      html.style.overflowX = "";
+      root.style.transform = root.style.transition = root.style.willChange = "";
       html.classList.remove("paging");
       nb = null;
       mode = 0;
@@ -333,6 +332,10 @@ function PagedDashboard() {
     // Glide the layers to where they should end up, then switch page for real.
     const settle = (to: number, id: string | null, speed = 1) => {
       busy.current = true;
+      const tb = tabbar();
+      tb?.classList.remove("is-dragging");
+      if (id) setActiveSection(id);
+      tb?.style.setProperty("--i", String(id ? NAV.findIndex((n) => n.id === id) : curIdx()));
       const dur = ms(300 * speed);
       root.style.transition = `transform ${dur}ms cubic-bezier(0.22, 1, 0.36, 1)`;
       root.style.transform = `translate3d(${to}px,0,0)`;
@@ -354,6 +357,7 @@ function PagedDashboard() {
       const d = NAV.findIndex((n) => n.id === id) > NAV.findIndex((n) => n.id === curRef.current) ? 1 : -1;
       setSeen((s) => (s.includes(id) ? s : [...s, id]));
       busy.current = true;
+      setActiveSection(id);
       // Wait a frame if it had to be mounted first.
       requestAnimationFrame(() => {
         const t = document.getElementById(id);
@@ -371,6 +375,9 @@ function PagedDashboard() {
     const apply = () => {
       raf = 0;
       root.style.transform = `translate3d(${x}px,0,0)`;
+      // The tab bar's open-tab circle travels with the page, not after it.
+      const w = root.clientWidth || window.innerWidth;
+      tabbar()?.style.setProperty("--i", String(curIdx() + dir * Math.min(1, Math.abs(x) / w)));
     };
     const start = (e: TouchEvent) => {
       if (busy.current || e.touches.length !== 1 || blocked(e.target) || document.body.classList.contains("cal-dragging")) {
@@ -402,13 +409,12 @@ function PagedDashboard() {
         else {
           dir = d;
           nb = null;
-          root.style.overflow = "visible";
-          html.style.overflowX = "clip";
           html.classList.add("paging");
           root.style.willChange = "transform";
         }
         if (target) setSeen((s) => (s.includes(target.id) ? s : [...s, target.id]));
         root.style.transition = "none";
+        tabbar()?.classList.add("is-dragging");
       }
       if (e.cancelable) e.preventDefault();
       const now = performance.now();
@@ -448,6 +454,7 @@ function PagedDashboard() {
       document.removeEventListener("touchcancel", end);
       root.style.touchAction = "";
       html.classList.remove("paging");
+      tabbar()?.classList.remove("is-dragging");
     };
   }, [go, commit]);
 
@@ -456,12 +463,14 @@ function PagedDashboard() {
 
   return (
     <InDashboard.Provider value={true}>
+      <div data-paged-clip>
       <div data-dashboard data-paged>
         {NAV.map((n) => (
           <section key={n.id} id={n.id} aria-label={n.label} className={n.id === cur ? "page-current" : "page-parked"} aria-hidden={n.id !== cur}>
             {seen.includes(n.id) && <Page id={n.id} />}
           </section>
         ))}
+      </div>
       </div>
     </InDashboard.Provider>
   );

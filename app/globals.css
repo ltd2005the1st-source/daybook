@@ -912,9 +912,12 @@ html[data-app="android"] [data-paged] > section {
 }
 
 /* Pages other than the open one stay laid out but invisible, so sliding one in costs no layout. */
+/* The outer box stays put and clips; only the inner one slides (see PagedDashboard). */
+[data-paged-clip] {
+  overflow: clip;
+}
 [data-paged] {
   position: relative;
-  overflow: clip;
 }
 [data-paged] > .page-parked {
   position: absolute;
@@ -928,4 +931,10 @@ html[data-app="android"] [data-paged] > section {
 html.paging [data-paged] * {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
+}
+
+/* While a page is being dragged, the open-tab circle and notch follow the finger without easing. */
+.tabbar.is-dragging .tabbar-strip,
+.tabbar.is-dragging .tabbar-carrier {
+  transition: none;
 }
