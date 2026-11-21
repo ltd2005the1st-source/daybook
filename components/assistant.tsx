@@ -329,7 +329,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
             </div>
 
             <form
-              className="edge-top px-3 pt-3 pb-[max(env(safe-area-inset-bottom),12px)]"
+              className="edge-top px-3 pt-3 pb-[max(var(--sab),12px)]"
               onSubmit={(e) => {
                 e.preventDefault();
                 send(input);

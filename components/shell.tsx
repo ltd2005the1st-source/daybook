@@ -201,7 +201,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Mobile top bar */}
-      <header ref={topbarRef} data-scrolled={scrolled || undefined} className="no-print md:hidden sticky top-0 z-30 flex items-center justify-between material edge-bottom px-4 pt-[max(env(safe-area-inset-top),10px)] pb-2.5">
+      <header ref={topbarRef} data-scrolled={scrolled || undefined} className="no-print md:hidden sticky top-0 z-30 flex items-center justify-between material edge-bottom px-4 pt-[max(var(--sat),10px)] pb-2.5">
         <Link href="/" className="flex items-center gap-2">
           <img src="/icon.svg" alt="" className="h-6 w-6 rounded-[6px]" />
           <span className="display text-[17px] font-semibold">Daybook</span>
@@ -234,7 +234,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <nav
         data-bottom-nav
         aria-label="Main"
-        className="no-print md:hidden pointer-events-none fixed inset-x-0 bottom-0 z-30 px-3 pt-[26px] pb-[max(env(safe-area-inset-bottom),12px)]"
+        className="no-print md:hidden pointer-events-none fixed inset-x-0 bottom-0 z-30 px-3 pt-[26px] pb-[max(var(--sab),12px)]"
       >
         <div
           className="tabbar pointer-events-auto relative mx-auto h-16 max-w-[440px]"
@@ -309,7 +309,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <MusicDock />
 
       {/* Toasts */}
-      <div className="no-print fixed bottom-[calc(env(safe-area-inset-bottom)+80px)] md:bottom-6 left-1/2 z-50 -translate-x-1/2 flex flex-col gap-2 items-center">
+      <div className="no-print fixed bottom-[calc(var(--sab)+80px)] md:bottom-6 left-1/2 z-50 -translate-x-1/2 flex flex-col gap-2 items-center">
         <AnimatePresence>
           {toasts.map((t) => (
             <motion.div

@@ -11,6 +11,9 @@
    Each student carries their own color, lifted from your Google Calendar.
 ---------------------------------------------------------------- */
 :root {
+  /* Safe-area insets. The Android app overwrites these from native insets (inline style on <html>). */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
   --bg: #e6ebf3;
   /* Translucent surfaces. --surface is a raised piece of glass inside a pane (cards, fields, pills). */
   --surface: rgba(255, 255, 255, 0.6);

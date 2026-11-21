@@ -106,7 +106,7 @@ export function Sheet({
             exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
             transition={{ duration: sec(0.34), ease: [0.65, 0, 0.35, 1] }}
             style={{ maxWidth: width, transformOrigin: "50% 100%" }}
-            className="relative w-full max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-xl md:rounded-xl glass-thick pb-[env(safe-area-inset-bottom)]"
+            className="relative w-full max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-xl md:rounded-xl glass-thick pb-[var(--sab)]"
           >
             <div className="sticky top-0 z-10 flex items-center justify-between px-5 pt-4 pb-2">
               <h3 className="display text-[20px] font-semibold">{title}</h3>

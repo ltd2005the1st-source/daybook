@@ -185,7 +185,7 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
                   </div>
                 )}
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-1.5 pb-[max(env(safe-area-inset-bottom),8px)]">
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-1.5 pb-[max(var(--sab),8px)]">
                 {nb.mode === "loading" ? (
                   <p className="px-3 py-6 text-[13px] text-muted">Loading notes…</p>
                 ) : shown.length === 0 ? (
@@ -275,7 +275,7 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
                 </button>
               </div>
               {note ? (
-                <div className="flex min-h-0 flex-1 flex-col px-4 pb-[max(env(safe-area-inset-bottom),16px)] md:px-6 md:pb-6">
+                <div className="flex min-h-0 flex-1 flex-col px-4 pb-[max(var(--sab),16px)] md:px-6 md:pb-6">
                   <input
                     ref={titleRef}
                     value={note.title}
