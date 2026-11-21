@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { AnimatePresence } from "motion/react";
 import { CheckRow, CheckSheet, repeatedNotes } from "@/components/checks";
 import { ChevronLeft, ChevronRight, Plus, ReceiptText } from "lucide-react";
@@ -26,8 +26,18 @@ export default function TeachingPage() {
   const students = useMemo(() => store.students.filter((s) => s.active).sort((a, b) => a.sort - b.sort), [store.students]);
   const pickedStudent = store.students.find((s) => s.id === picked) ?? null;
 
-  const taught = students.reduce((n, s) => n + taughtIn(store, s.id, month).length, 0);
-  const earned = students.reduce((n, s) => n + taughtIn(store, s.id, month).length * s.rate, 0);
+  const pickStudent = useCallback((s: Student) => setPicked(s.id), []);
+  const lessons = store.lessons;
+  const { taught, earned } = useMemo(() => {
+    let n = 0;
+    let sum = 0;
+    for (const s of students) {
+      const k = taughtIn({ lessons }, s.id, month).length;
+      n += k;
+      sum += k * s.rate;
+    }
+    return { taught: n, earned: sum };
+  }, [students, lessons, month]);
   const owed = students.reduce((n, s) => n + makeupsOwed(store, s), 0);
   const toCollect =
     store.receipts.filter((r) => r.status === "issued").reduce((n, r) => n + r.amount, 0) +
@@ -35,8 +45,16 @@ export default function TeachingPage() {
 
   // Homework still open, grouped by student, ordered by the next check.
   const t = today();
+  const events = store.events;
+  // Each student's next class: a two-week search, so it is worked out once per change to classes, not per render.
+  const nextOf = useMemo(() => {
+    const m = new Map<string, ReturnType<typeof nextLesson>>();
+    for (const s of students) m.set(s.id, nextLesson(store, s.id, t));
+    return m;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [students, events, lessons, t]);
   const openHw = students
-    .map((s) => ({ s, items: store.homework.filter((h) => h.student_id === s.id && h.status === "open"), next: nextLesson(store, s.id, t) }))
+    .map((s) => ({ s, items: store.homework.filter((h) => h.student_id === s.id && h.status === "open"), next: nextOf.get(s.id) }))
     .filter((x) => x.items.length)
     .sort((a, b) => (a.next?.date ?? "9").localeCompare(b.next?.date ?? "9"));
 
@@ -86,7 +104,7 @@ export default function TeachingPage() {
 
       <div className="grid gap-8 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0">
-          <Register month={month} students={students} onPickStudent={(s) => setPicked(s.id)} />
+          <Register month={month} students={students} onPickStudent={pickStudent} />
           <div className="mt-3">
             <Legend />
           </div>
@@ -133,7 +151,7 @@ export default function TeachingPage() {
           <Section title="Students">
             <div className="flex flex-col">
               {students.map((s) => {
-                const nl = nextLesson(store, s.id, t);
+                const nl = nextOf.get(s.id);
                 const o = makeupsOwed(store, s);
                 return (
                   <div key={s.id} role="button" tabIndex={0} onClick={() => setPicked(s.id)} onKeyDown={(e) => e.key === "Enter" && setPicked(s.id)} className="row flex cursor-pointer items-center gap-3 py-2 text-left hover:bg-hover">
