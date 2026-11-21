@@ -1,10 +1,10 @@
 "use client";
-import { useRef } from "react";
+import { memo, useCallback, useMemo, useRef } from "react";
 import { motion } from "motion/react";
 import { useData } from "./data";
 import { daysInMonth, parseDate, today, WD_SHORT } from "@/lib/dates";
 import { cx, vnd } from "@/lib/format";
-import { lessonRow, makeupsOwed, markFor, taughtIn, type DayMark } from "@/lib/teaching";
+import { eventsOn, lessonRow, makeupsOwed, type DayMark } from "@/lib/teaching";
 import type { LessonStatus, Student } from "@/lib/types";
 import { sec } from "@/lib/motion";
 
@@ -18,15 +18,18 @@ const NEXT: Record<DayMark, LessonStatus | null> = {
 
 export function useMarkLesson() {
   const { storeRef, insert, update, remove } = useData();
-  return (studentId: string, date: string, status: LessonStatus | null) => {
-    const row = lessonRow(storeRef.current, studentId, date);
-    if (status === null) {
-      if (row) remove("lessons", row.id, { silent: true });
-      return;
-    }
-    if (row) update("lessons", row.id, { status });
-    else insert("lessons", { student_id: studentId, date, status, start_time: null, end_time: null, note: null });
-  };
+  return useCallback(
+    (studentId: string, date: string, status: LessonStatus | null) => {
+      const row = lessonRow(storeRef.current, studentId, date);
+      if (status === null) {
+        if (row) remove("lessons", row.id, { silent: true });
+        return;
+      }
+      if (row) update("lessons", row.id, { status });
+      else insert("lessons", { student_id: studentId, date, status, start_time: null, end_time: null, note: null });
+    },
+    [storeRef, insert, update, remove],
+  );
 }
 
 /** One register cell. The mark is drawn in the student's color; missed classes use the red marking pen. */
@@ -75,11 +78,55 @@ export function Mark({ mark, color, past, size = 22 }: { mark: DayMark; color: s
   );
 }
 
-export function Register({ month, students, onPickStudent }: { month: string; students: Student[]; onPickStudent: (s: Student) => void }) {
+/** The mark for every student on every day of the month, worked out once (not once per cell). */
+function useMonthMarks(month: string, students: Student[]) {
   const { store } = useData();
+  const lessons = store.lessons;
+  const events = store.events;
+  return useMemo(() => {
+    const days = daysInMonth(month);
+    const row = new Map<string, (typeof lessons)[number]>();
+    for (const l of lessons) {
+      const k = l.student_id + "|" + l.date;
+      if (!row.has(k)) row.set(k, l);
+    }
+    const marks = new Map<string, DayMark>();
+    for (const d of days) {
+      const withClass = new Set<string>();
+      for (const o of eventsOn({ events }, d)) if (o.studentId) withClass.add(o.studentId);
+      for (const s of students) {
+        const l = row.get(s.id + "|" + d);
+        let m: DayMark;
+        if (l && !(l.status === "cancelled" && l.note?.startsWith("Moved to"))) m = l.status;
+        else m = withClass.has(s.id) ? "planned" : "none";
+        marks.set(s.id + "|" + d, m);
+      }
+    }
+    const taught = new Map<string, number>();
+    for (const s of students) taught.set(s.id, 0);
+    for (const l of lessons) if (l.status === "taught" && l.date.startsWith(month) && taught.has(l.student_id)) taught.set(l.student_id, taught.get(l.student_id)! + 1);
+    return { days, marks, taught };
+  }, [lessons, events, students, month]);
+}
+
+export function Register({ month, students, onPickStudent }: { month: string; students: Student[]; onPickStudent: (s: Student) => void }) {
+  const { marks, days, taught } = useMonthMarks(month, students);
   const mark = useMarkLesson();
-  const days = daysInMonth(month);
-  const t = today();
+  return <RegisterTable month={month} students={students} days={days} marks={marks} taught={taught} today={today()} mark={mark} onPickStudent={onPickStudent} />;
+}
+
+type TableProps = {
+  month: string;
+  students: Student[];
+  days: string[];
+  marks: Map<string, DayMark>;
+  taught: Map<string, number>;
+  today: string;
+  mark: (studentId: string, date: string, status: LessonStatus | null) => void;
+  onPickStudent: (s: Student) => void;
+};
+
+const RegisterTable = memo(function RegisterTable({ students, days, marks, taught, today: t, mark, onPickStudent }: TableProps) {
   const cols = `minmax(72px,88px) repeat(${students.length}, minmax(80px, 1fr))`;
   const minWidth = 72 + students.length * 80;
   const head = useRef<HTMLDivElement>(null);
@@ -103,8 +150,8 @@ export function Register({ month, students, onPickStudent }: { month: string; st
               >
                 <span className="h-[3px] w-6 rounded-full" style={{ background: s.color }} />
                 <span className="max-w-full line-clamp-2 break-words text-[12.5px] font-semibold leading-tight group-hover:underline underline-offset-2">{s.name}</span>
-                {makeupsOwed(store, s) > 0 ? (
-                  <span className="num text-[10.5px] text-pen leading-none">{makeupsOwed(store, s)} makeup{makeupsOwed(store, s) === 1 ? "" : "s"}</span>
+                {makeupsOwed(null, s) > 0 ? (
+                  <span className="num text-[10.5px] text-pen leading-none">{makeupsOwed(null, s)} makeup{makeupsOwed(null, s) === 1 ? "" : "s"}</span>
                 ) : (
                   <span className="num text-[10.5px] text-muted leading-none">{vnd(s.rate, { compact: true })}</span>
                 )}
@@ -143,7 +190,7 @@ export function Register({ month, students, onPickStudent }: { month: string; st
                   </div>
                 </div>
                 {students.map((s) => {
-                  const m = markFor(store, s.id, d);
+                  const m = marks.get(s.id + "|" + d) ?? "none";
                   return (
                     <button
                       key={s.id}
@@ -163,7 +210,7 @@ export function Register({ month, students, onPickStudent }: { month: string; st
           <div className="grid border-t border-line-strong bg-sunken" style={{ gridTemplateColumns: cols }}>
             <div className="sticky left-0 z-[1] flex items-center bg-sunken px-3 py-2 label">Earned</div>
             {students.map((s) => {
-              const n = taughtIn(store, s.id, month).length;
+              const n = taught.get(s.id) ?? 0;
               return (
                 <div key={s.id} className="flex flex-col items-center py-2">
                   <span className="num text-[13px] font-semibold">{n}</span>
@@ -176,7 +223,7 @@ export function Register({ month, students, onPickStudent }: { month: string; st
       </div>
     </div>
   );
-}
+});
 
 export const LABEL: Record<DayMark, string> = {
   taught: "taught",
