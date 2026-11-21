@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Daybook mark "Orbit" in one colour for Android 13+ themed icons. -->
+<!-- Daybook open book in one colour for Android 13+ themed icons. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:pathData="M78.88 51.52A25 25 0 1 1 56.48 29.12A1.6 1.6 0 0 1 57.65 31.61A13.5 13.5 0 0 0 55.77 35.80A1.6 1.6 0 0 1 54.20 37.00A17 17 0 1 0 71.00 53.80A1.6 1.6 0 0 1 72.20 52.23A13.5 13.5 0 0 0 76.39 50.35A1.6 1.6 0 0 1 78.88 51.52Z"
-        android:fillColor="#FFFFFF" />
-    <path android:pathData="M59.35,39.15a9.5,9.5 0,1 0,19 0a9.5,9.5 0,1 0,-19 0z" android:fillColor="#FFFFFF" />
+    <group android:pivotX="54" android:pivotY="54" android:scaleX="0.767" android:scaleY="0.767">
+        <path android:pathData="M51.5 51C44 45.5 35 45 28 48v28c7-3 16-2.5 23.5 3z" android:fillColor="#FFFFFF" />
+        <path android:pathData="M56.5 51C64 45.5 73 45 80 48v28c-7-3-16-2.5-23.5 3z" android:fillColor="#FFFFFF" />
+        <path android:pathData="M46.2,34a7.8,7.8 0,1 0,15.6 0a7.8,7.8 0,1 0,-15.6 0z" android:fillColor="#FFFFFF" />
+    </group>
 </vector>
