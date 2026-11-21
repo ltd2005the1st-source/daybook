@@ -10,9 +10,13 @@ import { MakeupStepper, StudentSheet, STUDENT_COLORS } from "@/components/studen
 import { Dot, Field, Page, PageHeader, Section, Segmented, Sheet, Tick } from "@/components/ui";
 import { fmtMonth, monthOf, relDay, shiftMonth, today } from "@/lib/dates";
 import { parseAmount, vnd } from "@/lib/format";
-import { checkTasksThisWeek, makeupsOwed, mergeChecks, nextLesson, taughtIn } from "@/lib/teaching";
+import { checkTasksBetween, makeupsOwed, mergeChecks, nextLesson, taughtIn } from "@/lib/teaching";
 import type { Student } from "@/lib/types";
 import { Money } from "@/components/rolling";
+import { RegisterNotes } from "@/components/register-notes";
+
+/** Homework checks show today and the three days after it. */
+const CHECK_DAYS = 4;
 
 export default function TeachingPage() {
   const { store, update } = useData();
@@ -36,7 +40,8 @@ export default function TeachingPage() {
     .filter((x) => x.items.length)
     .sort((a, b) => (a.next?.date ?? "9").localeCompare(b.next?.date ?? "9"));
 
-  const checks = mergeChecks(checkTasksThisWeek(store, t).filter((c) => !c.done));
+  // Everything to check from today through the next four days (a rolling window, not the week).
+  const checks = mergeChecks(checkTasksBetween(store, t, CHECK_DAYS).filter((c) => !c.done));
   // Show a repeated check note only on the soonest check for that student.
   const sameNote = repeatedNotes(checks);
   const [openCheck, setOpenCheck] = useState<{ studentId: string; date: string } | null>(null);
@@ -87,9 +92,13 @@ export default function TeachingPage() {
           </div>
         </div>
 
-        <aside>
-          <Section title="Homework checks">
-            {checks.length === 0 && <p className="text-[13.5px] text-muted">No checks left this week.</p>}
+        <aside className="min-w-0">
+          <Section title="Notes">
+            <RegisterNotes />
+          </Section>
+
+          <Section title="Homework checks" action={<span className="text-[12px] text-muted">Next 4 days</span>}>
+            {checks.length === 0 && <p className="text-[13.5px] text-muted">No checks in the next four days.</p>}
             <div className="row-list flex flex-col overflow-x-clip">
               <AnimatePresence initial={false}>
                 {checks.map((c) => (
