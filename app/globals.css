@@ -907,8 +907,21 @@ html[data-app="android"] [data-paged] > section {
   box-shadow: inset 0 1px 0 var(--rim), inset 0 0 0 1px color-mix(in oklab, var(--rim) 50%, transparent), var(--glass-edge), var(--shadow);
   border-radius: 12px 12px 0 0;
   margin: 6px 8px 0;
-  min-height: calc(100dvh - var(--topbar, 56px) - 6px);
+  /* Every page is the same fixed box and scrolls inside it, so the boxes always line up side by side. */
+  height: calc(100dvh - var(--topbar, 56px) - 6px);
+  box-sizing: border-box;
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
   padding-bottom: calc(9rem + var(--dock, 0px));
+}
+html[data-app="android"] [data-paged] > section::-webkit-scrollbar {
+  display: none;
+}
+/* Sticky bits inside a page stick to the top of that page's own box. */
+html[data-app="android"] [data-paged] .sticky:not([class*="bottom-"]) {
+  top: 0 !important;
 }
 
 /* Pages other than the open one stay laid out but invisible, so sliding one in costs no layout. */
@@ -937,4 +950,8 @@ html.paging [data-paged] * {
 .tabbar.is-dragging .tabbar-strip,
 .tabbar.is-dragging .tabbar-carrier {
   transition: none;
+}
+/* Parked and incoming pages are positioned from the box's top edge, so they carry no top margin. */
+html[data-app="android"] [data-paged] > .page-parked {
+  margin-top: 0;
 }
