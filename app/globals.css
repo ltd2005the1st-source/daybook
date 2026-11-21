@@ -885,13 +885,6 @@ body.cal-dragging.cal-copying * {
   flex: 1 1 0;
 }
 
-/* Android app pages: the new page eases in from the side you swiped towards. */
-@keyframes page-in-next { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
-@keyframes page-in-prev { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
-.page-in-next { animation: page-in-next calc(0.26s / var(--speed)) cubic-bezier(0.65, 0, 0.35, 1); }
-.page-in-prev { animation: page-in-prev calc(0.26s / var(--speed)) cubic-bezier(0.65, 0, 0.35, 1); }
-@media (prefers-reduced-motion: reduce) { .page-in-next, .page-in-prev { animation: none; } }
-
 /* ---------------------------------------------------------------
    Android app (html[data-app=android]): a plain backdrop with no coloured washes or glossy
    highlights, and every page carries its own glass box so the box moves with the page when you
@@ -916,4 +909,23 @@ html[data-app="android"] [data-paged] > section {
   margin: 6px 8px 0;
   min-height: calc(100dvh - var(--topbar, 56px) - 6px);
   padding-bottom: calc(9rem + var(--dock, 0px));
+}
+
+/* Pages other than the open one stay laid out but invisible, so sliding one in costs no layout. */
+[data-paged] {
+  position: relative;
+  overflow: clip;
+}
+[data-paged] > .page-parked {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% - 16px);
+  visibility: hidden;
+  pointer-events: none;
+}
+/* While pages are in motion nothing inside them blurs the backdrop: that is what makes a drag stutter. */
+html.paging [data-paged] * {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }

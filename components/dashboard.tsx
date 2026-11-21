@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { flushSync } from "react-dom";
 import TodaySection from "./sections/today";
@@ -192,35 +192,65 @@ export function OldAddress({ to }: { to: string }) {
 }
 
 
+/** One page's content. Memoised so switching pages doesn't re-render the ones that didn't change. */
+const Page = memo(function Page({ id }: { id: string }) {
+  const Part = PARTS[id];
+  return (
+    <DataGate>
+      <Part />
+    </DataGate>
+  );
+});
+
 /**
- * The Android app: each section is its own page. Pick one from the tab bar or swipe sideways.
- * Pages you have opened stay mounted (hidden) so they keep their state, and each remembers its
- * own scroll position.
+ * The Android app: each section is its own page. Pick one from the tab bar or drag/swipe sideways.
+ * Opened pages stay mounted (parked, invisible) so they keep their state and slide in without a
+ * layout hitch, and each remembers its own scroll position. Pages slide on the compositor
+ * (transform only) and ease out, so a drag is 1:1 with the finger and a release settles quickly.
  */
 function PagedDashboard() {
   const [cur, setCur] = useState<string>(() => hashSection() ?? NAV[0].id);
   const [seen, setSeen] = useState<string[]>(() => [hashSection() ?? NAV[0].id]);
-  const [dir, setDir] = useState(0);
   const curRef = useRef(cur);
   const scrolls = useRef<Record<string, number>>({});
+  const busy = useRef(false);
+  const queued = useRef<string | null>(null);
+  const slideRef = useRef<(id: string) => void>(() => {});
 
-  const go = useCallback((id: string, animate = true) => {
+  // Switches page at once, no animation.
+  const commit = useCallback((id: string) => {
     if (!NAV.some((n) => n.id === id) || id === curRef.current) return;
-    const from = NAV.findIndex((n) => n.id === curRef.current);
-    const to = NAV.findIndex((n) => n.id === id);
     scrolls.current[curRef.current] = pageScroller().scrollTop;
     curRef.current = id;
-    setDir(animate ? (to > from ? 1 : -1) : 0);
     setSeen((s) => (s.includes(id) ? s : [...s, id]));
     setCur(id);
     setActiveSection(id);
     history.replaceState(history.state, "", id === NAV[0].id ? location.pathname + location.search : `#${id}`);
   }, []);
 
+  // Tab bar, links and addresses: slide to the page.
+  const go = useCallback((id: string) => {
+    if (id === curRef.current) return;
+    if (busy.current) {
+      queued.current = id;
+      return;
+    }
+    slideRef.current(id);
+  }, []);
+
   // Each page opens where you left it (the top the first time).
   useLayoutEffect(() => {
     pageScroller().scrollTo({ top: scrolls.current[cur] ?? 0, behavior: "instant" });
   }, [cur]);
+
+  // Neighbouring pages are mounted in the background so a drag can show them straight away.
+  useEffect(() => {
+    const i = NAV.findIndex((n) => n.id === cur);
+    const want = [NAV[i - 1]?.id, NAV[i + 1]?.id].filter(Boolean) as string[];
+    if (want.every((w) => seen.includes(w))) return;
+    const h = window.setTimeout(() => setSeen((s) => [...s, ...want.filter((w) => !s.includes(w))]), 350);
+    return () => clearTimeout(h);
+  }, [cur, seen]);
 
   useEffect(() => {
     setActiveSection(cur);
@@ -254,24 +284,15 @@ function PagedDashboard() {
     return () => document.removeEventListener("click", onClick, true);
   }, [go]);
 
-  // Neighbouring pages are mounted in the background so a drag can show them straight away.
-  useEffect(() => {
-    const i = NAV.findIndex((n) => n.id === cur);
-    const want = [NAV[i - 1]?.id, NAV[i + 1]?.id].filter(Boolean) as string[];
-    if (want.every((w) => seen.includes(w))) return;
-    const h = window.setTimeout(() => setSeen((s) => [...s, ...want.filter((w) => !s.includes(w))]), 350);
-    return () => clearTimeout(h);
-  }, [cur, seen]);
-
-  // Drag the page sideways with your finger: the neighbouring page slides in beside it as you go,
-  // and lets go to the nearer one (or the one you flicked towards).
+  // Dragging and sliding. Direct DOM writes (no React renders) while the finger is down.
   useEffect(() => {
     const root = document.querySelector<HTMLElement>("[data-dashboard]");
     if (!root) return;
+    const html = document.documentElement;
     let mode = 0; // 0 idle, 1 undecided, 2 dragging
-    let busy = false;
-    let sx = 0, sy = 0, dir = 0, x = 0, vx = 0, lastX = 0, lastT = 0;
+    let sx = 0, sy = 0, dir = 0, x = 0, vx = 0, lastX = 0, lastT = 0, raf = 0;
     let nb: HTMLElement | null = null;
+    const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
     const blocked = (t: EventTarget | null) => {
       for (let el = t instanceof Element ? t : null; el && el !== document.body; el = el.parentElement) {
         if (el.matches("input, textarea, select, [contenteditable], [data-scroll-contain], .fixed.inset-0, [role=dialog]")) return true;
@@ -282,18 +303,77 @@ function PagedDashboard() {
       }
       return false;
     };
-    const clear = () => {
+    // Show the neighbour beside the current page and get the layers ready to move.
+    const prepare = (el: HTMLElement, d: number) => {
+      nb = el;
+      dir = d;
+      el.style.visibility = "visible";
+      el.style.left = `${d * 100}%`;
+      // Shown at its top, level with whatever part of this page is on screen.
+      el.style.top = `${Math.max(0, window.scrollY)}px`;
+      root.style.overflow = "visible";
+      html.style.overflowX = "clip";
+      html.classList.add("paging");
+      root.style.willChange = "transform";
+    };
+    const reset = () => {
       if (nb) {
-        nb.style.position = nb.style.left = nb.style.top = nb.style.width = "";
+        nb.style.visibility = nb.style.left = nb.style.top = "";
       }
-      root.style.transform = root.style.transition = root.style.overflow = "";
-      document.documentElement.style.overflowX = "";
+      root.style.transform = root.style.transition = root.style.overflow = root.style.willChange = "";
+      html.style.overflowX = "";
+      html.classList.remove("paging");
       nb = null;
       mode = 0;
-      busy = false;
+      busy.current = false;
+      const q = queued.current;
+      queued.current = null;
+      if (q && q !== curRef.current) go(q);
+    };
+    // Glide the layers to where they should end up, then switch page for real.
+    const settle = (to: number, id: string | null, speed = 1) => {
+      busy.current = true;
+      const dur = ms(300 * speed);
+      root.style.transition = `transform ${dur}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+      root.style.transform = `translate3d(${to}px,0,0)`;
+      window.setTimeout(() => {
+        if (id) {
+          scrolls.current[id] = 0;
+          flushSync(() => commit(id));
+        }
+        reset();
+      }, dur + 30);
+    };
+    slideRef.current = (id) => {
+      const el = document.getElementById(id);
+      if (!el || reduced()) {
+        scrolls.current[id] = 0;
+        commit(id);
+        return;
+      }
+      const d = NAV.findIndex((n) => n.id === id) > NAV.findIndex((n) => n.id === curRef.current) ? 1 : -1;
+      setSeen((s) => (s.includes(id) ? s : [...s, id]));
+      busy.current = true;
+      // Wait a frame if it had to be mounted first.
+      requestAnimationFrame(() => {
+        const t = document.getElementById(id);
+        if (!t) {
+          busy.current = false;
+          return commit(id);
+        }
+        prepare(t, d);
+        root.style.transition = "none";
+        root.style.transform = "translate3d(0,0,0)";
+        void root.offsetWidth;
+        settle(-d * (root.clientWidth || window.innerWidth), id);
+      });
+    };
+    const apply = () => {
+      raf = 0;
+      root.style.transform = `translate3d(${x}px,0,0)`;
     };
     const start = (e: TouchEvent) => {
-      if (busy || e.touches.length !== 1 || blocked(e.target) || document.body.classList.contains("cal-dragging")) {
+      if (busy.current || e.touches.length !== 1 || blocked(e.target) || document.body.classList.contains("cal-dragging")) {
         mode = 0;
         return;
       }
@@ -304,7 +384,7 @@ function PagedDashboard() {
       vx = 0;
     };
     const move = (e: TouchEvent) => {
-      if (mode === 0 || busy) return;
+      if (mode === 0 || busy.current) return;
       const t = e.touches[0];
       const dx = t.clientX - sx;
       const dy = t.clientY - sy;
@@ -315,35 +395,31 @@ function PagedDashboard() {
           return;
         }
         mode = 2;
-        dir = dx < 0 ? 1 : -1;
-        const i = NAV.findIndex((n) => n.id === curRef.current);
-        const target = NAV[i + dir];
-        nb = target ? document.getElementById(target.id) : null;
-        if (target && nb) {
-          setSeen((s) => (s.includes(target.id) ? s : [...s, target.id]));
-          nb.hidden = false;
-          nb.style.position = "absolute";
-          nb.style.width = "calc(100% - 16px)";
-          nb.style.left = `${dir * 100}%`;
-          // Shown at its top, level with whatever part of this page is on screen.
-          nb.style.top = `${Math.max(0, window.scrollY)}px`;
+        const d = dx < 0 ? 1 : -1;
+        const target = NAV[NAV.findIndex((n) => n.id === curRef.current) + d];
+        const el = target ? document.getElementById(target.id) : null;
+        if (el) prepare(el, d);
+        else {
+          dir = d;
+          nb = null;
+          root.style.overflow = "visible";
+          html.style.overflowX = "clip";
+          html.classList.add("paging");
+          root.style.willChange = "transform";
         }
-        root.style.position = "relative";
+        if (target) setSeen((s) => (s.includes(target.id) ? s : [...s, target.id]));
         root.style.transition = "none";
-        // The neighbour sits outside this box, so it must not be clipped; the screen edge clips instead.
-        root.style.overflow = "visible";
-        document.documentElement.style.overflowX = "clip";
       }
       if (e.cancelable) e.preventDefault();
       const now = performance.now();
-      if (now > lastT) vx = (t.clientX - lastX) / (now - lastT);
+      if (now > lastT) vx = 0.5 * vx + 0.5 * ((t.clientX - lastX) / (now - lastT));
       lastX = t.clientX;
       lastT = now;
       // Only towards the neighbour; past the first or last page it resists.
       let m = dx * dir < 0 ? dx : 0;
       if (!nb) m *= 0.25;
       x = m;
-      root.style.transform = `translate3d(${m}px,0,0)`;
+      if (!raf) raf = requestAnimationFrame(apply);
     };
     const end = () => {
       if (mode !== 2) {
@@ -351,22 +427,13 @@ function PagedDashboard() {
         return;
       }
       mode = 0;
-      busy = true;
+      cancelAnimationFrame(raf);
+      raf = 0;
       const w = root.clientWidth || window.innerWidth;
-      const commit = !!nb && (Math.abs(x) > w * 0.3 || vx * dir < -0.4);
-      const dur = ms(240);
-      root.style.transition = `transform ${dur}ms cubic-bezier(0.65, 0, 0.35, 1)`;
-      root.style.transform = `translate3d(${commit ? -dir * w : 0}px,0,0)`;
-      const target = nb;
-      window.setTimeout(() => {
-        if (commit && target) {
-          const id = target.id;
-          scrolls.current[id] = 0;
-          flushSync(() => go(id, false));
-        } else if (target) target.hidden = true;
-        clear();
-        root.style.position = "";
-      }, dur + 20);
+      const go2 = !!nb && (Math.abs(x) > w * 0.3 || vx * dir < -0.4);
+      // Closer to its end means a shorter glide.
+      const left = go2 ? w - Math.abs(x) : Math.abs(x);
+      settle(go2 ? -dir * w : 0, go2 && nb ? nb.id : null, Math.max(0.55, Math.min(1, left / w + 0.3)));
     };
     root.style.touchAction = "pan-y";
     document.addEventListener("touchstart", start, { passive: true });
@@ -374,39 +441,27 @@ function PagedDashboard() {
     document.addEventListener("touchend", end, { passive: true });
     document.addEventListener("touchcancel", end, { passive: true });
     return () => {
+      cancelAnimationFrame(raf);
       document.removeEventListener("touchstart", start);
       document.removeEventListener("touchmove", move);
       document.removeEventListener("touchend", end);
       document.removeEventListener("touchcancel", end);
       root.style.touchAction = "";
+      html.classList.remove("paging");
     };
-  }, [go]);
+  }, [go, commit]);
 
   // Leaving for Settings or a receipt: the next visit starts with Today lit until it measures.
   useEffect(() => () => setActiveSection(NAV[0].id), []);
 
   return (
     <InDashboard.Provider value={true}>
-      <div data-dashboard data-paged className="overflow-x-clip">
-        {NAV.map((n) => {
-          const Part = PARTS[n.id];
-          const here = n.id === cur;
-          return (
-            <section
-              key={n.id}
-              id={n.id}
-              aria-label={n.label}
-              hidden={!here}
-              className={here && dir ? (dir > 0 ? "page-in-next" : "page-in-prev") : undefined}
-            >
-              {seen.includes(n.id) && (
-                <DataGate>
-                  <Part />
-                </DataGate>
-              )}
-            </section>
-          );
-        })}
+      <div data-dashboard data-paged>
+        {NAV.map((n) => (
+          <section key={n.id} id={n.id} aria-label={n.label} className={n.id === cur ? "page-current" : "page-parked"} aria-hidden={n.id !== cur}>
+            {seen.includes(n.id) && <Page id={n.id} />}
+          </section>
+        ))}
       </div>
     </InDashboard.Provider>
   );
