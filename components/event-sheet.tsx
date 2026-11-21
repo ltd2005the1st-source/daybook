@@ -160,7 +160,7 @@ export function EventSheet({
       >
         <input
           autoFocus={!existing}
-          className="field !text-[18px] !font-semibold !border-transparent !px-0 mb-2"
+          className="field field-title mb-2"
           placeholder="Event name"
           value={draft.title}
           onChange={(e) => set({ title: e.target.value })}

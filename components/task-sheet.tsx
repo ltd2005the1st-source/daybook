@@ -19,7 +19,7 @@ export function TaskSheet({ task, onClose }: { task: Task | null; onClose: () =>
       {task && (
         <div key={task.id}>
           <input
-            className="field !text-[18px] !font-semibold !border-transparent !px-0 mb-2"
+            className="field field-title mb-2"
             defaultValue={task.title}
             onBlur={(e) => {
               const v = e.target.value.trim();
