@@ -28,6 +28,9 @@ class PullRefresh extends FrameLayout {
 
     private final View web;
     private final float density, slop;
+    private float topInset;
+
+    void setTopInset(int px) { topInset = px; }
     private final Paint disc = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint arc = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint shade = new Paint(Paint.ANTI_ALIAS_FLAG); // soft ring under the disc
@@ -169,7 +172,7 @@ class PullRefresh extends FrameLayout {
         float trigger = TRIGGER_DP * density;
         float progress = Math.min(offset / trigger, 1);
         float cx = getWidth() / 2f;
-        float cy = offset - size + REST_DP * density * progress;
+        float cy = topInset + offset - size + REST_DP * density * progress;
         if (cy + r < 0) return;
 
         c.drawCircle(cx, cy + density, r + 1.5f * density, shade);

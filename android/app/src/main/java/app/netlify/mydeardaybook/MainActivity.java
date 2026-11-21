@@ -37,6 +37,7 @@ public class MainActivity extends Activity {
     private FrameLayout root;
     private ValueCallback<Uri[]> pendingFiles;
     private boolean dark;
+    private int insetTop, insetBottom;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -50,24 +51,33 @@ public class MainActivity extends Activity {
         pull.setListener(this::refresh);
         root.addView(pull, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
+        edgeToEdge();
         applyBars(dark);
 
-        // Android 15+ draws apps edge to edge: keep the page clear of the status bar, the
-        // navigation bar and the keyboard.
+        // Edge to edge: the page draws behind transparent status and navigation bars. The insets are
+        // handed to the page as --sat / --sab (CSS pixels) so its top bar and tab bar clear them.
+        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(dark ? Color.parseColor("#0C0F15") : Color.parseColor("#E6EBF3")));
         root.setOnApplyWindowInsetsListener((v, insets) -> {
-            int top, bottom, left, right;
+            int top, bottom, left, right, ime;
             if (Build.VERSION.SDK_INT >= 30) {
                 android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
-                android.graphics.Insets ime = insets.getInsets(WindowInsets.Type.ime());
-                top = bars.top; left = bars.left; right = bars.right;
-                bottom = Math.max(bars.bottom, ime.bottom);
+                ime = insets.getInsets(WindowInsets.Type.ime()).bottom;
+                top = bars.top; left = bars.left; right = bars.right; bottom = bars.bottom;
             } else {
                 top = insets.getSystemWindowInsetTop(); bottom = insets.getSystemWindowInsetBottom();
                 left = insets.getSystemWindowInsetLeft(); right = insets.getSystemWindowInsetRight();
+                ime = 0;
             }
-            v.setPadding(left, top, right, bottom);
+            // With the keyboard open the page shrinks above it; otherwise it runs under the nav bar.
+            boolean keys = ime > bottom;
+            v.setPadding(left, 0, right, keys ? ime : 0);
+            insetTop = top;
+            insetBottom = keys ? 0 : bottom;
+            pull.setTopInset(top);
+            pushInsets();
             return insets;
         });
+        root.requestApplyInsets();
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -136,6 +146,33 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void edgeToEdge() {
+        android.view.Window w = getWindow();
+        if (Build.VERSION.SDK_INT >= 30) {
+            w.setDecorFitsSystemWindows(false);
+        } else {
+            w.getDecorView().setSystemUiVisibility(w.getDecorView().getSystemUiVisibility()
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        }
+        w.setStatusBarColor(Color.TRANSPARENT);
+        w.setNavigationBarColor(Color.TRANSPARENT);
+        if (Build.VERSION.SDK_INT >= 29) {
+            w.setStatusBarContrastEnforced(false);
+            w.setNavigationBarContrastEnforced(false);
+        }
+        if (Build.VERSION.SDK_INT >= 28) {
+            w.getAttributes().layoutInDisplayCutoutMode = android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
+    }
+
+    /** Tells the page how tall the system bars are (CSS pixels) so it can pad its top and bottom bars. */
+    void pushInsets() {
+        if (web == null) return;
+        float d = getResources().getDisplayMetrics().density;
+        web.evaluateJavascript("(function(){var s=document.documentElement.style;s.setProperty('--sat','" + Math.round(insetTop / d * 100) / 100f
+            + "px');s.setProperty('--sab','" + Math.round(insetBottom / d * 100) / 100f + "px')})()", null);
+    }
+
     /** Matches the system bars to the page's light or dark theme. */
     void applyBars(boolean isDark) {
         dark = isDark;
@@ -153,8 +190,6 @@ public class MainActivity extends Activity {
             int flags = getWindow().getDecorView().getSystemUiVisibility();
             int light = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             getWindow().getDecorView().setSystemUiVisibility(isDark ? flags & ~light : flags | light);
-            getWindow().setStatusBarColor(page);
-            getWindow().setNavigationBarColor(page);
         }
     }
 
@@ -220,11 +255,13 @@ public class MainActivity extends Activity {
         @Override
         public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
             pull.resetPage();
+            pushInsets();
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             pull.done();
+            pushInsets();
             view.evaluateJavascript(PULL_JS, null);
             // Follow the page's light/dark switch so the status bar always matches.
             view.evaluateJavascript(
