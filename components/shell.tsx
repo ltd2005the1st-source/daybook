@@ -6,6 +6,7 @@ import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import {
   LayoutGrid,
   Moon,
+  NotebookPen,
   PanelRightOpen,
   Sparkles,
   Sun,
@@ -17,6 +18,7 @@ import { Sheet } from "./ui";
 import { Login } from "./login";
 import { Palette } from "./palette";
 import { Assistant, useAssistantShortcut } from "./assistant";
+import { Notebook } from "./notebook";
 import { cx } from "@/lib/format";
 import { NAV, isDashboardPath } from "./nav";
 import { onPageScroll, pageScroller, useActiveSection } from "./scroll-spy";
@@ -63,6 +65,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   useSmoothWheel();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [askOpen, setAskOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
   const [appsOpen, setAppsOpen] = useState(false);
   const [editApps, setEditApps] = useState(false);
   const [askSeed, setAskSeed] = useState<string | null>(null);
@@ -171,6 +174,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span className="flex-1 text-left">Ask Claude</span>
             <kbd className="num text-[10.5px] text-muted">⌘J</kbd>
           </button>
+          <button onClick={() => setNotesOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+            <NotebookPen size={16} strokeWidth={1.8} /> My Notebook
+          </button>
           <button onClick={toggle} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             {theme === "dark" ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}
             {theme === "dark" ? "Light mode" : "Dark mode"}
@@ -202,6 +208,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-1">
           <button aria-label="Apps" onClick={() => setAppsOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
             <LayoutGrid size={17} />
+          </button>
+          <button aria-label="My Notebook" onClick={() => setNotesOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
+            <NotebookPen size={17} />
           </button>
           <button aria-label="Ask Claude" onClick={() => setAskOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-accent hover:bg-hover">
             <Sparkles size={17} />
@@ -294,6 +303,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         />
       </Sheet>
       <AppsEditor open={editApps} onClose={() => setEditApps(false)} />
+      <Notebook open={notesOpen} onClose={() => setNotesOpen(false)} />
       <Assistant open={askOpen} onClose={() => setAskOpen(false)} seed={askSeed} onSeedUsed={() => setAskSeed(null)} />
       <MusicDock />
 
