@@ -35,12 +35,43 @@ export function topbarHeight(): number {
   return bar && getComputedStyle(bar).display !== "none" && Number.isFinite(v) ? v : 0;
 }
 
+/**
+ * What scrolls the page. On desktop it is the content pane itself, so the glass frame around the
+ * app (sidebar, pane edges, the wallpaper margin) stays put and only the pane's insides move.
+ * On phones the window scrolls as before (address bar, pull to refresh).
+ */
+export function pageScroller(): HTMLElement {
+  const main = document.querySelector<HTMLElement>("main[data-page-scroll]");
+  if (main) {
+    const oy = getComputedStyle(main).overflowY;
+    if (oy === "auto" || oy === "scroll") return main;
+  }
+  return (document.scrollingElement as HTMLElement | null) ?? document.documentElement;
+}
+
+/** Top of the visible part of the page, in window pixels: under the phone's top bar, or the pane's top edge. */
+export function viewTop(sc: HTMLElement = pageScroller()): number {
+  return sc === document.scrollingElement ? topbarHeight() : sc.getBoundingClientRect().top;
+}
+
+/** Calls back when the page scrolls, whichever of the two is doing the scrolling. */
+export function onPageScroll(cb: () => void): () => void {
+  const main = document.querySelector<HTMLElement>("main[data-page-scroll]");
+  window.addEventListener("scroll", cb, { passive: true });
+  main?.addEventListener("scroll", cb, { passive: true });
+  return () => {
+    window.removeEventListener("scroll", cb);
+    main?.removeEventListener("scroll", cb);
+  };
+}
+
 /** Where the page has to be scrolled to for a section to sit at the top. */
 export function sectionTop(id: string): number {
   const el = document.getElementById(id);
-  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const sc = pageScroller();
+  const max = sc.scrollHeight - sc.clientHeight;
   if (!el || id === NAV[0].id) return 0;
-  return Math.max(0, Math.min(max, window.scrollY + el.getBoundingClientRect().top - topbarHeight()));
+  return Math.max(0, Math.min(max, sc.scrollTop + el.getBoundingClientRect().top - viewTop(sc)));
 }
 
 // The app's one curve, cubic-bezier(0.65, 0, 0.35, 1), solved for y at time x.
@@ -65,10 +96,11 @@ let stopJump: (() => void) | null = null;
 export function scrollToSection(id: string, opts: { instant?: boolean } = {}) {
   stopJump?.();
   setActiveSection(id);
-  const from = window.scrollY;
+  const sc = pageScroller();
+  const from = sc.scrollTop;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (opts.instant || reduced || Math.abs(sectionTop(id) - from) < 2) {
-    window.scrollTo({ top: sectionTop(id), behavior: "instant" });
+    sc.scrollTo({ top: sectionTop(id), behavior: "instant" });
     return;
   }
   // Longer trips take a little longer, but never drag: 0.45s to 0.8s at 1x, through the speed dial.
@@ -94,7 +126,7 @@ export function scrollToSection(id: string, opts: { instant?: boolean } = {}) {
     const p = Math.min(1, (now - start) / dur);
     // Re-measure every frame, in case something above the section is still settling in.
     const to = sectionTop(id);
-    window.scrollTo({ top: from + (to - from) * ease(p), behavior: "instant" });
+    sc.scrollTo({ top: from + (to - from) * ease(p), behavior: "instant" });
     if (p < 1) raf = requestAnimationFrame(frame);
     else end();
   };

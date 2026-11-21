@@ -19,7 +19,7 @@ import { Palette } from "./palette";
 import { Assistant, useAssistantShortcut } from "./assistant";
 import { cx } from "@/lib/format";
 import { NAV, isDashboardPath } from "./nav";
-import { useActiveSection } from "./scroll-spy";
+import { onPageScroll, pageScroller, useActiveSection } from "./scroll-spy";
 import { MusicDock, MusicProvider } from "./music";
 import { useSmoothWheel } from "./smooth-scroll";
 import { NativeSync } from "./native-sync";
@@ -71,10 +71,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
   // The top bar only shows its edge once the page has scrolled under it.
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 4);
+    const on = () => setScrolled(pageScroller().scrollTop > 4);
     on();
-    window.addEventListener("scroll", on, { passive: true });
-    return () => window.removeEventListener("scroll", on);
+    return onPageScroll(on);
   }, []);
   // Publish the mobile top bar's height so sticky headers inside pages can sit just below it.
   const topbarObserver = useRef<ResizeObserver | null>(null);
@@ -123,7 +122,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <MotionConfig transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }} reducedMotion="user">
     <MusicProvider>
     <NativeSync />
-    <div className="min-h-dvh md:flex md:gap-3 md:p-3">
+    <div className="min-h-dvh md:flex md:gap-3 md:p-3 md:h-dvh md:overflow-hidden print:h-auto print:overflow-visible">
       {/* Sidebar (desktop). Concentric corners: 12px panel, 6px padding, so the rows inside are 12 - 6 = 6px. */}
       <aside className="no-print hidden md:flex w-[196px] shrink-0 flex-col glass rounded-xl sticky top-3 h-[calc(100dvh-24px-var(--dock,0px))] px-1.5 py-3 transition-[height] duration-300 ease-in-out">
         <Link href="/" className="flex items-center gap-2 px-2 py-1.5 mb-3">
@@ -216,7 +215,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="app-pane pane min-w-0 flex-1 pb-[calc(9rem+var(--dock,0px))] md:pb-[calc(2.5rem+var(--dock,0px))]">
+      <main data-page-scroll className="app-pane pane min-w-0 flex-1 pb-[calc(9rem+var(--dock,0px))] md:pb-10">
         {ready ? children : <Loading />}
       </main>
 
