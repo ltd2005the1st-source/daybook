@@ -205,14 +205,13 @@ const Page = memo(function Page({ id }: { id: string }) {
 /**
  * The Android app: each section is its own page. Pick one from the tab bar or drag/swipe sideways.
  * Opened pages stay mounted (parked, invisible) so they keep their state and slide in without a
- * layout hitch, and each remembers its own scroll position. Pages slide on the compositor
+ * layout hitch. Each page is the same fixed box that scrolls inside itself, so boxes always line up. Pages slide on the compositor
  * (transform only) and ease out, so a drag is 1:1 with the finger and a release settles quickly.
  */
 function PagedDashboard() {
   const [cur, setCur] = useState<string>(() => hashSection() ?? NAV[0].id);
   const [seen, setSeen] = useState<string[]>(() => [hashSection() ?? NAV[0].id]);
   const curRef = useRef(cur);
-  const scrolls = useRef<Record<string, number>>({});
   const busy = useRef(false);
   const queued = useRef<string | null>(null);
   const slideRef = useRef<(id: string) => void>(() => {});
@@ -220,7 +219,6 @@ function PagedDashboard() {
   // Switches page at once, no animation.
   const commit = useCallback((id: string) => {
     if (!NAV.some((n) => n.id === id) || id === curRef.current) return;
-    scrolls.current[curRef.current] = pageScroller().scrollTop;
     curRef.current = id;
     setSeen((s) => (s.includes(id) ? s : [...s, id]));
     setCur(id);
@@ -237,11 +235,6 @@ function PagedDashboard() {
     }
     slideRef.current(id);
   }, []);
-
-  // Each page opens where you left it (the top the first time).
-  useLayoutEffect(() => {
-    pageScroller().scrollTo({ top: scrolls.current[cur] ?? 0, behavior: "instant" });
-  }, [cur]);
 
   // Neighbouring pages are mounted in the background so a drag can show them straight away.
   useEffect(() => {
@@ -311,8 +304,8 @@ function PagedDashboard() {
       dir = d;
       el.style.visibility = "visible";
       el.style.left = `${d * 100}%`;
-      // Shown at its top, level with whatever part of this page is on screen.
-      el.style.top = `${Math.max(0, window.scrollY)}px`;
+      // Pages always sit side by side at the same height, so nothing jumps while you move between them.
+      el.style.top = "0px";
       html.classList.add("paging");
       root.style.willChange = "transform";
     };
@@ -341,7 +334,6 @@ function PagedDashboard() {
       root.style.transform = `translate3d(${to}px,0,0)`;
       window.setTimeout(() => {
         if (id) {
-          scrolls.current[id] = 0;
           flushSync(() => commit(id));
         }
         reset();
@@ -350,7 +342,6 @@ function PagedDashboard() {
     slideRef.current = (id) => {
       const el = document.getElementById(id);
       if (!el || reduced()) {
-        scrolls.current[id] = 0;
         commit(id);
         return;
       }

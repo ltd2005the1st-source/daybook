@@ -28,6 +28,11 @@ export function useActiveSection(): string {
   );
 }
 
+let pagedGo: ((id: string) => void) | null = null;
+export function setPagedGo(fn: ((id: string) => void) | null) {
+  pagedGo = fn;
+}
+
 /** Height of the phone's top bar (0 on desktop), so a section lands just below it. */
 export function topbarHeight(): number {
   const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--topbar"));
@@ -41,6 +46,11 @@ export function topbarHeight(): number {
  * On phones the window scrolls as before (address bar, pull to refresh).
  */
 export function pageScroller(): HTMLElement {
+  // The Android app pages the dashboard: the open page is its own scroller.
+  if (pagedGo) {
+    const page = document.querySelector<HTMLElement>("[data-paged] > .page-current");
+    if (page) return page;
+  }
   const main = document.querySelector<HTMLElement>("main[data-page-scroll]");
   if (main) {
     const oy = getComputedStyle(main).overflowY;
@@ -59,9 +69,13 @@ export function onPageScroll(cb: () => void): () => void {
   const main = document.querySelector<HTMLElement>("main[data-page-scroll]");
   window.addEventListener("scroll", cb, { passive: true });
   main?.addEventListener("scroll", cb, { passive: true });
+  // Scroll events don't bubble, so catch the Android app's page scrollers on the way down.
+  const app = document.documentElement.dataset.app === "android";
+  if (app) document.addEventListener("scroll", cb, { capture: true, passive: true });
   return () => {
     window.removeEventListener("scroll", cb);
     main?.removeEventListener("scroll", cb);
+    if (app) document.removeEventListener("scroll", cb, { capture: true });
   };
 }
 
@@ -97,10 +111,6 @@ let stopJump: (() => void) | null = null;
  * In the Android app the dashboard is paged: one section at a time. The dashboard registers its
  * page switcher here, and every jump to a section goes through it instead of scrolling.
  */
-let pagedGo: ((id: string) => void) | null = null;
-export function setPagedGo(fn: ((id: string) => void) | null) {
-  pagedGo = fn;
-}
 
 export function scrollToSection(id: string, opts: { instant?: boolean } = {}) {
   if (pagedGo) return pagedGo(id);
