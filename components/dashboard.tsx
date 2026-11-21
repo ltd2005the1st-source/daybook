@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { flushSync } from "react-dom";
 import TodaySection from "./sections/today";
 import CalendarSection from "./sections/calendar";
 import TasksSection from "./sections/tasks";
@@ -13,6 +14,7 @@ import { DataGate } from "./data";
 import { NAV, sectionOf } from "./nav";
 import { jumping, onPageScroll, pageScroller, scrollToSection, setActiveSection, setPagedGo, viewTop } from "./scroll-spy";
 import { native } from "@/lib/native";
+import { ms } from "@/lib/motion";
 
 const PARTS: Record<string, React.ComponentType> = {
   today: TodaySection,
@@ -87,6 +89,8 @@ function ScrollDashboard() {
 
   // The menu highlight follows the section on screen, and the address follows it too.
   useEffect(() => {
+    // The Android app swaps this for the paged dashboard; don't rewrite its address meanwhile.
+    if (native()) return;
     let raf = 0;
     let hash = location.hash.replace(/^#/, "");
     const spy = () => {
@@ -200,13 +204,13 @@ function PagedDashboard() {
   const curRef = useRef(cur);
   const scrolls = useRef<Record<string, number>>({});
 
-  const go = useCallback((id: string) => {
+  const go = useCallback((id: string, animate = true) => {
     if (!NAV.some((n) => n.id === id) || id === curRef.current) return;
     const from = NAV.findIndex((n) => n.id === curRef.current);
     const to = NAV.findIndex((n) => n.id === id);
     scrolls.current[curRef.current] = pageScroller().scrollTop;
     curRef.current = id;
-    setDir(to > from ? 1 : -1);
+    setDir(animate ? (to > from ? 1 : -1) : 0);
     setSeen((s) => (s.includes(id) ? s : [...s, id]));
     setCur(id);
     setActiveSection(id);
@@ -250,9 +254,24 @@ function PagedDashboard() {
     return () => document.removeEventListener("click", onClick, true);
   }, [go]);
 
-  // Swipe left or right for the next or previous page.
+  // Neighbouring pages are mounted in the background so a drag can show them straight away.
   useEffect(() => {
-    let x0 = 0, y0 = 0, t0 = 0, ok = false;
+    const i = NAV.findIndex((n) => n.id === cur);
+    const want = [NAV[i - 1]?.id, NAV[i + 1]?.id].filter(Boolean) as string[];
+    if (want.every((w) => seen.includes(w))) return;
+    const h = window.setTimeout(() => setSeen((s) => [...s, ...want.filter((w) => !s.includes(w))]), 350);
+    return () => clearTimeout(h);
+  }, [cur, seen]);
+
+  // Drag the page sideways with your finger: the neighbouring page slides in beside it as you go,
+  // and lets go to the nearer one (or the one you flicked towards).
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>("[data-dashboard]");
+    if (!root) return;
+    let mode = 0; // 0 idle, 1 undecided, 2 dragging
+    let busy = false;
+    let sx = 0, sy = 0, dir = 0, x = 0, vx = 0, lastX = 0, lastT = 0;
+    let nb: HTMLElement | null = null;
     const blocked = (t: EventTarget | null) => {
       for (let el = t instanceof Element ? t : null; el && el !== document.body; el = el.parentElement) {
         if (el.matches("input, textarea, select, [contenteditable], [data-scroll-contain], .fixed.inset-0, [role=dialog]")) return true;
@@ -263,32 +282,103 @@ function PagedDashboard() {
       }
       return false;
     };
+    const clear = () => {
+      if (nb) {
+        nb.style.position = nb.style.left = nb.style.top = nb.style.width = "";
+      }
+      root.style.transform = root.style.transition = root.style.overflow = "";
+      document.documentElement.style.overflowX = "";
+      nb = null;
+      mode = 0;
+      busy = false;
+    };
     const start = (e: TouchEvent) => {
-      ok = e.touches.length === 1 && !blocked(e.target);
-      x0 = e.touches[0].clientX;
-      y0 = e.touches[0].clientY;
-      t0 = performance.now();
+      if (busy || e.touches.length !== 1 || blocked(e.target) || document.body.classList.contains("cal-dragging")) {
+        mode = 0;
+        return;
+      }
+      mode = 1;
+      sx = lastX = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+      lastT = performance.now();
+      vx = 0;
     };
-    const end = (e: TouchEvent) => {
-      if (!ok) return;
-      ok = false;
-      if (document.body.classList.contains("cal-dragging")) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - x0;
-      const dy = t.clientY - y0;
-      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.8 || performance.now() - t0 > 700) return;
-      const i = NAV.findIndex((n) => n.id === curRef.current);
-      const next = NAV[i + (dx < 0 ? 1 : -1)];
-      if (next) go(next.id);
+    const move = (e: TouchEvent) => {
+      if (mode === 0 || busy) return;
+      const t = e.touches[0];
+      const dx = t.clientX - sx;
+      const dy = t.clientY - sy;
+      if (mode === 1) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        if (Math.abs(dx) < Math.abs(dy) * 1.2 || document.body.classList.contains("cal-dragging")) {
+          mode = 0;
+          return;
+        }
+        mode = 2;
+        dir = dx < 0 ? 1 : -1;
+        const i = NAV.findIndex((n) => n.id === curRef.current);
+        const target = NAV[i + dir];
+        nb = target ? document.getElementById(target.id) : null;
+        if (target && nb) {
+          setSeen((s) => (s.includes(target.id) ? s : [...s, target.id]));
+          nb.hidden = false;
+          nb.style.position = "absolute";
+          nb.style.width = "100%";
+          nb.style.left = `${dir * 100}%`;
+          // Shown at its top, level with whatever part of this page is on screen.
+          nb.style.top = `${Math.max(0, window.scrollY)}px`;
+        }
+        root.style.position = "relative";
+        root.style.transition = "none";
+        // The neighbour sits outside this box, so it must not be clipped; the screen edge clips instead.
+        root.style.overflow = "visible";
+        document.documentElement.style.overflowX = "clip";
+      }
+      if (e.cancelable) e.preventDefault();
+      const now = performance.now();
+      if (now > lastT) vx = (t.clientX - lastX) / (now - lastT);
+      lastX = t.clientX;
+      lastT = now;
+      // Only towards the neighbour; past the first or last page it resists.
+      let m = dx * dir < 0 ? dx : 0;
+      if (!nb) m *= 0.25;
+      x = m;
+      root.style.transform = `translate3d(${m}px,0,0)`;
     };
-    const cancel = () => (ok = false);
+    const end = () => {
+      if (mode !== 2) {
+        mode = 0;
+        return;
+      }
+      mode = 0;
+      busy = true;
+      const w = root.clientWidth || window.innerWidth;
+      const commit = !!nb && (Math.abs(x) > w * 0.3 || vx * dir < -0.4);
+      const dur = ms(240);
+      root.style.transition = `transform ${dur}ms cubic-bezier(0.65, 0, 0.35, 1)`;
+      root.style.transform = `translate3d(${commit ? -dir * w : 0}px,0,0)`;
+      const target = nb;
+      window.setTimeout(() => {
+        if (commit && target) {
+          const id = target.id;
+          scrolls.current[id] = 0;
+          flushSync(() => go(id, false));
+        } else if (target) target.hidden = true;
+        clear();
+        root.style.position = "";
+      }, dur + 20);
+    };
+    root.style.touchAction = "pan-y";
     document.addEventListener("touchstart", start, { passive: true });
+    document.addEventListener("touchmove", move, { passive: false });
     document.addEventListener("touchend", end, { passive: true });
-    document.addEventListener("touchcancel", cancel, { passive: true });
+    document.addEventListener("touchcancel", end, { passive: true });
     return () => {
       document.removeEventListener("touchstart", start);
+      document.removeEventListener("touchmove", move);
       document.removeEventListener("touchend", end);
-      document.removeEventListener("touchcancel", cancel);
+      document.removeEventListener("touchcancel", end);
+      root.style.touchAction = "";
     };
   }, [go]);
 
