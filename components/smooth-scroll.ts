@@ -1,5 +1,6 @@
 "use client";
 import { useEffect } from "react";
+import { pageScroller } from "./scroll-spy";
 
 /*
  * Smooth mouse-wheel scrolling, tuned to feel like populous.com.
@@ -48,8 +49,9 @@ function scrollerFor(target: EventTarget | null, dir: number): Element | typeof 
     if (el.hasAttribute("data-scroll-contain")) return CONTAINED;
     el = el.parentElement;
   }
-  const root = document.scrollingElement;
-  return root && canScroll(root, dir) ? root : null;
+  // Nothing under the pointer scrolls (the sidebar, the margin around the pane): move the page.
+  const page = pageScroller();
+  return canScroll(page, dir) ? page : null;
 }
 
 export function useSmoothWheel() {

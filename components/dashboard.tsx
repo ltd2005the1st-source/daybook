@@ -10,7 +10,7 @@ import HabitsSection from "./sections/habits";
 import MusicSection from "./sections/music";
 import { InDashboard } from "./ui";
 import { NAV, sectionOf } from "./nav";
-import { jumping, scrollToSection, setActiveSection, topbarHeight } from "./scroll-spy";
+import { jumping, onPageScroll, pageScroller, scrollToSection, setActiveSection, viewTop } from "./scroll-spy";
 
 const PARTS: Record<string, React.ComponentType> = {
   today: TodaySection,
@@ -82,16 +82,18 @@ export function Dashboard() {
     const spy = () => {
       raf = 0;
       if (jumping) return;
-      const top = topbarHeight();
-      const line = top + (window.innerHeight - top) * 0.35;
-      const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+      const sc = pageScroller();
+      const top = viewTop(sc);
+      const bottom = sc === document.scrollingElement ? window.innerHeight : sc.getBoundingClientRect().bottom;
+      const line = top + (bottom - top) * 0.35;
+      const atEnd = sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2;
       let id = NAV[0].id;
       for (const n of NAV) {
         const el = document.getElementById(n.id);
         if (el && el.getBoundingClientRect().top <= line) id = n.id;
       }
       // At the very top it is always Today, even while Today is still short and loading.
-      if (window.scrollY < 4) id = NAV[0].id;
+      if (sc.scrollTop < 4) id = NAV[0].id;
       else if (atEnd) {
         const last = [...NAV].reverse().find((n) => document.getElementById(n.id));
         if (last) id = last.id;
@@ -110,13 +112,15 @@ export function Dashboard() {
     // Sections grow as their data arrives without any scroll, so measure again when the page resizes.
     const ro = new ResizeObserver(on);
     ro.observe(document.body);
-    window.addEventListener("scroll", on, { passive: true });
+    const board = document.querySelector("[data-dashboard]");
+    if (board) ro.observe(board);
+    const offScroll = onPageScroll(on);
     window.addEventListener("resize", on);
     window.addEventListener("daybook:jumped", on);
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
-      window.removeEventListener("scroll", on);
+      offScroll();
       window.removeEventListener("resize", on);
       window.removeEventListener("daybook:jumped", on);
     };
