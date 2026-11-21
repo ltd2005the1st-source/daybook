@@ -234,9 +234,19 @@ select:focus-visible {
 }
 .field:focus {
   outline: none;
-  border-color: color-mix(in oklab, var(--accent) 55%, var(--line-strong));
+  /* Neutral focus: the border firms up and the well brightens. No blue ring. */
+  border-color: color-mix(in oklab, var(--ink-2) 40%, var(--line-strong));
   background: var(--glass-pill);
-  box-shadow: inset 0 1px 1px var(--rim-low), 0 0 0 3px var(--accent-soft);
+  box-shadow: inset 0 1px 1px var(--rim-low);
+}
+.field-title {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-color: transparent;
+}
+.field-title:hover:not(:focus) {
+  border-color: var(--line);
 }
 .field::placeholder {
   color: var(--muted);
