@@ -304,8 +304,6 @@ select:focus-visible {
   border: 1px solid var(--rim);
   color: var(--ink);
   box-shadow: none;
-  -webkit-backdrop-filter: blur(12px) saturate(170%);
-  backdrop-filter: blur(12px) saturate(170%);
 }
 .btn-line:hover {
   background: var(--glass-pill);

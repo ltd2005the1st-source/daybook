@@ -9,6 +9,7 @@ import MoneySection from "./sections/money";
 import HabitsSection from "./sections/habits";
 import MusicSection from "./sections/music";
 import { InDashboard } from "./ui";
+import { DataGate } from "./data";
 import { NAV, sectionOf } from "./nav";
 import { jumping, onPageScroll, pageScroller, scrollToSection, setActiveSection, viewTop } from "./scroll-spy";
 
@@ -153,7 +154,13 @@ export function Dashboard() {
           const Part = PARTS[n.id];
           return (
             <section key={n.id} id={n.id} aria-label={n.label} className="dash-section">
-              {i < count ? <Part /> : <div className="min-h-[70vh]" />}
+              {i < count ? (
+                <DataGate>
+                  <Part />
+                </DataGate>
+              ) : (
+                <div className="min-h-[70vh]" />
+              )}
             </section>
           );
         })}

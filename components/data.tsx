@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, startTransition, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { ONLINE, supabase } from "@/lib/supabase";
 import { buildSeed } from "@/lib/seed";
@@ -27,13 +27,28 @@ type Ctx = {
   resetLocal: () => void;
   restoreBackup: (data: Partial<Store>) => Promise<number>;
   toast: (text: string, undo?: () => void) => void;
-  toasts: Toast[];
-  dismissToast: (id: string) => void;
   signOut: () => Promise<void>;
   storeRef: React.MutableRefObject<Store>;
 };
 
 const DataCtx = createContext<Ctx | null>(null);
+// Pop-ups live in their own context so showing or hiding one doesn't re-render every section.
+const ToastCtx = createContext<{ toasts: Toast[]; dismissToast: (id: string) => void }>({ toasts: [], dismissToast: () => {} });
+export const useToasts = () => useContext(ToastCtx);
+
+/** True when every field of `b` already holds the same value in `a` (rows are flat JSON). */
+function sameRow(a: object, b: object): boolean {
+  const x = a as Record<string, unknown>;
+  const y = b as Record<string, unknown>;
+  const kx = Object.keys(x);
+  if (kx.length !== Object.keys(y).length) return false;
+  for (const k of kx) {
+    const u = x[k];
+    const v = y[k];
+    if (u !== v && JSON.stringify(u) !== JSON.stringify(v)) return false;
+  }
+  return true;
+}
 
 export function useData(): Ctx {
   const c = useContext(DataCtx);
@@ -59,6 +74,51 @@ function writeLocal(s: Store) {
   }
 }
 
+/**
+ * Wrap a part of the page so it only re-renders when the tables it actually reads change.
+ * Every change to the store used to re-render all seven sections at once, even when only a task
+ * was ticked. The wrapper hands its children a view of the store that notes which tables get
+ * read while rendering; on the next change, if none of those tables moved, it keeps the old view
+ * and React skips the whole subtree. Reads inside event handlers always see the live data.
+ */
+export function DataGate({ children }: { children: React.ReactNode }) {
+  const real = useData();
+  const last = useRef<{ real: Ctx; value: Ctx; seen: Map<string, unknown> } | null>(null);
+  const prev = last.current;
+  let reuse = false;
+  if (prev) {
+    reuse = true;
+    for (const k of Object.keys(real) as (keyof Ctx)[]) {
+      if (k === "store") continue;
+      if (real[k] !== prev.real[k]) {
+        reuse = false;
+        break;
+      }
+    }
+    if (reuse) for (const [t, v] of prev.seen) if ((real.store as Record<string, unknown>)[t] !== v) {
+      reuse = false;
+      break;
+    }
+  }
+  if (!reuse) {
+    const seen = new Map<string, unknown>();
+    const snapshot = real.store as Record<string, unknown>;
+    const view = {} as Record<string, unknown>;
+    for (const t of Object.keys(snapshot)) {
+      Object.defineProperty(view, t, {
+        enumerable: true,
+        get() {
+          // Render-time reads are recorded against the snapshot this render saw.
+          if (!seen.has(t)) seen.set(t, snapshot[t]);
+          return real.storeRef.current[t as TableName] ?? snapshot[t];
+        },
+      });
+    }
+    last.current = { real, value: { ...real, store: view as unknown as Store }, seen };
+  }
+  return <DataCtx.Provider value={last.current!.value}>{children}</DataCtx.Provider>;
+}
+
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [store, setStore] = useState<Store>(empty);
   const storeRef = useRef<Store>(store);
@@ -80,9 +140,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return p ? { ...row, ...p.patch } : row;
   }, []);
 
-  const commit = useCallback((next: Store, broadcast = true) => {
+  const commit = useCallback((next: Store, broadcast = true, background = false) => {
     storeRef.current = next;
-    setStore(next);
+    // Updates that arrive from the server (not from a tap or a key) can wait for input to be handled first.
+    if (background) startTransition(() => setStore(next));
+    else setStore(next);
     if (!ONLINE) {
       writeLocal(next);
       if (broadcast) channel.current?.postMessage("changed");
@@ -129,12 +191,26 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           .limit(5000),
       ),
     );
+    const cur = storeRef.current;
     const next = empty();
+    let changed = false;
     results.forEach((r, i) => {
-      if (r.error) console.error(TABLES[i], r.error.message);
-      (next as Record<string, unknown[]>)[TABLES[i]] = ((r.data as { id: string }[]) ?? []).map((row) => overlay(TABLES[i], row));
+      const t = TABLES[i];
+      if (r.error) console.error(t, r.error.message);
+      const old = cur[t] as { id: string }[];
+      const byId = new Map(old.map((o) => [o.id, o]));
+      const rows = ((r.data as { id: string }[]) ?? []).map((raw) => {
+        const row = overlay(t, raw);
+        const prev = byId.get(row.id);
+        // Keep the very same object when nothing changed, so memoised parts skip re-rendering.
+        return prev && sameRow(prev, row) ? prev : row;
+      });
+      const same = rows.length === old.length && rows.every((row, k) => row === old[k]);
+      if (!same) changed = true;
+      (next as Record<string, unknown[]>)[t] = same ? old : rows;
     });
-    commit(next);
+    // The first load must land together with `ready`, so only later refreshes wait their turn.
+    if (changed) commit(next, true, TABLES.some((t) => (cur[t] as unknown[]).length > 0));
     setReady(true);
   }, [commit, overlay]);
 
@@ -169,9 +245,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         } else {
           const row = overlay(t, payload.new as { id: string });
           const i = rows.findIndex((r) => r.id === row.id);
+          // Our own writes echo back unchanged: nothing to do.
+          if (i !== -1 && sameRow(rows[i], row)) return;
           nextRows = i === -1 ? [...rows, row] : rows.map((r) => (r.id === row.id ? row : r));
         }
-        commit({ ...cur, [t]: nextRows } as Store);
+        commit({ ...cur, [t]: nextRows } as Store, true, true);
       });
     }
     ch.subscribe();
@@ -376,13 +454,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       resetLocal,
       restoreBackup,
       toast,
-      toasts,
-      dismissToast,
       signOut,
       storeRef,
     }),
-    [store, ready, session, needsLogin, isEmpty, insert, update, remove, loadSeed, resetLocal, restoreBackup, toast, toasts, dismissToast, signOut],
+    [store, ready, session, needsLogin, isEmpty, insert, update, remove, loadSeed, resetLocal, restoreBackup, toast, signOut],
   );
+  const toastValue = useMemo(() => ({ toasts, dismissToast }), [toasts, dismissToast]);
 
-  return <DataCtx.Provider value={value}>{children}</DataCtx.Provider>;
+  return (
+    <DataCtx.Provider value={value}>
+      <ToastCtx.Provider value={toastValue}>{children}</ToastCtx.Provider>
+    </DataCtx.Provider>
+  );
 }

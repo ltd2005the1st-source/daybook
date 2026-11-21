@@ -12,13 +12,13 @@ import {
   Sun,
   X,
 } from "lucide-react";
-import { useData } from "./data";
+import { useData, useToasts } from "./data";
 import { AppGrid, AppLinks, AppsEditor } from "./apps";
-import { Sheet } from "./ui";
-import { Login } from "./login";
 import { Palette } from "./palette";
 import { Assistant, useAssistantShortcut } from "./assistant";
 import { Notebook } from "./notebook";
+import { Sheet } from "./ui";
+import { Login } from "./login";
 import { cx } from "@/lib/format";
 import { NAV, isDashboardPath } from "./nav";
 import { onPageScroll, pageScroller, useActiveSection } from "./scroll-spy";
@@ -51,7 +51,8 @@ function useTheme() {
 }
 
 export function Shell({ children }: { children: React.ReactNode }) {
-  const { ready, needsLogin, online, toasts, dismissToast, signOut, session } = useData();
+  const { ready, needsLogin, online, signOut, session } = useData();
+  const { toasts, dismissToast } = useToasts();
   const path = usePathname();
   const { theme, toggle } = useTheme();
   // Which section is lit: on the dashboard it follows the scroll; on Settings nothing is, and on
