@@ -13,8 +13,8 @@ android {
         applicationId "app.netlify.mydeardaybook"
         minSdk 29
         targetSdk 36
-        versionCode 7
-        versionName "2.5.0"
+        versionCode 8
+        versionName "2.6.0"
         buildConfigField "String", "SITE", '"https://mydeardaybook.netlify.app"'
     }
 

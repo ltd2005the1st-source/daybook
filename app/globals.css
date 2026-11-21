@@ -884,3 +884,10 @@ body.cal-dragging.cal-copying * {
   display: block;
   flex: 1 1 0;
 }
+
+/* Android app pages: the new page eases in from the side you swiped towards. */
+@keyframes page-in-next { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes page-in-prev { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+.page-in-next { animation: page-in-next calc(0.26s / var(--speed)) cubic-bezier(0.65, 0, 0.35, 1); }
+.page-in-prev { animation: page-in-prev calc(0.26s / var(--speed)) cubic-bezier(0.65, 0, 0.35, 1); }
+@media (prefers-reduced-motion: reduce) { .page-in-next, .page-in-prev { animation: none; } }

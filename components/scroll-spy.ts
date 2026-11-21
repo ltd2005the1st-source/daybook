@@ -93,7 +93,17 @@ export let jumping: string | null = null;
 let raf = 0;
 let stopJump: (() => void) | null = null;
 
+/**
+ * In the Android app the dashboard is paged: one section at a time. The dashboard registers its
+ * page switcher here, and every jump to a section goes through it instead of scrolling.
+ */
+let pagedGo: ((id: string) => void) | null = null;
+export function setPagedGo(fn: ((id: string) => void) | null) {
+  pagedGo = fn;
+}
+
 export function scrollToSection(id: string, opts: { instant?: boolean } = {}) {
+  if (pagedGo) return pagedGo(id);
   stopJump?.();
   setActiveSection(id);
   const sc = pageScroller();
