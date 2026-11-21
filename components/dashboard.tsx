@@ -323,7 +323,7 @@ function PagedDashboard() {
           setSeen((s) => (s.includes(target.id) ? s : [...s, target.id]));
           nb.hidden = false;
           nb.style.position = "absolute";
-          nb.style.width = "100%";
+          nb.style.width = "calc(100% - 16px)";
           nb.style.left = `${dir * 100}%`;
           // Shown at its top, level with whatever part of this page is on screen.
           nb.style.top = `${Math.max(0, window.scrollY)}px`;

@@ -28,7 +28,7 @@ export const viewport: Viewport = {
 };
 
 // Sets the theme before first paint so there is no flash.
-const themeScript = `(function(){try{var t=localStorage.getItem('daybook.theme');if(t!=='light'&&t!=='dark'){t=document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}document.documentElement.dataset.theme=t}catch(e){}})()`;
+const themeScript = `(function(){try{var t=localStorage.getItem('daybook.theme');if(t!=='light'&&t!=='dark'){t=document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}document.documentElement.dataset.theme=t}catch(e){}if(window.DaybookAndroid)document.documentElement.dataset.app='android'})()`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
