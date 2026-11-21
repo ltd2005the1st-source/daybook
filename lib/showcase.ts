@@ -13,7 +13,7 @@ import { addShowcaseMock } from "./showcase-mock";
 export const SHOWCASE_USERNAME = "tester";
 export const SHOWCASE_PIN = "0000";
 /** Bump when the showcase contents change, so the owner's next visit rebuilds it once. */
-export const SHOWCASE_VERSION = 2;
+export const SHOWCASE_VERSION = 3;
 
 export const isShowcase = (u: User | null | undefined) => !!u && (u.app_metadata?.showcase === true || usernameOf(u) === SHOWCASE_USERNAME);
 
@@ -117,5 +117,25 @@ export async function refreshShowcase(ownerId: string): Promise<Record<string, n
     counts[t] = ok.length;
   }
   const mock = await addShowcaseMock(tester.id);
-  return { ...counts, mock_tasks: mock.tasks, mock_milestones: mock.milestones, mock_habit_logs: mock.habit_logs };
+  const notes = await addShowcaseNotes(tester.id);
+  return { ...counts, mock_tasks: mock.tasks, mock_milestones: mock.milestones, mock_habit_logs: mock.habit_logs, mock_notes: notes };
+}
+
+/**
+ * My Notebook for the tester: a few made-up notes, never the owner's own (those are private).
+ * Skipped quietly if the notes table hasn't been created yet.
+ */
+async function addShowcaseNotes(testerId: string): Promise<number> {
+  const sb = admin();
+  const { error: clearErr } = await sb.from("notes").delete().eq("user_id", testerId);
+  if (clearErr) return 0;
+  const ago = (days: number, h: number) => new Date(Date.now() - days * 864e5 - h * 36e5).toISOString();
+  const rows = [
+    { title: "Lesson ideas for next week", body: "Warm-up: two truths and a lie with past tense.\nTask 2 practice: opinion essays, plan in 5 minutes.\nVocabulary: environment topic, 12 words.", flair: "Teaching", flair_color: "#039BE5", at: ago(0, 2) },
+    { title: "Client follow-ups", body: "Call back about the family plan on Monday.\nSend the brochure for the education saving plan.", flair: "Insurance", flair_color: "#F4511E", at: ago(2, 5) },
+    { title: "Weekend plan", body: "Morning run, then coffee and planning the week.\nCall home on Sunday evening.", flair: "Personal", flair_color: "#8E24AA", at: ago(4, 1) },
+    { title: "Books to read", body: "Atomic Habits\nThe Psychology of Money\nNorwegian Wood", flair: "Personal", flair_color: "#8E24AA", at: ago(9, 3) },
+  ].map(({ at, ...r }) => ({ ...r, id: randomUUID(), user_id: testerId, created_at: at, updated_at: at }));
+  const { error } = await sb.from("notes").insert(rows);
+  return error ? 0 : rows.length;
 }

@@ -9,13 +9,14 @@ import { remindersFor, fmtAt } from "@/lib/reminders";
 import { today } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import { native } from "@/lib/native";
+import { notebookSnapshot, restoreNotes } from "@/components/notebook-store";
 import { TABLES, type Store } from "@/lib/types";
 
 /* ---------- Backups ---------- */
 
-type Backup = { data: Partial<Store>; settings: Record<string, string> };
+type Backup = { data: Partial<Store>; settings: Record<string, string>; notes?: unknown };
 // Preferences kept in this browser (theme, name, calendar view…). The local data store itself is in `data`.
-const isSetting = (k: string) => /^daybook[.:]/.test(k) && k !== "daybook.store.v1";
+const isSetting = (k: string) => /^daybook[.:]/.test(k) && k !== "daybook.store.v1" && k !== "daybook.notebook.v1";
 
 function downloadBackup(store: Store): boolean | void {
   const settings: Record<string, string> = {};
@@ -26,7 +27,8 @@ function downloadBackup(store: Store): boolean | void {
     }
   } catch {}
   const counts = Object.fromEntries(TABLES.map((t) => [t, store[t].length]));
-  const file = { app: "daybook", version: 1, exported_at: new Date().toISOString(), counts, settings, data: store };
+  const notes = notebookSnapshot();
+  const file = { app: "daybook", version: 1, exported_at: new Date().toISOString(), counts: { ...counts, notes: notes.length }, settings, data: store, notes };
   const text = JSON.stringify(file, null, 2);
   const app = native();
   // The Android app has no browser downloads, so it writes the file to Downloads itself.
@@ -46,7 +48,7 @@ function readBackup(raw: unknown): Backup {
   const data = (r.app === "daybook" ? r.data : r) as Partial<Store>;
   if (!data || typeof data !== "object" || !TABLES.some((t) => Array.isArray(data[t]))) throw new Error("not a backup");
   const settings = r.app === "daybook" && r.settings && typeof r.settings === "object" ? (r.settings as Record<string, string>) : {};
-  return { data, settings };
+  return { data, settings, notes: r.app === "daybook" ? r.notes : undefined };
 }
 
 function restoreSettings(settings: Record<string, string>) {
@@ -334,7 +336,7 @@ export default function SettingsPage() {
                 }
                 setRestoring(true);
                 try {
-                  const n = await restoreBackup(parsed.data);
+                  const n = (await restoreBackup(parsed.data)) + restoreNotes(parsed.notes);
                   restoreSettings(parsed.settings);
                   toast(n ? `Restored ${n} ${n === 1 ? "item" : "items"} from the backup.` : "Nothing to restore: everything in that file is already here.");
                 } finally {
@@ -355,7 +357,7 @@ export default function SettingsPage() {
           )}
         </div>
         <p className="mt-2 text-[12px] text-muted">
-          The download has everything: calendar, classes, students, tasks, money, food, habits, music and your preferences. Restoring only adds back what’s missing; it never
+          The download has everything: calendar, classes, students, tasks, money, food, habits, music, your notebook and your preferences. Restoring only adds back what’s missing; it never
           changes or deletes anything you have now.
         </p>
         <p className="mt-1 text-[12px] text-muted">
