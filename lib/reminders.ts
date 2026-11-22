@@ -78,23 +78,25 @@ export function remindersFor(store: Store, date: string): Reminder[] {
     });
   }
 
-  // Morning brief
-  const classes = lessonsOn(store, date).filter((o) => o.status === "planned");
-  const due = store.tasks.filter((t) => !t.done && t.due_on && t.due_on <= date);
-  if (classes.length || due.length) {
-    out.push({
-      key: `brief:${date}`,
-      at: 7 * 60 + 30,
-      title: "Today",
-      body: [
-        classes.length ? `Classes: ${classes.map((c) => `${c.title.replace("Teach ", "")} ${c.start}`).join(", ")}` : "No classes",
-        due.length ? `${due.length} task${due.length === 1 ? "" : "s"} due` : "",
-      ]
-        .filter(Boolean)
-        .join(" · "),
-      url: "/",
-    });
-  }
+  // Morning brief at 8:15: classes today, unfinished tasks and homework checks. Always sent, even on an empty day.
+  const classes = lessonsOn(store, date).filter((o) => o.status === "planned" || o.status === "taught");
+  const open = store.tasks.filter((t) => !t.done && !t.student_id);
+  const overdue = open.filter((t) => t.due_on && t.due_on < date);
+  const today = open.filter((t) => t.due_on === date);
+  const undated = open.filter((t) => !t.due_on);
+  const tonight = checkTasksOn(store, date).filter((c) => !c.done);
+  const list = (ts: { title: string }[]) => ts.slice(0, 4).map((t) => `• ${t.title}`).join("\n") + (ts.length > 4 ? `\n• +${ts.length - 4} more` : "");
+  const lines: string[] = [];
+  lines.push(
+    classes.length
+      ? `Classes (${classes.length}): ${[...classes].sort((a, b) => (a.start ?? "").localeCompare(b.start ?? "")).map((c) => `${c.title.replace("Teach ", "")}${c.start ? ` ${c.start}` : ""}`).join(", ")}`
+      : "No classes today",
+  );
+  if (today.length) lines.push(`Due today (${today.length}):\n${list(today)}`);
+  if (overdue.length) lines.push(`Overdue (${overdue.length}):\n${list(overdue)}`);
+  if (undated.length) lines.push(`${undated.length} more unfinished task${undated.length === 1 ? "" : "s"} without a date`);
+  if (tonight.length) lines.push(`Homework to check tonight: ${tonight.map((c) => c.student.name).join(", ")}`);
+  out.push({ key: `brief:${date}`, at: 8 * 60 + 15, title: "Good morning · today", body: lines.join("\n"), url: "/" });
 
   return out.map((r) => ({ ...r, at: ((r.at % 1440) + 1440) % 1440 }));
 }

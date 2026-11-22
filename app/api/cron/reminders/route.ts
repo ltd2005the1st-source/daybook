@@ -34,8 +34,17 @@ async function handle(req: Request) {
   for (const uid of users) {
     const store = Object.fromEntries(TABLES.map((t) => [t, []])) as unknown as Store;
     const needed = ["students", "slots", "lessons", "homework", "events", "tasks", "habits"] as const;
-    const results = await Promise.all(needed.map((t) => sb.from(t).select("*").eq("user_id", uid)));
-    needed.forEach((t, i) => ((store as Record<string, unknown[]>)[t] = results[i].data ?? []));
+    // PostgREST returns at most 1000 rows per request, so page through (a long lessons history could otherwise hide classes).
+    const all = async (t: string) => {
+      const rows: unknown[] = [];
+      for (let from = 0; ; from += 1000) {
+        const { data } = await sb.from(t).select("*").eq("user_id", uid).order("id").range(from, from + 999);
+        rows.push(...(data ?? []));
+        if (!data || data.length < 1000) return rows;
+      }
+    };
+    const results = await Promise.all(needed.map((t) => all(t)));
+    needed.forEach((t, i) => ((store as Record<string, unknown[]>)[t] = results[i]));
 
     const due = remindersFor(store, now.date).filter((r) => now.minutes >= r.at && now.minutes - r.at < WINDOW);
     const sent: string[] = [];
