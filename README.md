@@ -1,3 +1,5 @@
+> 👋 **Want to try Daybook?** Open the live app at **https://mydeardaybook.netlify.app** and sign in with the username **`tester`** and the PIN/password **`0000`**. It's a demo account, so feel free to click around.
+
 # Daybook
 
 A personal dashboard for money, teaching, calendar, tasks and habits. It runs online so your phone and laptop stay in sync in real time, and installs on your phone like an app.
@@ -88,4 +90,3 @@ when its icon, name, colours or package settings change.
   Play, the "App signing key" from Play Console → Test and release → App integrity.
 - To change version: bump `versionCode` / `versionName` in `android/app/build.gradle`
   and `appVersionCode` / `appVersionName` in `android/twa-manifest.json`.
-
