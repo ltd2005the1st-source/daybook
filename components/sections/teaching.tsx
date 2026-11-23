@@ -159,7 +159,12 @@ export default function TeachingPage() {
                     <div className="min-w-0 flex-1">
                       <div className="text-[14px] font-medium">
                         {s.name}
-                        {s.kind === "class" && <span className="ml-1.5 text-[12px] font-normal text-muted">{s.members.join(", ")}</span>}
+                        {s.kind === "class" && (
+                          <>
+                            <br />
+                            <span className="text-[12px] font-normal text-muted">{s.members.join(", ")}</span>
+                          </>
+                        )}
                       </div>
                       <div className="text-[12px] text-muted">
                         {nl ? `Next ${relDay(nl.date).toLowerCase()} ${nl.start}` : "No upcoming class"}
@@ -169,7 +174,7 @@ export default function TeachingPage() {
                     <span className="flex flex-col items-end gap-1">
                       <span className="num text-[12.5px] text-ink-2">{vnd(s.rate, { compact: true })}</span>
                       <span className="flex items-center gap-1 text-[11px] text-muted">
-                        makeups <MakeupStepper s={s} compact />
+                        <span className="mr-1.5">makeups</span> <MakeupStepper s={s} compact />
                       </span>
                     </span>
                   </div>
