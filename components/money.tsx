@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useData } from "./data";
 import { Segmented, Tick } from "./ui";
-import { today } from "@/lib/dates";
+import { addDays, today } from "@/lib/dates";
 import { cx, parseAmount, vnd } from "@/lib/format";
 import { EXPENSE_CATEGORIES } from "@/lib/types";
 
@@ -58,7 +58,15 @@ export function QuickAdd({ compact }: { compact?: boolean }) {
             { value: "income", label: "Received" },
           ]}
         />
-        <input type="date" className="field !w-auto num text-[13px] !py-1" value={date} onChange={(e) => setDate(e.target.value)} />
+        <div className="flex items-center gap-1">
+          <button type="button" aria-label="Previous day" className="btn btn-ghost px-1.5" onClick={() => setDate(addDays(date || today(), -1))}>
+            <ChevronLeft size={17} />
+          </button>
+          <input type="date" className="field !w-auto num text-[13px] !py-1" value={date} onChange={(e) => setDate(e.target.value || today())} aria-label="Day" />
+          <button type="button" aria-label="Next day" className="btn btn-ghost px-1.5" onClick={() => setDate(addDays(date || today(), 1))}>
+            <ChevronRight size={17} />
+          </button>
+        </div>
       </div>
       <div className="flex flex-col gap-2 md:flex-row">
         <div className="relative md:w-44">
