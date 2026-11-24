@@ -69,6 +69,7 @@
   --ease: cubic-bezier(0.65, 0, 0.35, 1);
   /* How fast everything moves; 1 = original pace. Same value as SPEED in lib/motion.ts. */
   --speed: 1.5;
+  --btn-drop: var(--ink);
   color-scheme: light;
 }
 
@@ -76,6 +77,7 @@
   --bg: #0c0f15;
   --surface: rgba(255, 255, 255, 0.06);
   --sunken: rgba(0, 0, 0, 0.16);
+  --btn-drop: #000;
   --paper: #1d2129;
   --hover: rgba(255, 255, 255, 0.07);
   --ink: #eceef3;
@@ -266,7 +268,9 @@ select:focus-visible {
   font-size: 13.5px;
   letter-spacing: 0.005em;
   /* Release eases back; the press itself is instant (below). */
-  transition: background calc(0.15s / var(--speed)) var(--ease), transform calc(0.22s / var(--speed)) var(--ease), color calc(0.15s / var(--speed)) var(--ease), box-shadow calc(0.15s / var(--speed)) var(--ease);
+  /* Hover feel copied from the IELTS app's Start test / Shuffle: lift and drop shadow ease out on
+     cubic-bezier(.22,1,.36,1), colours fade on ease-out. 0.375s at 1x lands on its 0.25s at the speed dial. */
+  transition: background calc(0.375s / var(--speed)) ease-out, transform calc(0.375s / var(--speed)) cubic-bezier(0.22, 1, 0.36, 1), color calc(0.375s / var(--speed)) ease-out, border-color calc(0.375s / var(--speed)) ease-out, box-shadow calc(0.375s / var(--speed)) cubic-bezier(0.22, 1, 0.36, 1);
   white-space: nowrap;
   touch-action: manipulation;
 }
@@ -284,11 +288,10 @@ select:focus-visible {
 .btn-primary {
   background: #2f4fb5;
   color: #fff;
-  box-shadow: none;
+  box-shadow: 0 0 0 0 var(--btn-drop);
 }
 :root[data-theme="dark"] .btn-primary {
   background: #3d5bc4;
-  box-shadow: none;
 }
 .btn-primary:hover {
   background-color: #2a46a3;
@@ -306,10 +309,13 @@ select:focus-visible {
   background: var(--surface);
   border: 1px solid var(--rim);
   color: var(--ink);
-  box-shadow: none;
+  box-shadow: 0 0 0 0 var(--btn-drop);
 }
+/* Like the IELTS app: the outlined button fills solid ink and its label flips to the page colour. */
 .btn-line:hover {
-  background: var(--glass-pill);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
 }
 
 /* Cards: a raised piece of glass inside the pane, with a lit top edge. */
@@ -675,11 +681,11 @@ body.cal-dragging.cal-copying * {
 
 @media (hover: hover) and (pointer: fine) {
   /* Buttons: primary lifts with a deeper shadow; outlined firms up its edge; icons grow slightly. */
-  .btn-primary:hover:not(:active) {
-    transform: translateY(-1px);
-  }
-  .btn-line:hover {
-    border-color: var(--ink-2);
+  /* The IELTS app's action buttons: lift 3.6px and grow a hard 4px drop shadow. Pressing keeps
+     them lifted (touch screens, which can't hover, still sink on press). */
+  .btn:is(.btn-primary, .btn-line):not(:disabled):hover {
+    transform: translateY(-3.6px);
+    box-shadow: 0 4px 0 0 var(--btn-drop);
   }
   .btn:hover:not(:active) svg.lucide,
   .nav-item:hover svg.lucide {
@@ -730,7 +736,7 @@ body.cal-dragging.cal-copying * {
 
 @media (prefers-reduced-motion: reduce) {
   :where(a, button, [role="button"]):active,
-  .btn-primary:hover,
+  .btn:is(.btn-primary, .btn-line):hover,
   :is(a, button).card:hover,
   .nav-item:hover > span:last-child,
   .btn:hover svg.lucide,
