@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 import { cx } from "@/lib/format";
 import { sec } from "@/lib/motion";
+import { sfx } from "@/lib/sound/app";
 
 /** True inside the one-page dashboard, where every section shares the same left edge. */
 export const InDashboard = createContext(false);
@@ -79,6 +80,12 @@ export function Sheet({
   children: React.ReactNode;
   width?: number;
 }) {
+  // Sheet sounds: open when it appears, close when it goes (not on first render while closed).
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (open !== wasOpen.current) sfx.play("sheet", open ? "open" : "close");
+    wasOpen.current = open;
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -233,6 +240,7 @@ export function Segmented<T extends string>({
         <button
           key={o.value}
           type="button"
+          data-sound="tab"
           onClick={() => onChange(o.value)}
           className={cx(
             "press relative rounded-[9px] px-3 py-1 text-[13px]",

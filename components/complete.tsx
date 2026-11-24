@@ -4,6 +4,7 @@ import { useData } from "./data";
 import { cx } from "@/lib/format";
 import type { Task } from "@/lib/types";
 import { sec, ms } from "@/lib/motion";
+import { sfx } from "@/lib/sound/app";
 
 /** One ease-in-out curve for all motion in the app. */
 export const EASE = [0.65, 0, 0.35, 1] as const;
@@ -54,6 +55,7 @@ export function useCompleteTask(task: Pick<Task, "id" | "title" | "done">, setDo
     setDone ? setDone(done) : update("tasks", task.id, done ? { done, done_at: new Date().toISOString() } : { done, done_at: null });
 
   const commit = () => {
+    sfx.play("success", "done", { gain: 0.8 });
     save(true);
     toast(`Done: ${task.title}`, () => save(false));
   };

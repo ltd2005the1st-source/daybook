@@ -4,6 +4,7 @@ import { Bell, Download, Upload } from "lucide-react";
 import { ChangePin } from "@/components/change-pin";
 import { Showcase } from "@/components/showcase";
 import { useData } from "@/components/data";
+import { SoundSettings } from "@/components/sound-settings";
 import { ConfirmButton, Field, Page, PageHeader, Section } from "@/components/ui";
 import { remindersFor, fmtAt } from "@/lib/reminders";
 import { today } from "@/lib/dates";
@@ -233,6 +234,10 @@ export default function SettingsPage() {
           </Field>
         )}
         {online && session && !session.user.app_metadata?.showcase && <Showcase />}
+      </Section>
+
+      <Section title="Sounds">
+        <SoundSettings />
       </Section>
 
       <Section title="Reminders on this device">
