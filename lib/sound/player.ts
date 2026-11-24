@@ -1,23 +1,24 @@
 import { createEngine, type Engine, type PlayOpts } from "./engine";
 import { EVENTS } from "./library";
 
-const KEY = "daybook.soundlab";
+const LAB_KEY = "daybook.soundlab";
 
 export type Choices = Record<string, 0 | 1 | 2>;
 type Saved = { volume: number; muted: boolean; choices: Choices };
 
-const defaults = (): Saved => ({ volume: 0.8, muted: false, choices: Object.fromEntries(EVENTS.map((e) => [e.id, 0])) as Choices });
+const defaults = (): Saved => ({ volume: 0.6, muted: false, choices: Object.fromEntries(EVENTS.map((e) => [e.id, 0])) as Choices });
 
-function load(): Saved {
+function load(key: string, fixed?: 0 | 1 | 2): Saved {
   const d = defaults();
   try {
-    const raw = JSON.parse(localStorage.getItem(KEY) || "null");
+    const raw = JSON.parse(localStorage.getItem(key) || "null");
     if (raw) {
       if (typeof raw.volume === "number") d.volume = Math.min(1, Math.max(0, raw.volume));
       if (typeof raw.muted === "boolean") d.muted = raw.muted;
       for (const e of EVENTS) if ([0, 1, 2].includes(raw.choices?.[e.id])) d.choices[e.id] = raw.choices[e.id];
     }
   } catch {}
+  if (fixed !== undefined) for (const e of EVENTS) d.choices[e.id] = fixed;
   return d;
 }
 
@@ -29,9 +30,14 @@ export class SoundPlayer {
   state: Saved = defaults();
   unlocked = false;
 
+  /** `key` is the localStorage slot; `fixed` pins every event to one option (the app uses B). */
+  constructor(private key: string = LAB_KEY, private fixed?: 0 | 1 | 2) {
+    if (fixed !== undefined) for (const e of EVENTS) this.state.choices[e.id] = fixed;
+  }
+
   /** Call once on the client. Reads saved choices. */
   hydrate() {
-    this.state = load();
+    this.state = load(this.key, this.fixed);
     this.emit();
   }
 
@@ -45,7 +51,7 @@ export class SoundPlayer {
   }
   private save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify(this.state));
+      localStorage.setItem(this.key, JSON.stringify(this.state));
     } catch {}
   }
 

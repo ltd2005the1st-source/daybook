@@ -16,6 +16,7 @@ import { cx } from "@/lib/format";
 import { agendaOn, checkTasksOn, type Occurrence } from "@/lib/teaching";
 import type { CalEvent } from "@/lib/types";
 import { sec } from "@/lib/motion";
+import { sfx } from "@/lib/sound/app";
 
 const START_H = 6;
 const END_H = 24;
@@ -397,6 +398,7 @@ export default function CalendarPage() {
     document.body.classList.add("cal-dragging");
     document.body.classList.toggle("cal-copying", d.copy);
     if (d.pointer === "touch") navigator.vibrate?.(8);
+    if (d.mode !== "create") sfx.play("pickup", "pickup");
     setDrag({ ...d });
   }
 
@@ -427,6 +429,7 @@ export default function CalendarPage() {
       else if (e.clientY > r.bottom - 28) sc.scrollBy({ top: 14 });
     }
     const len = d.end - d.start;
+    const before = `${d.date}|${d.start}|${d.end}`;
     if (d.mode === "move") {
       d.date = mobile ? d.origDate : dateAt(e.clientX, d.date);
       const m = minuteAt(e.clientY, d.date);
@@ -442,6 +445,8 @@ export default function CalendarPage() {
       d.start = Math.min(a, b);
       d.end = Math.max(Math.max(a, b), d.start + SNAP);
     }
+    // A tick each time the block lands on a new slot or day (rate-limited inside the player).
+    if (d.mode !== "create" && before !== `${d.date}|${d.start}|${d.end}`) sfx.play("over", "enter");
     setDrag({ ...d });
   }
 
@@ -455,6 +460,7 @@ export default function CalendarPage() {
     }
     suppressClick.current = true;
     setTimeout(() => (suppressClick.current = false), 0);
+    if (d.mode !== "create") sfx.play("drop", "drop");
     if (d.mode === "create") {
       setDrag(null);
       setNewAt({ date: d.date, start: fromMinutes(d.start), end: fromMinutes(d.end) });

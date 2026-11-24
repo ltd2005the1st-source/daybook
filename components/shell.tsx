@@ -23,6 +23,7 @@ import { onPageScroll, pageScroller, useActiveSection } from "./scroll-spy";
 import { MusicDock, MusicProvider } from "./music";
 import { useSmoothWheel } from "./smooth-scroll";
 import { NativeSync } from "./native-sync";
+import { AppSounds } from "./app-sounds";
 import { sec, ms } from "@/lib/motion";
 
 
@@ -113,13 +114,20 @@ export function Shell({ children }: { children: React.ReactNode }) {
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
 
-  if (online && needsLogin) return <Login />;
+  if (online && needsLogin)
+    return (
+      <>
+        <AppSounds />
+        <Login />
+      </>
+    );
 
   return (
     // Anything that animates without its own timing eases in and out the same way.
     <MotionConfig transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }} reducedMotion="user">
     <MusicProvider>
     <NativeSync />
+    <AppSounds />
     <div className="min-h-dvh md:flex md:gap-3 md:p-3 md:h-dvh md:overflow-hidden print:h-auto print:overflow-visible">
       {/* Sidebar (desktop). Concentric corners: 12px panel, 6px padding, so the rows inside are 12 - 6 = 6px. */}
       <aside className="no-print hidden md:flex w-[196px] shrink-0 flex-col glass rounded-xl sticky top-3 h-[calc(100dvh-24px-var(--dock,0px))] px-1.5 py-3 transition-[height] duration-300 ease-in-out">
