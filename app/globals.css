@@ -311,11 +311,12 @@ select:focus-visible {
   color: var(--ink);
   box-shadow: 0 0 0 0 var(--btn-drop);
 }
-/* Like the IELTS app: the outlined button fills solid ink and its label flips to the page colour. */
+/* On hover the outlined button fills a blue-grey and its label goes white (5.6:1). The hard drop shadow
+   keeps its own colour (--btn-drop), untouched. */
 .btn-line:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--paper);
+  background: #5b6b8c;
+  border-color: #5b6b8c;
+  color: #fff;
 }
 
 /* Cards: a raised piece of glass inside the pane, with a lit top edge. */
