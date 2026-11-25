@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ms } from "@/lib/motion";
+import { useSeen } from "./reveal";
 import { cx, vnd } from "@/lib/format";
 
 const DIGITS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
@@ -11,10 +13,23 @@ const DIGITS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
  * slides with a transform. A wheel that appears after the number first showed (the number grew a
  * digit) starts at 0 and rolls up to its value.
  */
-function Wheel({ d, fresh }: { d: number; fresh: boolean }) {
+function Wheel({ d, fresh, hold, delay }: { d: number; fresh: boolean; hold: boolean; delay: number }) {
   const [shown, setShown] = useState(fresh ? 0 : d);
+  const [intro, setIntro] = useState(false);
+  // Until the figure first scrolls into view every wheel waits at 0 (no transition), then rolls up.
+  useLayoutEffect(() => {
+    if (hold) {
+      setShown(0);
+      setIntro(true);
+    }
+  }, [hold]);
   useEffect(() => {
-    if (shown === d) return;
+    if (hold || !intro) return;
+    const h = window.setTimeout(() => setIntro(false), ms(1500) + delay);
+    return () => clearTimeout(h);
+  }, [hold, intro, delay]);
+  useEffect(() => {
+    if (hold || shown === d) return;
     // Two frames so a fresh wheel paints at 0 before it rolls.
     let b = 0;
     const a = requestAnimationFrame(() => (b = requestAnimationFrame(() => setShown(d))));
@@ -22,11 +37,14 @@ function Wheel({ d, fresh }: { d: number; fresh: boolean }) {
       cancelAnimationFrame(a);
       cancelAnimationFrame(b);
     };
-  }, [d, shown]);
+  }, [d, shown, hold]);
   return (
     <span className="roll-cell">
       <span className="invisible">{d}</span>
-      <span className="roll-wheel" style={{ transform: `translate3d(0, ${-shown * 10}%, 0)` }}>
+      <span
+        className={cx("roll-wheel", hold && "roll-snap", intro && "roll-intro")}
+        style={{ transform: `translate3d(0, ${-(hold ? 0 : shown) * 10}%, 0)`, transitionDelay: intro && !hold ? `${delay}ms` : undefined }}
+      >
         {DIGITS.map((x) => (
           <span key={x}>{x}</span>
         ))}
@@ -42,16 +60,19 @@ function Wheel({ d, fresh }: { d: number; fresh: boolean }) {
 export function RollingText({ text, className }: { text: string; className?: string }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const ref = useRef<HTMLSpanElement>(null);
+  const seen = useSeen(ref);
   const chars = Array.from(text);
   const n = chars.length;
+  let digit = 0;
   return (
-    <span className={cx("roll", className)}>
+    <span ref={ref} className={cx("roll", className)}>
       <span className="sr-only">{text}</span>
       <span aria-hidden="true">
         {chars.map((c, i) => {
           const key = n - i; // position from the right
           return /\d/.test(c) ? (
-            <Wheel key={`d${key}`} d={+c} fresh={mounted} />
+            <Wheel key={`d${key}`} d={+c} fresh={mounted} hold={!seen} delay={ms(Math.min(digit++, 8) * 70)} />
           ) : (
             <span key={`c${key}${c}`}>{c}</span>
           );

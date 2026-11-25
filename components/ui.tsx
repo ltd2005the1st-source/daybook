@@ -58,9 +58,10 @@ export function Section({
 }) {
   return (
     <section className={cx("mb-8", className)}>
-      <div className="mb-2.5 flex items-center justify-between gap-2 border-b border-line pb-1.5">
+      <div className="relative mb-2.5 flex items-center justify-between gap-2 pb-1.5">
         <h2 className="text-[13px] font-semibold text-ink-2">{title}</h2>
         {action}
+        <span className="rv-line" aria-hidden />
       </div>
       {children}
     </section>

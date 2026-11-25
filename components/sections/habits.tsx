@@ -7,7 +7,7 @@ import { Field, Page, PageHeader, Section, Sheet, Tick } from "@/components/ui";
 import { addDays, fmtDay, fromMinutes, minutes, parseDate, startOfWeek, today, WD_SHORT } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import type { Habit, HabitLog } from "@/lib/types";
-import { sec } from "@/lib/motion";
+import { CountUp, Grow } from "@/components/reveal";
 
 /** Sleep times live on a night axis from 20:00 to 12:00 the next day. */
 const AXIS_START = 20 * 60;
@@ -117,13 +117,13 @@ function Sleep({ h }: { h: Habit }) {
                 return (
                   <div key={d} className="absolute inset-y-0" style={{ left: `${i * W}%`, width: `${W}%` }}>
                     {has && (
-                      <motion.div
+                      <Grow
+                        prop="height"
                         title={`${fmtDay(d)}: ${l!.slept_at} → ${l!.woke_at}`}
                         className="absolute left-1/2 w-[58%] -translate-x-1/2 rounded-full"
                         style={{ background: good ? h.color : "var(--pen)", top: `${(top / AXIS_LEN) * 100}%` }}
-                        initial={{ height: 0 }}
-                        animate={{ height: `${(Math.max(8, bottom - top) / AXIS_LEN) * 100}%` }}
-                        transition={{ duration: sec(0.6), ease: [0.65, 0, 0.35, 1], delay: sec(i * 0.02) }}
+                        to={`${(Math.max(8, bottom - top) / AXIS_LEN) * 100}%`}
+                        delay={i * 0.05}
                       />
                     )}
                   </div>
@@ -196,7 +196,7 @@ function Sleep({ h }: { h: Habit }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-hover px-2 py-2">
+    <div data-reveal="pop" className="rounded-xl bg-hover px-2 py-2">
       <div className="num text-[16px] font-semibold">{value}</div>
       <div className="text-[11px] text-muted">{label}</div>
     </div>
@@ -207,7 +207,7 @@ function WeekGrid({ h, logs, weeks = 12 }: { h: Habit; logs: HabitLog[]; weeks?:
   const t = today();
   const start = addDays(startOfWeek(t), -7 * (weeks - 1));
   return (
-    <div className="flex gap-[3px] overflow-x-auto">
+    <div data-reveal="up" className="flex gap-[3px] overflow-x-auto">
       {Array.from({ length: weeks }, (_, w) => (
         <div key={w} className="flex flex-col gap-[3px]">
           {Array.from({ length: 7 }, (_, d) => {
@@ -259,7 +259,7 @@ function Exercise({ h }: { h: Habit }) {
         <div>
           <div className="mb-3 flex items-end gap-3">
             <div className="display text-[44px] font-semibold leading-none">
-              {thisWeek}
+              <CountUp value={thisWeek} />
               <span className="text-[22px] text-muted">/{target}</span>
             </div>
             <div className="pb-1 text-[13px] text-ink-2">
@@ -361,7 +361,7 @@ function Custom({ h }: { h: Habit }) {
           Done today
         </label>
         <span className="text-[13px] text-ink-2">
-          {thisWeek}/{h.weekly_target ?? 7} this week{streak > 0 && ` · ${streak}-week streak`}
+          <CountUp value={thisWeek} />/{h.weekly_target ?? 7} this week{streak > 0 && <> · <CountUp value={streak} />-week streak</>}
         </span>
         <WeekGrid h={h} logs={logs} weeks={8} />
       </div>

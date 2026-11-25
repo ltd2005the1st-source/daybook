@@ -545,6 +545,96 @@ select:focus-visible {
   }
 }
 
+/* ---------------------------------------------------------------
+   Reveal (components/reveal.tsx): opening and scroll animations. Content inside the dashboard's
+   sections starts hidden ("out"), then eases into place ("in") as it scrolls into view, and is
+   left alone ("done") afterwards so its own hover and press transitions are untouched. Only
+   opacity, translate and scale move, all with a strong ease-out. The classes exist only while
+   html.rv-on is set, which the dashboard does unless the visitor prefers reduced motion.
+---------------------------------------------------------------- */
+:root {
+  --rv-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media not print {
+  html.rv-on [data-rv="out"] {
+    opacity: 0;
+  }
+  html.rv-on [data-rv="out"][data-rvk="up"] {
+    translate: 0 28px;
+  }
+  html.rv-on [data-rv="out"][data-rvk="title"] {
+    translate: -28px 0;
+  }
+  html.rv-on [data-rv="out"][data-rvk="fade"] {
+    translate: 0 10px;
+  }
+  html.rv-on [data-rv="out"][data-rvk="row"] {
+    translate: 0 14px;
+  }
+  html.rv-on [data-rv="out"][data-rvk="left"] {
+    translate: -22px 0;
+  }
+  html.rv-on [data-rv="out"][data-rvk="pop"] {
+    scale: 0.88;
+  }
+  html.rv-on [data-rv="out"][data-rvk="icon"] {
+    translate: -14px 0;
+    scale: 0.55;
+  }
+  html.rv-on [data-rv="out"][data-rvk="line"] {
+    opacity: 1;
+    scale: 0 1;
+    transform-origin: left center;
+  }
+  html.rv-on [data-rv="in"] {
+    transition:
+      opacity calc(0.9s / var(--speed)) var(--rv-ease),
+      translate calc(1.1s / var(--speed)) var(--rv-ease),
+      scale calc(1.1s / var(--speed)) var(--rv-ease);
+    transition-delay: calc(var(--rv-d, 0) * 1ms / var(--speed));
+  }
+  html.rv-on [data-rv="in"][data-rvk="line"] {
+    transform-origin: left center;
+    transition-duration: calc(1.3s / var(--speed));
+  }
+}
+
+/* The section rule under each heading draws itself in from the left. */
+.rv-line {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: var(--line);
+  pointer-events: none;
+}
+
+/* App chrome sliding in as Daybook opens (sidebar rows, phone top bar). */
+@keyframes intro-in {
+  from {
+    opacity: 0;
+    translate: -20px 0;
+  }
+}
+@keyframes intro-down {
+  from {
+    opacity: 0;
+    translate: 0 -14px;
+  }
+}
+.intro,
+.intro-down {
+  animation-duration: calc(0.8s / var(--speed));
+  animation-timing-function: var(--rv-ease);
+  animation-fill-mode: backwards;
+  animation-delay: calc((var(--i, 0) * 50ms + 60ms) / var(--speed));
+}
+.intro {
+  animation-name: intro-in;
+}
+.intro-down {
+  animation-name: intro-down;
+}
+
 /* Thin scrollbars */
 * {
   scrollbar-width: thin;
@@ -609,6 +699,25 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .tick-pop {
     transition: none;
     animation: none;
+  }
+}
+
+/* Calendar blocks, task bars and month chips behave like the action buttons on hover: they lift and
+   grow the same hard drop shadow, and keep their own fill and text colour. Pointer devices only; no
+   lift while a drag is under way. The ring/shadow a bar already has is kept under the drop. */
+.cal-lift {
+  transition: transform calc(0.375s / var(--speed)) cubic-bezier(0.22, 1, 0.36, 1), box-shadow calc(0.375s / var(--speed)) cubic-bezier(0.22, 1, 0.36, 1), opacity calc(0.22s / var(--speed)) var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  body:not(.cal-dragging) .cal-lift:hover {
+    transform: translateY(-3.6px);
+    box-shadow: var(--tw-ring-shadow, 0 0 #0000), 0 4px 0 0 var(--btn-drop);
+    z-index: 6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cal-lift:hover {
+    transform: none !important;
   }
 }
 
@@ -862,6 +971,14 @@ body.cal-dragging.cal-copying * {
   flex-direction: column;
   text-align: center;
   transition: transform calc(0.7s / var(--speed)) var(--ease);
+}
+/* First time a figure comes into view its digits roll up from 0, one after another. */
+.roll-snap {
+  transition: none !important;
+}
+.roll-intro {
+  transition-duration: calc(1.4s / var(--speed));
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 .roll-wheel > span {
   display: block;

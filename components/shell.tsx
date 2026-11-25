@@ -131,13 +131,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <div className="min-h-dvh md:flex md:gap-3 md:p-3 md:h-dvh md:overflow-hidden print:h-auto print:overflow-visible">
       {/* Sidebar (desktop). Concentric corners: 12px panel, 6px padding, so the rows inside are 12 - 6 = 6px. */}
       <aside className="no-print hidden md:flex w-[196px] shrink-0 flex-col glass rounded-xl sticky top-3 h-[calc(100dvh-24px-var(--dock,0px))] px-1.5 py-3 transition-[height] duration-300 ease-in-out">
-        <Link href="/" className="flex items-center gap-2 px-2 py-1.5 mb-3">
+        <Link href="/" className="intro flex items-center gap-2 px-2 py-1.5 mb-3" style={{ ["--i" as string]: 0 }}>
           <img src="/icon.svg" alt="" className="h-6 w-6 rounded-[6px]" />
           <span className="display text-[17px] font-semibold">Daybook</span>
         </Link>
         <button
           onClick={() => setPaletteOpen(true)}
-          className="press mb-3 flex items-center justify-between rounded-full glass-pill px-3 py-1.5 text-[13px] text-muted hover:text-ink"
+          style={{ ["--i" as string]: 1 }}
+          className="intro press mb-3 flex items-center justify-between rounded-full glass-pill px-3 py-1.5 text-[13px] text-muted hover:text-ink"
         >
           <span>Jump or add…</span>
           <kbd className="num rounded-full border border-line px-1.5 text-[10.5px] leading-[16px]">⌘K</kbd>
@@ -151,8 +152,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 key={n.href}
                 href={n.href}
                 aria-current={active ? "true" : undefined}
+                style={{ ["--i" as string]: i + 2 }}
                 className={cx(
-                  "press nav-item relative flex items-center gap-2.5 rounded-full px-3.5 py-[7px] text-[14px]",
+                  "intro press nav-item relative flex items-center gap-2.5 rounded-full px-3.5 py-[7px] text-[14px]",
                   active ? "text-ink font-medium" : "text-ink-2 hover:bg-hover hover:text-ink",
                 )}
               >
@@ -171,7 +173,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </nav>
         <AppLinks onEdit={() => setEditApps(true)} />
         </div>
-        <div className="mt-auto flex flex-col gap-px">
+        <div className="intro mt-auto flex flex-col gap-px" style={{ ["--i" as string]: NAV.length + 3 }}>
           <button onClick={() => setNotesOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <NotebookPen size={16} strokeWidth={1.8} /> My Notebook
           </button>
@@ -199,11 +201,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile top bar */}
       <header ref={topbarRef} data-scrolled={scrolled || undefined} className="no-print md:hidden sticky top-0 z-30 flex items-center justify-between material edge-bottom px-4 pt-[max(var(--sat),10px)] pb-2.5">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="intro-down flex items-center gap-2">
           <img src="/icon.svg" alt="" className="h-6 w-6 rounded-[6px]" />
           <span className="display text-[17px] font-semibold">Daybook</span>
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="intro-down flex items-center gap-1" style={{ ["--i" as string]: 2 }}>
           <button aria-label="Apps" onClick={() => setAppsOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
             <LayoutGrid size={17} />
           </button>
