@@ -621,6 +621,25 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 }
 
+/* Calendar blocks, task bars and month chips behave like the action buttons on hover: they lift and
+   grow the same hard drop shadow, and keep their own fill and text colour. Pointer devices only; no
+   lift while a drag is under way. The ring/shadow a bar already has is kept under the drop. */
+.cal-lift {
+  transition: transform calc(0.375s / var(--speed)) cubic-bezier(0.22, 1, 0.36, 1), box-shadow calc(0.375s / var(--speed)) cubic-bezier(0.22, 1, 0.36, 1), opacity calc(0.22s / var(--speed)) var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  body:not(.cal-dragging) .cal-lift:hover {
+    transform: translateY(-3.6px);
+    box-shadow: var(--tw-ring-shadow, 0 0 #0000), 0 4px 0 0 var(--btn-drop);
+    z-index: 6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cal-lift:hover {
+    transform: none !important;
+  }
+}
+
 /* Calendar blocks can be long-pressed and dragged on phones without the text-selection callout. */
 .cal-block {
   -webkit-user-select: none;

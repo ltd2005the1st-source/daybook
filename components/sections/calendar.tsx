@@ -881,7 +881,7 @@ function Block({
         onMenu(e.clientX, e.clientY);
       }}
       className={cx(
-        "cal-block group absolute z-[1] flex cursor-grab flex-col justify-start overflow-hidden rounded-[6px] px-1.5 py-1 text-left text-[11.5px] leading-tight transition-[filter,box-shadow] hover:brightness-110",
+        "cal-block cal-lift group absolute z-[1] flex cursor-grab flex-col justify-start overflow-hidden rounded-[6px] px-1.5 py-1 text-left text-[11.5px] leading-tight cal-lift",
         struck && "opacity-45",
         dragging && "!opacity-30",
       )}
@@ -940,7 +940,7 @@ function Bar({
       }}
       title={`${o.start} · ${o.title}`}
       className={cx(
-        "absolute inset-x-[3px] z-[3] flex cursor-grab items-center gap-1 overflow-hidden rounded-[6px] px-1.5 text-left text-[11px] leading-none shadow-[0_1px_3px_rgba(0,0,0,0.18)] ring-1 ring-white/60 transition-[filter,opacity] duration-300 hover:brightness-110",
+        "cal-lift absolute inset-x-[3px] z-[3] flex cursor-grab items-center gap-1 overflow-hidden rounded-[6px] px-1.5 text-left text-[11px] leading-none shadow-[0_1px_3px_rgba(0,0,0,0.18)] ring-1 ring-white/60",
         o.done && "opacity-45",
         dragging && "!opacity-30",
       )}
@@ -1037,7 +1037,7 @@ function MonthView({ month, onDay, onOcc }: { month: string; onDay: (d: string) 
                     }}
                     className={cx(
                       // On a phone each item is a thin coloured line; on a computer it has its name.
-                      "flex h-[5px] min-w-0 items-center gap-1 overflow-hidden rounded-full text-left text-[11px] leading-tight md:h-auto md:rounded-[4px] md:px-1 md:py-[1px]",
+                      "cal-lift flex h-[5px] min-w-0 items-center gap-1 overflow-hidden rounded-full text-left text-[11px] leading-tight md:h-auto md:rounded-[4px] md:px-1 md:py-[1px]",
                       (o.done || o.status === "cancelled" || o.status === "missed_owe") && "opacity-45 line-through",
                     )}
                     style={isBar(o) && desktopNow() ? undefined : { background: isBar(o) && o.kind === "task" ? "var(--ink)" : o.color, color: textOn(o.color) }}
