@@ -11,6 +11,7 @@ import { MilestoneBar } from "@/components/milestone-bar";
 import { QuickAdd } from "@/components/money";
 import { useMarkLesson } from "@/components/register";
 import { Dot, Page, Section, Tick } from "@/components/ui";
+import { CountUp } from "@/components/reveal";
 import { addDays, fmtDay, minutes, MONTHS, monthOf, parseDate, startOfWeek, today, WD_LONG } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import { agendaOn, checkTasksOn, makeupsOwed, mergeChecks, taughtIn, type Occurrence } from "@/lib/teaching";
@@ -202,7 +203,7 @@ export default function TodayPage() {
                       <li key={s.id} className="flex items-center gap-2 py-1 text-[13.5px] text-ink-2">
                         <Dot color={s.color} />
                         <span className="min-w-0 flex-1 truncate">{s.name}</span>
-                        <span className="num font-semibold text-pen">{n}</span>
+                        <span className="num font-semibold text-pen"><CountUp value={n} /></span>
                       </li>
                     ))}
                   </ul>
