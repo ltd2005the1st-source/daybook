@@ -60,7 +60,7 @@ export function Grow({
       {...rest}
       initial={{ [prop]: 0 }}
       animate={{ [prop]: seen ? to : 0 }}
-      transition={{ duration: sec(1), ease: OUT_EXPO, delay: sec(delay) }}
+      transition={{ duration: sec(1.5), ease: OUT_EXPO, delay: sec(delay) }}
     />
   );
 }
@@ -86,7 +86,7 @@ export function CountUp({ value, className }: { value: number; className?: strin
       return;
     }
     const t0 = performance.now();
-    const dur = 1100 / SPEED;
+    const dur = 1500 / SPEED;
     let raf = 0;
     const tick = (now: number) => {
       const p = Math.min(1, (now - t0) / dur);
@@ -106,7 +106,7 @@ export function CountUp({ value, className }: { value: number; className?: strin
   );
 }
 
-const SELECTOR = "h1, h2, .label, .card, li, .row, svg.lucide, .rv-line, [data-reveal]";
+const SELECTOR = "h1, h2, .label, .card, li, .row, svg.lucide, .rv-line, .cal-lift, [data-reveal]";
 const SKIP = "[role=dialog], .fixed, [data-scroll-contain], [data-rv-skip], [class*='sticky']";
 /** New content keeps animating in for this long after its section first came on screen. */
 const WINDOW = 2500;
@@ -119,6 +119,7 @@ function kindOf(el: Element): string {
   if (el.matches(".rv-line")) return "line";
   if (el.matches("li, .row")) return "row";
   if (el.matches(".label")) return "fade";
+  if (el.matches(".cal-lift")) return "drop";
   return "up";
 }
 
@@ -159,7 +160,7 @@ export function useRevealScan() {
           .filter((e) => e.isIntersecting)
           .sort((a, b) => Math.round(a.boundingClientRect.top / 8) - Math.round(b.boundingClientRect.top / 8) || a.boundingClientRect.left - b.boundingClientRect.left);
         inView.forEach((e, i) => {
-          reveal(e.target as HTMLElement, Math.min(i, 16) * 55);
+          reveal(e.target as HTMLElement, Math.min(i, 10) * 38);
           io.unobserve(e.target);
         });
         for (const e of entries) {
