@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Plus, Repeat, Trash2 } from "lucide-react";
 import { useData } from "@/components/data";
 import { Field, Page, PageHeader, Section, Segmented, Sheet, Tick } from "@/components/ui";
@@ -11,7 +10,7 @@ import { taughtIn } from "@/lib/teaching";
 import { EXPENSE_CATEGORIES, type Debt, type Transaction } from "@/lib/types";
 import { CAT_COLORS, QuickAdd } from "@/components/money";
 import { FoodSection, isFood } from "@/components/food";
-import { sec } from "@/lib/motion";
+import { CountUp, Grow } from "@/components/reveal";
 import { fixedFor } from "@/lib/fixed";
 import { FixedCard } from "@/components/fixed";
 import { Money } from "@/components/rolling";
@@ -81,7 +80,7 @@ export default function MoneyPage() {
           { l: "Went out", v: -spent, sub: fixedTotal ? <><Money value={fixedTotal} compact /> monthly fixed</> : undefined },
           { l: "Kept", v: income - spent, strong: true },
         ].map((x) => (
-          <div key={x.l} className="bg-surface px-3 py-3 md:px-5 md:py-4">
+          <div key={x.l} data-reveal="up" className="bg-surface px-3 py-3 md:px-5 md:py-4">
             <div className="label">{x.l}</div>
             <div className={cx("num mt-1 text-[17px] md:text-[26px] font-semibold leading-tight", x.strong && (x.v >= 0 ? "text-good" : "text-pen"))}>
               <Money value={x.v} />
@@ -99,17 +98,11 @@ export default function MoneyPage() {
 
           <Section title="Where it went">
             <div className="flex flex-col gap-2">
-              {byCat.map(({ c, v }) => (
+              {byCat.map(({ c, v }, bi) => (
                 <div key={c} className="grid grid-cols-[92px_1fr_auto] items-center gap-3 text-[13.5px]">
                   <span className="text-ink-2">{c}</span>
                   <div className="h-5 rounded bg-hover overflow-hidden">
-                    <motion.div
-                      className="h-full rounded"
-                      style={{ background: CAT_COLORS[c] }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(v / maxCat) * 100}%` }}
-                      transition={{ duration: sec(0.6), ease: [0.65, 0, 0.35, 1] }}
-                    />
+                    <Grow className="h-full rounded" style={{ background: CAT_COLORS[c] }} to={`${(v / maxCat) * 100}%`} delay={bi * 0.07} />
                   </div>
                   <Money value={v} className="num w-[92px] text-right" />
                 </div>
@@ -117,7 +110,7 @@ export default function MoneyPage() {
             </div>
           </Section>
 
-          <Section title={`Entries · ${listed.length}`}>
+          <Section title={<>Entries · <CountUp value={listed.length} /></>}>
             {groups.length === 0 && <p className="text-[13.5px] text-muted">Nothing logged in {fmtMonth(month)} yet.</p>}
             {groups.map(([date, items]) => (
               <div key={date} className="mb-3">

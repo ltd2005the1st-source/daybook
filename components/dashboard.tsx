@@ -15,6 +15,7 @@ import { NAV, sectionOf } from "./nav";
 import { jumping, onPageScroll, pageScroller, scrollToSection, setActiveSection, setPagedGo, viewTop } from "./scroll-spy";
 import { native } from "@/lib/native";
 import { ms } from "@/lib/motion";
+import { useRevealScan } from "./reveal";
 
 const PARTS: Record<string, React.ComponentType> = {
   today: TodaySection,
@@ -54,6 +55,7 @@ export function Dashboard() {
 }
 
 function ScrollDashboard() {
+  useRevealScan();
   // Sections come in one at a time after the first paint, so opening the app stays quick.
   // Everything down to the section you asked for is there straight away.
   const [shown, setShown] = useState(1);
@@ -209,6 +211,7 @@ const Page = memo(function Page({ id }: { id: string }) {
  * (transform only) and ease out, so a drag is 1:1 with the finger and a release settles quickly.
  */
 function PagedDashboard() {
+  useRevealScan();
   const [cur, setCur] = useState<string>(() => hashSection() ?? NAV[0].id);
   const [seen, setSeen] = useState<string[]>(() => [hashSection() ?? NAV[0].id]);
   const curRef = useRef(cur);

@@ -1,23 +1,27 @@
 "use client";
+import { useRef } from "react";
 import { motion } from "motion/react";
 import type { Milestone } from "@/lib/types";
 import { sec } from "@/lib/motion";
+import { OUT_EXPO, useSeen } from "./reveal";
 
 /** A progress bar where each milestone is a station along the line. */
 export function MilestoneBar({ items, color = "var(--ink)" }: { items: Milestone[]; color?: string }) {
   const n = items.length;
+  const ref = useRef<HTMLDivElement>(null);
+  const seen = useSeen(ref);
   if (!n) return null;
   const done = items.filter((m) => m.done).length;
   const pct = done / n;
   return (
-    <div className="relative h-4 w-full" aria-label={`${done} of ${n} milestones done`}>
+    <div ref={ref} className="relative h-4 w-full" aria-label={`${done} of ${n} milestones done`}>
       <div className="absolute inset-x-[7px] top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-hover" />
       <motion.div
         className="absolute left-[7px] top-1/2 h-[3px] -translate-y-1/2 rounded-full"
         style={{ background: color }}
-        initial={false}
-        animate={{ width: `calc((100% - 14px) * ${pct})` }}
-        transition={{ duration: sec(0.6), ease: [0.65, 0, 0.35, 1] }}
+        initial={{ width: 0 }}
+        animate={{ width: seen ? `calc((100% - 14px) * ${pct})` : 0 }}
+        transition={{ duration: sec(seen ? 1 : 0.6), ease: OUT_EXPO }}
       />
       {items.map((m, i) => {
         const left = `calc(7px + (100% - 14px) * ${(i + 1) / n} - 5px)`;

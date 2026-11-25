@@ -8,6 +8,7 @@ import { TaskSheet } from "@/components/task-sheet";
 import { MilestoneBar } from "@/components/milestone-bar";
 import { Strike, TASK_ENTER, TASK_EXIT, useCompleteTask } from "@/components/complete";
 import { Page, PageHeader, Section, Segmented, Tick } from "@/components/ui";
+import { CountUp } from "@/components/reveal";
 import { addDays, relDay, today, weekday } from "@/lib/dates";
 import { cx } from "@/lib/format";
 import { sec } from "@/lib/motion";
@@ -212,7 +213,7 @@ export default function TasksPage() {
       {done.length > 0 && (
         <div>
           <button onClick={() => setShowDone(!showDone)} className="mb-2 flex items-center gap-1 text-[13px] font-semibold text-muted hover:text-ink">
-            <ChevronDown size={15} className={cx("transition-transform", !showDone && "-rotate-90")} /> Done · {done.length}
+            <ChevronDown size={15} className={cx("transition-transform", !showDone && "-rotate-90")} /> Done · <CountUp value={done.length} />
           </button>
           {showDone && (
             <AnimatePresence initial={false}>
@@ -252,7 +253,7 @@ function TaskGroup({
 }) {
   if (open === undefined)
     return (
-      <Section title={<span className={tone}>{title} · {count}</span>}>
+      <Section title={<span className={tone}>{title} · <CountUp value={count} /></span>}>
         {children}
       </Section>
     );
@@ -266,7 +267,7 @@ function TaskGroup({
       >
         <ChevronDown size={15} className={cx("shrink-0 text-muted transition-transform", !open && "-rotate-90")} />
         <span className={tone}>{title}</span>
-        <span className="num font-normal text-muted">· {count}</span>
+        <span className="num font-normal text-muted">· <CountUp value={count} /></span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
