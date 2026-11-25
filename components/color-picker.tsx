@@ -16,7 +16,7 @@ export function ColorPicker({ value, onChange, size = 26 }: { value: string; onC
         aria-label={name}
         aria-pressed={on}
         onClick={() => onChange(hex)}
-        className={cx("flex items-center justify-center rounded-full transition-transform hover:scale-110", on && "ring-2 ring-ink ring-offset-2 ring-offset-surface")}
+        className={cx("flex items-center justify-center rounded-full transition-transform hover:scale-110", on && "ring-2 ring-ring ring-offset-2 ring-offset-surface")}
         style={{ width: size, height: size, background: hex }}
       >
         {on && <Check size={size * 0.55} color={textOn(hex)} strokeWidth={3} />}
@@ -29,7 +29,7 @@ export function ColorPicker({ value, onChange, size = 26 }: { value: string; onC
       {!known && swatch(value, "Current colour")}
       <label
         title="Custom colour"
-        className="relative flex cursor-pointer items-center justify-center rounded-full border border-dashed border-line-strong text-[13px] text-muted hover:bg-hover"
+        className="relative flex cursor-pointer items-center justify-center rounded-full border border-dashed border-input text-[13px] text-muted-foreground hover:bg-accent"
         style={{ width: size, height: size }}
       >
         +

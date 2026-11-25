@@ -6,7 +6,7 @@ import { sec } from "@/lib/motion";
 import { OUT_EXPO, useSeen } from "./reveal";
 
 /** A progress bar where each milestone is a station along the line. */
-export function MilestoneBar({ items, color = "var(--ink)" }: { items: Milestone[]; color?: string }) {
+export function MilestoneBar({ items, color = "var(--foreground)" }: { items: Milestone[]; color?: string }) {
   const n = items.length;
   const ref = useRef<HTMLDivElement>(null);
   const seen = useSeen(ref);
@@ -15,7 +15,7 @@ export function MilestoneBar({ items, color = "var(--ink)" }: { items: Milestone
   const pct = done / n;
   return (
     <div ref={ref} className="relative h-4 w-full" aria-label={`${done} of ${n} milestones done`}>
-      <div className="absolute inset-x-[7px] top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-hover" />
+      <div className="absolute inset-x-[7px] top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-accent" />
       <motion.div
         className="absolute left-[7px] top-1/2 h-[3px] -translate-y-1/2 rounded-full"
         style={{ background: color }}
@@ -30,7 +30,7 @@ export function MilestoneBar({ items, color = "var(--ink)" }: { items: Milestone
             key={m.id}
             title={m.title}
             className="absolute top-1/2 h-[10px] w-[10px] -translate-y-1/2 rounded-full border-2"
-            style={{ left, borderColor: m.done ? color : "var(--line-strong)", background: m.done ? color : "var(--surface)" }}
+            style={{ left, borderColor: m.done ? color : "var(--input)", background: m.done ? color : "var(--card)" }}
             initial={false}
             animate={{ scale: m.done ? [1.5, 1] : 1 }}
             transition={{ duration: sec(0.3) }}

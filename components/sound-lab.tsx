@@ -18,8 +18,8 @@ const play = (event: string, cue: string, opts?: Parameters<SoundPlayer["play"]>
 function Demo({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {
   return (
     <div className="card p-4">
-      <div className="text-[13.5px] font-medium text-ink">{title}</div>
-      <div className="mb-3 mt-0.5 text-[12.5px] text-muted">{hint}</div>
+      <div className="text-[13.5px] font-medium text-foreground">{title}</div>
+      <div className="mb-3 mt-0.5 text-[12.5px] text-muted-foreground">{hint}</div>
       {children}
     </div>
   );
@@ -71,12 +71,12 @@ function TickDemo() {
               play("tick", on[i] ? "uncheck" : "check");
               setOn((s) => s.map((v, j) => (j === i ? !v : v)));
             }}
-            className="press flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-hover"
+            className="press flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-accent"
           >
-            <span className={cx("grid h-5 w-5 shrink-0 place-items-center rounded-full border transition-colors duration-200", on[i] ? "border-accent bg-accent text-white" : "border-line-strong bg-surface")}>
+            <span className={cx("grid h-5 w-5 shrink-0 place-items-center rounded-full border transition-colors duration-200", on[i] ? "border-info bg-info text-white" : "border-input bg-card")}>
               {on[i] && <Check size={12} strokeWidth={3} />}
             </span>
-            <span className={cx("text-[14px] transition-colors", on[i] ? "text-muted line-through" : "text-ink")}>{l}</span>
+            <span className={cx("text-[14px] transition-colors", on[i] ? "text-muted-foreground line-through" : "text-foreground")}>{l}</span>
           </button>
         ))}
       </div>
@@ -92,7 +92,7 @@ function SwitchDemo() {
       <div className="space-y-2">
         {labels.map((l, i) => (
           <div key={l} className="flex items-center justify-between rounded-lg px-2 py-1">
-            <span className="text-[14px] text-ink">{l}</span>
+            <span className="text-[14px] text-foreground">{l}</span>
             <button
               role="switch"
               aria-checked={on[i]}
@@ -101,7 +101,7 @@ function SwitchDemo() {
                 play("switch", on[i] ? "off" : "on");
                 setOn((s) => s.map((v, j) => (j === i ? !v : v)));
               }}
-              className={cx("relative h-[22px] w-[38px] shrink-0 rounded-full transition-colors duration-300", on[i] ? "bg-accent" : "bg-line-strong")}
+              className={cx("relative h-[22px] w-[38px] shrink-0 rounded-full transition-colors duration-300", on[i] ? "bg-info" : "bg-input")}
             >
               <span className="absolute left-[3px] top-[3px] h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-300" style={{ transform: `translateX(${on[i] ? 16 : 0}px)`, transitionTimingFunction: "var(--ease)" }} />
             </button>
@@ -139,9 +139,9 @@ function SheetDemo() {
       <button className="btn btn-line" onClick={() => toggle(true)}>Open a sheet</button>
       {open && (
         <div className="fixed inset-0 z-50 grid place-items-end bg-black/20 p-4 sm:place-items-center" onClick={() => toggle(false)}>
-          <div className="glass-thick w-full max-w-sm rounded-xl p-5" onClick={(e) => e.stopPropagation()}>
-            <div className="text-[15px] font-medium text-ink">New event</div>
-            <p className="mt-1 text-[13px] text-muted">Closing it, or tapping outside, plays the close sound.</p>
+          <div className="border bg-popover text-popover-foreground shadow-lg/5 w-full max-w-sm rounded-xl p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="text-[15px] font-medium text-foreground">New event</div>
+            <p className="mt-1 text-[13px] text-muted-foreground">Closing it, or tapping outside, plays the close sound.</p>
             <div className="mt-4 flex justify-end">
               <button className="btn btn-primary" onClick={() => toggle(false)}>Done</button>
             </div>
@@ -173,7 +173,7 @@ function TypeDemo() {
   return (
     <Demo title="Typing in a field" hint="Every key makes a sound, space is deeper.">
       <input
-        className="w-full rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px] text-ink outline-none focus:border-accent"
+        className="w-full rounded-xl border border-input bg-card px-3 py-2 text-[14px] text-foreground outline-none focus:border-info"
         placeholder="Type something…"
         onKeyDown={(e) => {
           if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -240,16 +240,16 @@ function DragDemo() {
 
   return (
     <div className="card p-4 md:col-span-2">
-      <div className="text-[13.5px] font-medium text-ink">Pick up, move over, drop</div>
-      <div className="mb-3 mt-0.5 text-[12.5px] text-muted">Drag a task or event between the columns. Pick-up, passing over a column and dropping each use their own sound.</div>
+      <div className="text-[13.5px] font-medium text-foreground">Pick up, move over, drop</div>
+      <div className="mb-3 mt-0.5 text-[12.5px] text-muted-foreground">Drag a task or event between the columns. Pick-up, passing over a column and dropping each use their own sound.</div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {ZONES.map((z) => (
           <div
             key={z.id}
             data-zone={z.id}
-            className={cx("min-h-[132px] rounded-xl border border-dashed p-2 transition-colors duration-200", drag?.over === z.id ? "border-accent bg-accent-soft" : "border-line-strong bg-sunken")}
+            className={cx("min-h-[132px] rounded-xl border border-dashed p-2 transition-colors duration-200", drag?.over === z.id ? "border-info bg-info/12" : "border-input bg-muted")}
           >
-            <div className="mb-1.5 px-1 text-[12px] font-medium text-muted">{z.label}</div>
+            <div className="mb-1.5 px-1 text-[12px] font-medium text-muted-foreground">{z.label}</div>
             <div className="space-y-1.5">
               {CHIPS.filter((c) => place[c.id] === z.id).map((c) => {
                 const active = drag?.id === c.id;
@@ -260,12 +260,12 @@ function DragDemo() {
                     onPointerMove={move}
                     onPointerUp={up}
                     onPointerCancel={up}
-                    className={cx("relative flex cursor-grab touch-none select-none items-center gap-2 rounded-lg border border-rim bg-surface px-2.5 py-2 text-[13px] text-ink", active ? "z-50 cursor-grabbing shadow-pop" : "transition-transform duration-200")}
+                    className={cx("relative flex cursor-grab touch-none select-none items-center gap-2 rounded-lg border border-rim bg-card px-2.5 py-2 text-[13px] text-foreground", active ? "z-50 cursor-grabbing shadow-pop" : "transition-transform duration-200")}
                     style={active ? { transform: `translate(${drag!.dx}px, ${drag!.dy}px) scale(1.03)`, transition: "none" } : undefined}
                   >
                     <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: c.color }} />
                     <span className="truncate">{c.text}</span>
-                    <span className="ml-auto text-[11px] text-muted">{c.kind}</span>
+                    <span className="ml-auto text-[11px] text-muted-foreground">{c.kind}</span>
                   </div>
                 );
               })}
@@ -286,15 +286,15 @@ function EventCard({ ev, choice }: { ev: SoundEvent; choice: number }) {
   return (
     <section className="card p-4 md:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-        <h3 className="text-[16px] font-medium text-ink">{ev.title}</h3>
-        <span className="text-[12px] text-muted">Using option {ev.options[choice].id}</span>
+        <h3 className="text-[16px] font-medium text-foreground">{ev.title}</h3>
+        <span className="text-[12px] text-muted-foreground">Using option {ev.options[choice].id}</span>
       </div>
-      <p className="mb-3 mt-0.5 text-[13px] text-muted">{ev.hint}</p>
+      <p className="mb-3 mt-0.5 text-[13px] text-muted-foreground">{ev.hint}</p>
       <div className="grid gap-2.5 md:grid-cols-3">
         {ev.options.map((o, i) => {
           const sel = choice === i;
           return (
-            <div key={o.id} className={cx("rounded-xl border p-3 transition-colors duration-200", sel ? "glass-pill border-accent" : "border-rim bg-sunken")}>
+            <div key={o.id} className={cx("rounded-xl border p-3 transition-colors duration-200", sel ? "bg-accent border-info" : "border-rim bg-muted")}>
               <button
                 className="press block w-full text-left"
                 aria-pressed={sel}
@@ -304,11 +304,11 @@ function EventCard({ ev, choice }: { ev: SoundEvent; choice: number }) {
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <span className={cx("grid h-5 w-5 place-items-center rounded-md text-[11px] font-semibold", sel ? "bg-accent text-white" : "bg-hover text-ink-2")}>{o.id}</span>
-                  <span className="text-[14px] font-medium text-ink">{o.name}</span>
-                  {sel && <Check size={14} className="ml-auto text-accent" />}
+                  <span className={cx("grid h-5 w-5 place-items-center rounded-md text-[11px] font-semibold", sel ? "bg-info text-white" : "bg-accent text-foreground/80")}>{o.id}</span>
+                  <span className="text-[14px] font-medium text-foreground">{o.name}</span>
+                  {sel && <Check size={14} className="ml-auto text-info-foreground" />}
                 </div>
-                <p className="mt-1.5 text-[12.5px] leading-snug text-muted">{o.blurb}</p>
+                <p className="mt-1.5 text-[12.5px] leading-snug text-muted-foreground">{o.blurb}</p>
               </button>
               <div className="mt-2.5 flex flex-wrap gap-1.5">
                 {ev.cues.map((c) => (
@@ -346,11 +346,11 @@ export function SoundLab() {
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 pb-24 pt-4 md:px-8 md:pt-8">
-      <div className="glass sticky top-3 z-40 mb-6 rounded-xl p-3 md:p-4">
+      <div className="border bg-card sticky top-3 z-40 mb-6 rounded-xl p-3 md:p-4">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
           <div className="min-w-[160px]">
-            <h1 className="text-[20px] font-semibold leading-tight text-ink">Sound lab</h1>
-            <div className={cx("text-[12.5px]", s && player.unlocked ? "text-good" : "text-muted")}>{player.unlocked ? "Sound is on" : "Tap anywhere to turn sound on"}</div>
+            <h1 className="text-[20px] font-semibold leading-tight text-foreground">Sound lab</h1>
+            <div className={cx("text-[12.5px]", s && player.unlocked ? "text-success-foreground" : "text-muted-foreground")}>{player.unlocked ? "Sound is on" : "Tap anywhere to turn sound on"}</div>
           </div>
           <div className="flex min-w-[200px] flex-1 items-center gap-2.5">
             <button className="btn btn-ghost !px-2" aria-label={s.muted ? "Unmute" : "Mute"} onClick={() => { player.unlock(); player.setMuted(!s.muted); }}>
@@ -365,12 +365,12 @@ export function SoundLab() {
               aria-label="Master volume"
               onChange={(e) => { player.unlock(); player.setVolume(Number(e.target.value)); }}
               className="h-1.5 w-full cursor-pointer"
-              style={{ accentColor: "var(--accent)" }}
+              style={{ accentColor: "var(--info)" }}
             />
-            <span className="w-9 text-right text-[12.5px] tabular-nums text-muted">{Math.round(s.volume * 100)}%</span>
+            <span className="w-9 text-right text-[12.5px] tabular-nums text-muted-foreground">{Math.round(s.volume * 100)}%</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[12.5px] text-muted">Use all</span>
+            <span className="text-[12.5px] text-muted-foreground">Use all</span>
             <Segmented
               value={set === -1 ? "" : String(set)}
               options={[{ value: "0", label: "A" }, { value: "1", label: "B" }, { value: "2", label: "C" }]}
@@ -383,8 +383,8 @@ export function SoundLab() {
         </div>
       </div>
 
-      <h2 className="mb-1 px-1 text-[13px] font-medium uppercase tracking-wide text-muted">Try it</h2>
-      <p className="mb-3 px-1 text-[13.5px] text-muted">Everything here plays with the options you pick below. Your picks are saved on this device.</p>
+      <h2 className="mb-1 px-1 text-[13px] font-medium uppercase tracking-wide text-muted-foreground">Try it</h2>
+      <p className="mb-3 px-1 text-[13.5px] text-muted-foreground">Everything here plays with the options you pick below. Your picks are saved on this device.</p>
       <div className="mb-8 grid gap-3 md:grid-cols-2">
         <ClickDemo />
         <HoverDemo />
@@ -397,7 +397,7 @@ export function SoundLab() {
         <DragDemo />
       </div>
 
-      <h2 className="mb-3 px-1 text-[13px] font-medium uppercase tracking-wide text-muted">Pick a sound for each moment</h2>
+      <h2 className="mb-3 px-1 text-[13px] font-medium uppercase tracking-wide text-muted-foreground">Pick a sound for each moment</h2>
       <div className="space-y-3">
         {EVENTS.map((ev) => (
           <EventCard key={ev.id} ev={ev} choice={s.choices[ev.id] ?? 0} />

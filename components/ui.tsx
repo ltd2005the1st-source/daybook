@@ -1,9 +1,11 @@
 "use client";
 import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { X } from "lucide-react";
+import { Dialog, DialogHeader, DialogPanel, DialogPopup, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs";
+import { Progress as CossProgress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { cx } from "@/lib/format";
-import { sec } from "@/lib/motion";
 import { sfx } from "@/lib/sound/app";
 
 /** True inside the one-page dashboard, where every section shares the same left edge. */
@@ -35,10 +37,10 @@ export function PageHeader({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 md:mb-8 flex flex-wrap items-end justify-between gap-3">
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-3 md:mb-8">
       <div className="min-w-0">
-        {eyebrow && <div className="label mb-1.5">{eyebrow}</div>}
-        <h1 className="display title text-[32px] md:text-[40px] font-semibold">{title}</h1>
+        {eyebrow && <div className="mb-1 text-sm text-muted-foreground">{eyebrow}</div>}
+        <h1 className="title font-heading text-3xl font-semibold md:text-4xl">{title}</h1>
       </div>
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
     </div>
@@ -58,8 +60,8 @@ export function Section({
 }) {
   return (
     <section className={cx("mb-8", className)}>
-      <div className="relative mb-2.5 flex items-center justify-between gap-2 pb-1.5">
-        <h2 className="text-[13px] font-semibold text-ink-2">{title}</h2>
+      <div className="relative mb-3 flex items-center justify-between gap-2 pb-2">
+        <h2 className="font-heading text-sm font-semibold">{title}</h2>
         {action}
         <span className="rv-line" aria-hidden />
       </div>
@@ -87,53 +89,22 @@ export function Sheet({
     if (open !== wasOpen.current) sfx.play("sheet", open ? "open" : "close");
     wasOpen.current = open;
   }, [open]);
-  useEffect(() => {
-    if (!open) return;
-    const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", k);
-    return () => window.removeEventListener("keydown", k);
-  }, [open, onClose]);
   return (
-    <AnimatePresence>
-      {open && (
-        <div data-scroll-contain className="fixed inset-0 z-40 flex items-end md:items-center justify-center">
-          <motion.div
-            className="absolute inset-0 bg-[var(--scrim)]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            // Materialises rather than just fading: rises from where it docks, sharpening as it
-            // arrives, and leaves along the same path it came in on.
-            initial={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
-            transition={{ duration: sec(0.34), ease: [0.65, 0, 0.35, 1] }}
-            style={{ maxWidth: width, transformOrigin: "50% 100%" }}
-            className="relative w-full max-h-[88dvh] overflow-y-auto overscroll-contain rounded-t-xl md:rounded-xl glass-thick pb-[var(--sab)]"
-          >
-            <div className="sticky top-0 z-10 flex items-center justify-between px-5 pt-4 pb-2">
-              <h3 className="display text-[20px] font-semibold">{title}</h3>
-              <button aria-label="Close" onClick={onClose} className="press glass-pill inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-2 hover:text-ink">
-                <X size={17} />
-              </button>
-            </div>
-            <div className="px-5 pb-5">{children}</div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogPopup data-scroll-contain className="max-h-[88dvh] sm:max-w-[var(--sheet-w)]" style={{ ["--sheet-w" as string]: `${width}px` }}>
+        <DialogHeader className="pb-2">
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <DialogPanel className="pt-1">{children}</DialogPanel>
+      </DialogPopup>
+    </Dialog>
   );
 }
 
 export function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
   return (
-    <label className={cx("block mb-3", className)}>
-      <span className="label block mb-1">{label}</span>
+    <label className={cx("mb-3 flex flex-col gap-1.5", className)}>
+      <Label render={<span />} className="text-sm font-medium">{label}</Label>
       {children}
     </label>
   );
@@ -142,15 +113,11 @@ export function Field({ label, children, className }: { label: string; children:
 export function Progress({ value, color, className, height = 6 }: { value: number; color?: string; className?: string; height?: number }) {
   const pct = Math.max(0, Math.min(1, value)) * 100;
   return (
-    <div className={cx("relative w-full overflow-hidden rounded-full bg-hover", className)} style={{ height }}>
-      <motion.div
-        className="absolute inset-y-0 left-0 rounded-full"
-        style={{ background: color ?? "var(--ink)" }}
-        initial={false}
-        animate={{ width: `${pct}%` }}
-        transition={{ duration: sec(0.6), ease: [0.65, 0, 0.35, 1] }}
-      />
-    </div>
+    <CossProgress value={pct} className={className}>
+      <ProgressTrack style={{ height }}>
+        <ProgressIndicator style={color ? { background: color } : undefined} />
+      </ProgressTrack>
+    </CossProgress>
   );
 }
 
@@ -158,7 +125,7 @@ export function Progress({ value, color, className, height = 6 }: { value: numbe
 export function Tick({
   checked,
   onChange,
-  color = "var(--ink)",
+  color = "var(--foreground)",
   size = 18,
   label,
   round,
@@ -196,7 +163,7 @@ export function Tick({
       style={{
         width: size,
         height: size,
-        borderColor: checked ? color : "var(--line-strong)",
+        borderColor: checked ? color : "var(--input)",
         background: checked ? color : "transparent",
       }}
     >
@@ -232,34 +199,21 @@ export function Segmented<T extends string>({
   onChange: (v: T) => void;
   className?: string;
 }) {
-  // One id per control, so two copies of the same options on screen never share (and hide) one pill.
-  const pillId = useId();
-  // Concentric corners: the track is 12px with 3px of padding, so the buttons and the pill are 12 - 3 = 9px.
   return (
-    <div className={cx("inline-flex rounded-xl bg-hover p-[3px]", className)}>
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          data-sound="tab"
-          onClick={() => onChange(o.value)}
-          className={cx(
-            "press relative rounded-[9px] px-3 py-1 text-[13px]",
-            value === o.value ? "text-ink font-medium" : "text-muted hover:text-ink",
-          )}
-        >
-          {value === o.value && (
-            <motion.span layoutId={`seg-${pillId}`} className="absolute inset-0 rounded-[9px] glass-pill" transition={{ duration: sec(0.32), ease: [0.65, 0, 0.35, 1] }} />
-          )}
-          <span className="relative">{o.label}</span>
-        </button>
-      ))}
-    </div>
+    <Tabs value={value} onValueChange={(v) => onChange(v as T)} className={className}>
+      <TabsList>
+        {options.map((o) => (
+          <TabsTab key={o.value} value={o.value} data-sound="tab">
+            {o.label}
+          </TabsTab>
+        ))}
+      </TabsList>
+    </Tabs>
   );
 }
 
 export function Empty({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-[13.5px] text-muted">{children}</div>;
+  return <div className="rounded-xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">{children}</div>;
 }
 
 /** A destructive button that asks for a second tap instead of a browser dialog. */
@@ -283,7 +237,7 @@ export function ConfirmButton({
   return (
     <button
       type="button"
-      className={cx(className, armed && "!bg-pen !text-white")}
+      className={cx(className, armed && "!bg-destructive !text-white")}
       onClick={() => (armed ? (setArmed(false), onConfirm()) : setArmed(true))}
     >
       {armed ? confirmLabel : children}

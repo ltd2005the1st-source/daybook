@@ -63,7 +63,7 @@ export function ChangePin() {
       <label className="label block mb-1.5">New PIN again</label>
       <PinInput label="Repeat new PIN" value={again} onChange={setAgain} shake={shake} />
       {msg && (
-        <p role="alert" className="mb-3 text-[13px] text-pen">
+        <p role="alert" className="mb-3 text-[13px] text-destructive-foreground">
           {msg}
         </p>
       )}

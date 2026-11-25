@@ -74,18 +74,18 @@ export default function MoneyPage() {
       </PageHeader>
 
       {/* The month as one ledger line */}
-      <div className="mb-8 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-line bg-line">
+      <div className="mb-8 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-border bg-border">
         {[
           { l: "Came in", v: income, sub: teaching ? <><Money value={teaching} compact /> from teaching</> : undefined },
           { l: "Went out", v: -spent, sub: fixedTotal ? <><Money value={fixedTotal} compact /> monthly fixed</> : undefined },
           { l: "Kept", v: income - spent, strong: true },
         ].map((x) => (
-          <div key={x.l} data-reveal="up" className="bg-surface px-3 py-3 md:px-5 md:py-4">
+          <div key={x.l} data-reveal="up" className="bg-card px-3 py-3 md:px-5 md:py-4">
             <div className="label">{x.l}</div>
-            <div className={cx("num mt-1 text-[17px] md:text-[26px] font-semibold leading-tight", x.strong && (x.v >= 0 ? "text-good" : "text-pen"))}>
+            <div className={cx("num mt-1 text-[17px] md:text-[26px] font-semibold leading-tight", x.strong && (x.v >= 0 ? "text-success-foreground" : "text-destructive-foreground"))}>
               <Money value={x.v} />
             </div>
-            {x.sub && <div className="mt-0.5 text-[11.5px] text-muted">{x.sub}</div>}
+            {x.sub && <div className="mt-0.5 text-[11.5px] text-muted-foreground">{x.sub}</div>}
           </div>
         ))}
       </div>
@@ -100,8 +100,8 @@ export default function MoneyPage() {
             <div className="flex flex-col gap-2">
               {byCat.map(({ c, v }, bi) => (
                 <div key={c} className="grid grid-cols-[92px_1fr_auto] items-center gap-3 text-[13.5px]">
-                  <span className="text-ink-2">{c}</span>
-                  <div className="h-5 rounded bg-hover overflow-hidden">
+                  <span className="text-foreground/80">{c}</span>
+                  <div className="h-5 rounded bg-accent overflow-hidden">
                     <Grow className="h-full rounded" style={{ background: CAT_COLORS[c] }} to={`${(v / maxCat) * 100}%`} delay={bi * 0.07} />
                   </div>
                   <Money value={v} className="num w-[92px] text-right" />
@@ -111,24 +111,24 @@ export default function MoneyPage() {
           </Section>
 
           <Section title={<>Entries · <CountUp value={listed.length} /></>}>
-            {groups.length === 0 && <p className="text-[13.5px] text-muted">Nothing logged in {fmtMonth(month)} yet.</p>}
+            {groups.length === 0 && <p className="text-[13.5px] text-muted-foreground">Nothing logged in {fmtMonth(month)} yet.</p>}
             {groups.map(([date, items]) => (
               <div key={date} className="mb-3">
-                <div className="sticky top-[52px] md:top-0 z-[1] bg-bg/90 backdrop-blur py-1 text-[12px] font-semibold text-muted">{relDay(date)}</div>
+                <div className="sticky top-[52px] md:top-0 z-[1] bg-background/90 backdrop-blur py-1 text-[12px] font-semibold text-muted-foreground">{relDay(date)}</div>
                 {items.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => setEdit(t)}
-                    className="row group flex w-full items-center gap-3 py-2 text-left hover:bg-hover"
+                    className="row group flex w-full items-center gap-3 py-2 text-left hover:bg-accent"
                   >
-                    <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: t.kind === "income" ? "var(--good)" : CAT_COLORS[t.category] ?? CAT_COLORS.Other }} />
+                    <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: t.kind === "income" ? "var(--success)" : CAT_COLORS[t.category] ?? CAT_COLORS.Other }} />
                     <span className="min-w-0 flex-1 truncate text-[14px]">
                       {t.title}
-                      {t.recurring && <Repeat size={12} className="ml-1.5 inline text-muted" />}
-                      {t.note && <span className="ml-2 text-[12px] text-muted">{t.note}</span>}
+                      {t.recurring && <Repeat size={12} className="ml-1.5 inline text-muted-foreground" />}
+                      {t.note && <span className="ml-2 text-[12px] text-muted-foreground">{t.note}</span>}
                     </span>
-                    <span className="hidden text-[12px] text-muted md:inline">{t.category}</span>
-                    <span className={cx("num w-[104px] text-right text-[14px]", t.kind === "income" && "text-good")}>
+                    <span className="hidden text-[12px] text-muted-foreground md:inline">{t.category}</span>
+                    <span className={cx("num w-[104px] text-right text-[14px]", t.kind === "income" && "text-success-foreground")}>
                       {vnd(t.kind === "income" ? t.amount : -t.amount, { sign: t.kind === "income" })}
                     </span>
                   </button>
@@ -152,9 +152,9 @@ export default function MoneyPage() {
             {unpaid.map((r) => {
               const s = store.students.find((x) => x.id === r.student_id);
               return (
-                <Link key={r.id} href={`/teaching/receipts/${r.id}`} className="row flex items-center justify-between gap-2 border-b border-line py-2 text-[13.5px] hover:bg-hover">
+                <Link key={r.id} href={`/teaching/receipts/${r.id}`} className="row flex items-center justify-between gap-2 border-b border-border py-2 text-[13.5px] hover:bg-accent">
                   <span>
-                    {s?.name} <span className="text-muted">· {fmtMonth(r.month)} receipt</span>
+                    {s?.name} <span className="text-muted-foreground">· {fmtMonth(r.month)} receipt</span>
                   </span>
                   <span className="num">{vnd(r.amount)}</span>
                 </Link>
@@ -163,7 +163,7 @@ export default function MoneyPage() {
             {receivables.map((d) => (
               <DebtRow key={d.id} d={d} onEdit={() => setDebtOpen(d)} onSettle={() => update("debts", d.id, { settled: true })} />
             ))}
-            {!unpaid.length && !receivables.length && <p className="text-[13.5px] text-muted">Nobody owes you anything.</p>}
+            {!unpaid.length && !receivables.length && <p className="text-[13.5px] text-muted-foreground">Nobody owes you anything.</p>}
             <div className="mt-2 flex justify-between text-[13px] font-semibold">
               <span>Total</span>
               <Money value={unpaid.reduce((n, r) => n + r.amount, 0) + receivables.reduce((n, d) => n + d.amount, 0)} className="num" />
@@ -174,7 +174,7 @@ export default function MoneyPage() {
             {payables.map((d) => (
               <DebtRow key={d.id} d={d} onEdit={() => setDebtOpen(d)} onSettle={() => update("debts", d.id, { settled: true })} />
             ))}
-            {!payables.length && <p className="text-[13.5px] text-muted">All clear.</p>}
+            {!payables.length && <p className="text-[13.5px] text-muted-foreground">All clear.</p>}
           </Section>
         </aside>
       </div>
@@ -187,10 +187,10 @@ export default function MoneyPage() {
 
 function DebtRow({ d, onEdit, onSettle }: { d: Debt; onEdit: () => void; onSettle: () => void }) {
   return (
-    <div className="flex items-center gap-2.5 border-b border-line py-2 text-[13.5px]">
+    <div className="flex items-center gap-2.5 border-b border-border py-2 text-[13.5px]">
       <Tick checked={false} size={16} round label="Settled" onChange={onSettle} />
       <button onClick={onEdit} className="min-w-0 flex-1 truncate text-left hover:underline underline-offset-2">
-        {d.person} {d.note && <span className="text-muted">· {d.note}</span>}
+        {d.person} {d.note && <span className="text-muted-foreground">· {d.note}</span>}
       </button>
       <span className="num">{vnd(d.amount)}</span>
     </div>
@@ -238,7 +238,7 @@ function TxSheet({ tx, onClose, onDelete }: { tx: Transaction | null; onClose: (
           </label>
           <div className="flex justify-between">
             <button
-              className="btn btn-ghost text-pen"
+              className="btn btn-ghost text-destructive-foreground"
               onClick={() => {
                 onDelete(t.id);
                 onClose();
@@ -310,7 +310,7 @@ function DebtSheet({ debt, onClose }: { debt: Debt | "new" | null; onClose: () =
             {d ? (
               <button
                 type="button"
-                className="btn btn-ghost text-pen"
+                className="btn btn-ghost text-destructive-foreground"
                 onClick={() => {
                   remove("debts", d.id);
                   onClose();

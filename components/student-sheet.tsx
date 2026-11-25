@@ -47,7 +47,7 @@ function HomeworkTab({ s }: { s: Student }) {
   const nl = nextLesson(store, s.id, today());
   return (
     <div>
-      <p className="text-[13.5px] text-ink-2 mb-3">
+      <p className="text-[13.5px] text-foreground/80 mb-3">
         {nl ? (
           <>
             Next class <b>{fmtDay(nl.date, { weekday: true })}</b> at <span className="num">{nl.start}</span>.{" "}
@@ -71,28 +71,28 @@ function HomeworkTab({ s }: { s: Student }) {
       </form>
       <ul className="flex flex-col">
         {items.map((h) => (
-          <li key={h.id} className="group flex items-start gap-3 border-b border-line py-2.5">
+          <li key={h.id} className="group flex items-start gap-3 border-b border-border py-2.5">
             <Tick
               checked={h.status === "checked"}
-              color="var(--pen)"
+              color="var(--destructive)"
               label="Checked"
               onChange={() =>
                 update("homework", h.id, h.status === "open" ? { status: "checked", checked_on: today() } : { status: "open", checked_on: null })
               }
             />
             <div className="min-w-0 flex-1">
-              <div className={cx("text-[14px]", h.status === "checked" && "text-muted line-through decoration-pen/60")}>{h.title}</div>
-              <div className="text-[12px] text-muted">
+              <div className={cx("text-[14px]", h.status === "checked" && "text-muted-foreground line-through decoration-destructive/60")}>{h.title}</div>
+              <div className="text-[12px] text-muted-foreground">
                 Assigned {fmtDay(h.assigned_on)}
                 {h.checked_on && ` · checked ${fmtDay(h.checked_on)}`}
               </div>
             </div>
-            <button aria-label="Delete" onClick={() => remove("homework", h.id)} className="opacity-0 group-hover:opacity-100 text-muted hover:text-pen">
+            <button aria-label="Delete" onClick={() => remove("homework", h.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive-foreground">
               <Trash2 size={15} />
             </button>
           </li>
         ))}
-        {!items.length && <li className="text-[13.5px] text-muted py-2">No homework logged yet.</li>}
+        {!items.length && <li className="text-[13.5px] text-muted-foreground py-2">No homework logged yet.</li>}
       </ul>
     </div>
   );
@@ -117,18 +117,18 @@ function ScheduleTab({ s }: { s: Student }) {
       <div className="label mb-2">Weekly classes</div>
       <ul className="mb-3">
         {series.map((e) => (
-          <li key={e.id} className="flex items-center gap-3 border-b border-line py-2">
+          <li key={e.id} className="flex items-center gap-3 border-b border-border py-2">
             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: e.color }} />
             <span className="text-[13px] font-semibold">{WEEK.filter((d) => e.days.includes(d)).map((d) => WD_SHORT[d]).join(", ")}</span>
             <span className="num text-[13px]">
               {e.start_time}–{e.end_time}
             </span>
-            <button aria-label="Remove these classes" onClick={() => remove("events", e.id)} className="ml-auto text-muted hover:text-pen">
+            <button aria-label="Remove these classes" onClick={() => remove("events", e.id)} className="ml-auto text-muted-foreground hover:text-destructive-foreground">
               <Trash2 size={15} />
             </button>
           </li>
         ))}
-        {series.length === 0 && <li className="py-2 text-[13px] text-muted">No weekly classes yet.</li>}
+        {series.length === 0 && <li className="py-2 text-[13px] text-muted-foreground">No weekly classes yet.</li>}
       </ul>
       <form
         className="flex flex-wrap items-end gap-2 mb-2"
@@ -164,10 +164,10 @@ function ScheduleTab({ s }: { s: Student }) {
           <Plus size={15} /> Add weekly class
         </button>
       </form>
-      <p className="mb-6 text-[12px] text-muted">Classes are events on your calendar. Open one there to change its days, time, colour or notes, or to move a single class.</p>
+      <p className="mb-6 text-[12px] text-muted-foreground">Classes are events on your calendar. Open one there to change its days, time, colour or notes, or to move a single class.</p>
 
       <div className="label mb-1">Free slots</div>
-      <p className="text-[12.5px] text-muted mb-2">
+      <p className="text-[12.5px] text-muted-foreground mb-2">
         Tap to mark when {s.kind === "class" ? "the class" : s.name} can study. Green means you are free too.
       </p>
       <div className="overflow-x-auto">
@@ -176,7 +176,7 @@ function ScheduleTab({ s }: { s: Student }) {
             <tr>
               <th />
               {WEEK.map((d) => (
-                <th key={d} className="font-medium text-muted">
+                <th key={d} className="font-medium text-muted-foreground">
                   {WD_SHORT[d]}
                 </th>
               ))}
@@ -185,7 +185,7 @@ function ScheduleTab({ s }: { s: Student }) {
           <tbody>
             {BANDS.map((band) => (
               <tr key={band}>
-                <td className="num pr-1 text-muted whitespace-nowrap">{band.replace("-", "–")}</td>
+                <td className="num pr-1 text-muted-foreground whitespace-nowrap">{band.replace("-", "–")}</td>
                 {WEEK.map((d) => {
                   const free = s.availability?.[band]?.includes(d) ?? false;
                   const meBusy = busy(d, band);
@@ -202,9 +202,9 @@ function ScheduleTab({ s }: { s: Student }) {
                         }}
                         className={cx(
                           "h-8 w-full min-w-9 rounded-xl border text-[11px] transition-colors",
-                          free && !meBusy && "bg-good-soft border-good/40 text-good font-semibold",
-                          free && meBusy && "bg-hover border-line text-muted line-through",
-                          !free && "border-line hover:bg-hover",
+                          free && !meBusy && "bg-success/12 border-success/40 text-success-foreground font-semibold",
+                          free && meBusy && "bg-accent border-border text-muted-foreground line-through",
+                          !free && "border-border hover:bg-accent",
                         )}
                         title={meBusy ? "You already have something here" : undefined}
                       >
@@ -243,11 +243,11 @@ function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
               setRate(String(v ?? s.rate));
             }}
           />
-          <span className="text-[12px] text-muted">{vnd(s.rate)} per session</span>
+          <span className="text-[12px] text-muted-foreground">{vnd(s.rate)} per session</span>
         </Field>
         <Field label="Makeups left (cần bù)">
           <MakeupStepper s={s} />
-          <span className="text-[12px] text-muted">You keep this count. The app never changes it.</span>
+          <span className="text-[12px] text-muted-foreground">You keep this count. The app never changes it.</span>
         </Field>
       </div>
       {s.kind === "class" && (
@@ -270,7 +270,7 @@ function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
                 store.events.filter((e) => e.student_id === s.id && e.color === s.color).forEach((e) => update("events", e.id, { color: c }));
                 update("students", s.id, { color: c });
               }}
-              className={cx("h-7 w-7 rounded-full ring-offset-2 ring-offset-surface", s.color === c && "ring-2 ring-ink")}
+              className={cx("h-7 w-7 rounded-full ring-offset-2 ring-offset-surface", s.color === c && "ring-2 ring-ring")}
               style={{ background: c }}
             />
           ))}
@@ -288,16 +288,16 @@ function ProfileTab({ s, onDeleted }: { s: Student; onDeleted: () => void }) {
           if (v !== (s.check_note ?? null)) update("students", s.id, { check_note: v });
         }}
       />
-      <p className="mb-3 mt-1 text-[12px] text-muted">
+      <p className="mb-3 mt-1 text-[12px] text-muted-foreground">
         Shown on every homework check for {s.name} and in its reminder. To change one night only, tap that check on the Calendar or under Checks on Teaching.
       </p>
 
-      <div className="mt-6 flex items-center justify-between border-t border-line pt-4">
+      <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
         <label className="flex items-center gap-2 text-[13.5px]">
           <Tick checked={s.active} onChange={() => update("students", s.id, { active: !s.active })} /> Active (shows on calendar and reminders)
         </label>
         <ConfirmButton
-          className="btn btn-ghost text-pen"
+          className="btn btn-ghost text-destructive-foreground"
           confirmLabel={`Delete ${s.name} for good?`}
           onConfirm={() => {
             remove("students", s.id);
@@ -320,12 +320,12 @@ export function MakeupStepper({ s, compact }: { s: Student; compact?: boolean })
     update("students", s.id, { makeup_baseline: Math.max(0, Math.max(0, cur) + d) });
   };
   return (
-    <div className={cx("inline-flex items-center rounded-xl border border-line", compact && "text-[12px]")} onClick={(e) => e.stopPropagation()}>
-      <button type="button" aria-label="One fewer makeup" className={cx("text-ink-2 hover:bg-hover", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => step(-1)}>
+    <div className={cx("inline-flex items-center rounded-xl border border-border", compact && "text-[12px]")} onClick={(e) => e.stopPropagation()}>
+      <button type="button" aria-label="One fewer makeup" className={cx("text-foreground/80 hover:bg-accent", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => step(-1)}>
         −
       </button>
-      <span className={cx("num text-center font-semibold", compact ? "w-5" : "w-8", n > 0 && "text-pen")}>{n}</span>
-      <button type="button" aria-label="One more makeup" className={cx("text-ink-2 hover:bg-hover", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => step(1)}>
+      <span className={cx("num text-center font-semibold", compact ? "w-5" : "w-8", n > 0 && "text-destructive-foreground")}>{n}</span>
+      <button type="button" aria-label="One more makeup" className={cx("text-foreground/80 hover:bg-accent", compact ? "px-1.5 py-0" : "px-2.5 py-1")} onClick={() => step(1)}>
         +
       </button>
     </div>

@@ -69,30 +69,30 @@ export default function MusicPage() {
       </PageHeader>
 
       <form onSubmit={add} className="mb-2">
-        <div className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-1 focus-within:border-ink-2">
-          <Plus size={17} className="text-muted" />
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-1 focus-within:border-foreground/70">
+          <Plus size={17} className="text-muted-foreground" />
           <input
-            className="min-w-0 flex-1 bg-transparent py-2 text-[15px] outline-none focus-visible:outline-none placeholder:text-muted"
+            className="min-w-0 flex-1 bg-transparent py-2 text-[15px] outline-none focus-visible:outline-none placeholder:text-muted-foreground"
             placeholder="Paste a Spotify link to a playlist, album or song"
             value={link}
             onChange={(e) => setLink(e.target.value)}
             aria-label="Spotify link"
           />
-          {parsed && <span className="hidden text-[12px] text-muted md:inline">{KIND_LABEL[parsed.kind]}</span>}
+          {parsed && <span className="hidden text-[12px] text-muted-foreground md:inline">{KIND_LABEL[parsed.kind]}</span>}
           <button className="btn btn-primary" disabled={!link.trim()}>
             Add
           </button>
         </div>
       </form>
-      <p className="mb-8 text-[12.5px] text-muted">
+      <p className="mb-8 text-[12.5px] text-muted-foreground">
         In Spotify, open a playlist, album or song and choose Share → Copy link. It plays in the player at the bottom and keeps playing while you move between
         tabs. Sign in to Spotify in this browser to hear whole songs instead of previews.
       </p>
 
       {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-line px-6 py-12 text-center">
-          <Music2 size={22} className="mx-auto mb-2 text-muted" />
-          <p className="text-[14px] text-ink-2">Nothing saved yet. Paste your first Spotify link above.</p>
+        <div className="rounded-xl border border-dashed border-border px-6 py-12 text-center">
+          <Music2 size={22} className="mx-auto mb-2 text-muted-foreground" />
+          <p className="text-[14px] text-foreground/80">Nothing saved yet. Paste your first Spotify link above.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
@@ -103,7 +103,7 @@ export default function MusicPage() {
           </AnimatePresence>
         </div>
       )}
-      {items.length > 0 && shown.length === 0 && <p className="text-[13.5px] text-muted">Nothing here under this filter.</p>}
+      {items.length > 0 && shown.length === 0 && <p className="text-[13.5px] text-muted-foreground">Nothing here under this filter.</p>}
     </Page>
   );
 }
@@ -120,21 +120,21 @@ function Card({ m, playing, onPlay }: { m: MusicItem; playing: boolean; onPlay: 
       transition={{ duration: sec(0.3), ease: EASE }}
       className="group min-w-0"
     >
-      <button type="button" onClick={onPlay} className="relative block aspect-square w-full overflow-hidden rounded-xl bg-sunken text-left" aria-label={`Play ${m.title}`}>
+      <button type="button" onClick={onPlay} className="relative block aspect-square w-full overflow-hidden rounded-xl bg-muted text-left" aria-label={`Play ${m.title}`}>
         {m.image ? (
           <img src={m.image} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
         ) : (
-          <span className="flex h-full w-full items-center justify-center text-muted">
+          <span className="flex h-full w-full items-center justify-center text-muted-foreground">
             <Music2 size={28} />
           </span>
         )}
         <span
           className={cx(
-            "absolute bottom-2 right-2 flex h-10 w-10 items-center justify-center rounded-full bg-ink text-bg shadow-pop transition-[opacity,transform] duration-300",
+            "absolute bottom-2 right-2 flex h-10 w-10 items-center justify-center rounded-full bg-foreground text-background shadow-pop transition-[opacity,transform] duration-300",
             playing ? "opacity-100" : "translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100",
           )}
         >
-          {playing ? <Bars className="!h-4 !w-4 [&>span]:!bg-bg" /> : <Play size={17} fill="currentColor" className="ml-0.5" />}
+          {playing ? <Bars className="!h-4 !w-4 [&>span]:!bg-background" /> : <Play size={17} fill="currentColor" className="ml-0.5" />}
         </span>
       </button>
       <div className="mt-2 flex items-start gap-1">
@@ -151,25 +151,25 @@ function Card({ m, playing, onPlay }: { m: MusicItem; playing: boolean; onPlay: 
               else if (v !== m.title) update("music", m.id, { title: v });
             }}
             className={cx(
-              "-mx-1 w-full truncate rounded-xl px-1 text-[14px] font-semibold leading-snug outline-none transition-colors duration-200 hover:bg-hover focus:bg-hover bg-transparent",
-              playing && "text-accent",
+              "-mx-1 w-full truncate rounded-xl px-1 text-[14px] font-semibold leading-snug outline-none transition-colors duration-200 hover:bg-accent focus:bg-accent bg-transparent",
+              playing && "text-info-foreground",
             )}
           />
-          <div className="text-[12px] text-muted">{playing ? "Playing" : KIND_LABEL[m.kind]}</div>
+          <div className="text-[12px] text-muted-foreground">{playing ? "Playing" : KIND_LABEL[m.kind]}</div>
         </div>
         <a
           href={openUrl(m.kind, m.spotify_id)}
           target="_blank"
           rel="noreferrer"
           aria-label="Open in Spotify"
-          className="rounded-xl p-1 text-muted opacity-0 transition-opacity duration-200 hover:text-ink group-hover:opacity-100 max-md:opacity-60"
+          className="rounded-xl p-1 text-muted-foreground opacity-0 transition-opacity duration-200 hover:text-foreground group-hover:opacity-100 max-md:opacity-60"
         >
           <ExternalLink size={14} />
         </a>
         <button
           type="button"
           aria-label={`Remove ${m.title}`}
-          className="rounded-xl p-1 text-muted opacity-0 transition-opacity duration-200 hover:text-pen group-hover:opacity-100 max-md:opacity-60"
+          className="rounded-xl p-1 text-muted-foreground opacity-0 transition-opacity duration-200 hover:text-destructive-foreground group-hover:opacity-100 max-md:opacity-60"
           onClick={() => {
             if (current?.id === m.id) stop();
             remove("music", m.id);

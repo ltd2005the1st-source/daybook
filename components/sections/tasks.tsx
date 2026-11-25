@@ -113,7 +113,7 @@ export default function TasksPage() {
   // Show a repeated check note only on the soonest check for that student.
   const sameNote = repeatedNotes(shownChecks);
   const groups: { title: string; items: Task[]; checks?: CheckTask[]; tone?: string }[] = [
-    { title: "Overdue", items: open.filter((x) => x.due_on && x.due_on < t), tone: "text-pen" },
+    { title: "Overdue", items: open.filter((x) => x.due_on && x.due_on < t), tone: "text-destructive-foreground" },
     {
       title: "Today & tomorrow",
       items: open.filter((x) => x.due_on === t || x.due_on === tomorrow),
@@ -164,16 +164,16 @@ export default function TasksPage() {
           setQ("");
         }}
       >
-        <div className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-1 focus-within:border-ink-2">
-          <Plus size={17} className="text-muted" />
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-1 focus-within:border-foreground/70">
+          <Plus size={17} className="text-muted-foreground" />
           <input
-            className="flex-1 bg-transparent py-2 text-[15px] outline-none focus-visible:outline-none placeholder:text-muted"
+            className="flex-1 bg-transparent py-2 text-[15px] outline-none focus-visible:outline-none placeholder:text-muted-foreground"
             placeholder="Add a task. Try “Học Chapter 2 tomorrow !”"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
           {preview && preview.title && (
-            <span className="hidden md:inline text-[12px] text-muted">
+            <span className="hidden md:inline text-[12px] text-muted-foreground">
               {relDay(preview.due ?? t)}
               {preview.time && ` at ${preview.time}`}
               {preview.priority && " · flagged"}
@@ -208,11 +208,11 @@ export default function TasksPage() {
             </TaskGroup>
           ),
       )}
-      {open.length + shownChecks.length === 0 && <p className="mb-8 text-[14px] text-muted">Nothing open. Enjoy it, or add the next thing above.</p>}
+      {open.length + shownChecks.length === 0 && <p className="mb-8 text-[14px] text-muted-foreground">Nothing open. Enjoy it, or add the next thing above.</p>}
 
       {done.length > 0 && (
         <div>
-          <button onClick={() => setShowDone(!showDone)} className="mb-2 flex items-center gap-1 text-[13px] font-semibold text-muted hover:text-ink">
+          <button onClick={() => setShowDone(!showDone)} className="mb-2 flex items-center gap-1 text-[13px] font-semibold text-muted-foreground hover:text-foreground">
             <ChevronDown size={15} className={cx("transition-transform", !showDone && "-rotate-90")} /> Done · <CountUp value={done.length} />
           </button>
           {showDone && (
@@ -263,11 +263,11 @@ function TaskGroup({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className={cx("flex w-full items-center gap-1.5 border-b border-line pb-1.5 text-left text-[13px] font-semibold text-ink-2 hover:text-ink", open ? "mb-2.5" : "mb-0")}
+        className={cx("flex w-full items-center gap-1.5 border-b border-border pb-1.5 text-left text-[13px] font-semibold text-foreground/80 hover:text-foreground", open ? "mb-2.5" : "mb-0")}
       >
-        <ChevronDown size={15} className={cx("shrink-0 text-muted transition-transform", !open && "-rotate-90")} />
+        <ChevronDown size={15} className={cx("shrink-0 text-muted-foreground transition-transform", !open && "-rotate-90")} />
         <span className={tone}>{title}</span>
-        <span className="num font-normal text-muted">· <CountUp value={count} /></span>
+        <span className="num font-normal text-muted-foreground">· <CountUp value={count} /></span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
@@ -297,20 +297,20 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
     <motion.div
       {...TASK_ENTER}
       exit={TASK_EXIT}
-      className="row group cursor-pointer overflow-hidden hover:bg-hover"
+      className="row group cursor-pointer overflow-hidden hover:bg-accent"
       onClick={onOpen}
     >
       <div className="flex items-start gap-3 py-2.5">
         <div className="pt-[1px]">
-          <Tick checked={c.checked} round label="Complete" color="var(--accent)" onChange={c.toggle} />
+          <Tick checked={c.checked} round label="Complete" color="var(--info)" onChange={c.toggle} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-[14.5px] leading-snug">
-            {task.priority && <Flag size={13} className="mr-1.5 inline -mt-0.5 text-pen" fill="currentColor" />}
+            {task.priority && <Flag size={13} className="mr-1.5 inline -mt-0.5 text-destructive-foreground" fill="currentColor" />}
             <Strike on={c.checked} animate={c.completing}>{task.title}</Strike>
           </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-muted">
-            {task.due_on && <span className={cx(task.due_on < t && !task.done && "text-pen")}>{relDay(task.due_on)}{task.due_time && ` · ${task.due_time}`}</span>}
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-muted-foreground">
+            {task.due_on && <span className={cx(task.due_on < t && !task.done && "text-destructive-foreground")}>{relDay(task.due_on)}{task.due_time && ` · ${task.due_time}`}</span>}
             <span>{task.list}</span>
             {ms.length > 0 && (
               <span className="num">
@@ -320,7 +320,7 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: () => void }) {
           </div>
           {ms.length > 0 && (
             <div className="mt-1.5 max-w-[360px]">
-              <MilestoneBar items={ms} color={task.done ? "var(--muted)" : "var(--accent)"} />
+              <MilestoneBar items={ms} color={task.done ? "var(--muted-foreground)" : "var(--info)"} />
             </div>
           )}
         </div>

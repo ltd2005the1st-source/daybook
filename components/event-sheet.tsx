@@ -168,7 +168,7 @@ export function EventSheet({
         {clash && (
           <p
             role="alert"
-            className="mb-3 -mt-1 rounded-xl bg-pen-soft px-2.5 py-1.5 text-[13px] text-pen"
+            className="mb-3 -mt-1 rounded-xl bg-destructive/10 px-2.5 py-1.5 text-[13px] text-destructive-foreground"
           >
             {describeEvent(clash)} Change the name or the time to add it.
           </p>
@@ -237,8 +237,8 @@ export function EventSheet({
                       className={cx(
                         "rounded-xl border px-2.5 py-1 text-[13px]",
                         on
-                          ? "border-ink bg-ink text-bg"
-                          : "border-line text-ink-2 hover:bg-hover",
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border text-foreground/80 hover:bg-accent",
                       )}
                     >
                       {WD_SHORT[d]}
@@ -247,7 +247,7 @@ export function EventSheet({
                 })}
                 <button
                   type="button"
-                  className="text-[12.5px] text-muted underline underline-offset-2 ml-1"
+                  className="text-[12.5px] text-muted-foreground underline underline-offset-2 ml-1"
                   onClick={() =>
                     set({ days: repeats ? [] : [0, 1, 2, 3, 4, 5, 6] })
                   }
@@ -318,7 +318,7 @@ export function EventSheet({
 
           <div className="min-w-0 flex flex-col">
         {existing?.student_id && (
-              <div className="mb-4 rounded-xl border border-line p-3">
+              <div className="mb-4 rounded-xl border border-border p-3">
                 <div className="label mb-2">
                   This class, {fmtDay(occurrenceDate, { weekday: true })}
                 </div>
@@ -333,11 +333,11 @@ export function EventSheet({
                       className={cx(
                         "btn justify-center border px-1 py-1.5 text-[13px] transition-colors duration-200",
                         st === status
-                          ? "border-ink bg-ink text-bg"
-                          : "border-line hover:bg-hover",
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border hover:bg-accent",
                         st === "missed_owe" &&
                           status !== "missed_owe" &&
-                          "text-pen",
+                          "text-destructive-foreground",
                       )}
                     >
                       {label}
@@ -364,7 +364,7 @@ export function EventSheet({
                     label="Sync notes across all repeats"
                   />
                 </label>
-                <p className="mt-0.5 text-[12px] text-muted">
+                <p className="mt-0.5 text-[12px] text-muted-foreground">
                   {sync
                     ? "These notes show on every repeat."
                     : `These notes are only for ${fmtDay(occurrenceDate, { weekday: true })}.`}
@@ -381,7 +381,7 @@ export function EventSheet({
         </div>
 
         {/* Actions stay in view at the bottom, even when the sheet has to scroll on a phone. */}
-        <div className="sticky bottom-0 z-10 -mx-5 -mb-5 flex flex-wrap items-center justify-between gap-2 border-t border-line material px-5 py-3">
+        <div className="sticky bottom-0 z-10 -mx-5 -mb-5 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-background/90 backdrop-blur px-5 py-3">
           {existing ? (
             <div className="flex flex-wrap gap-1">
               {onCopy && (
@@ -396,7 +396,7 @@ export function EventSheet({
               {repeats && (
                 <button
                   type="button"
-                  className="btn btn-ghost text-pen"
+                  className="btn btn-ghost text-destructive-foreground"
                   onClick={() => {
                     update("events", existing.id, {
                       skip_dates: [
@@ -412,7 +412,7 @@ export function EventSheet({
               )}
               <button
                 type="button"
-                className="btn btn-ghost text-pen"
+                className="btn btn-ghost text-destructive-foreground"
                 onClick={() => {
                   remove("events", existing.id);
                   onClose();
@@ -471,7 +471,7 @@ export function LessonSheet({
     >
       {occ && s && (
         <div>
-          <p className="mb-4 text-[13.5px] text-ink-2">
+          <p className="mb-4 text-[13.5px] text-foreground/80">
             {fmtDay(occ.date, { weekday: true })} ·{" "}
             <span className="num">
               {occ.start}–{occ.end}
@@ -496,11 +496,11 @@ export function LessonSheet({
                   className={cx(
                     "btn justify-center border py-2",
                     (st ?? "planned") === current
-                      ? "border-ink bg-ink text-bg"
-                      : "border-line hover:bg-hover",
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border hover:bg-accent",
                     st === "missed_owe" &&
                       current !== "missed_owe" &&
-                      "text-pen",
+                      "text-destructive-foreground",
                   )}
                 >
                   {label}
@@ -515,7 +515,7 @@ export function LessonSheet({
             onChange={(c) => update("students", s.id, { color: c })}
             size={24}
           />
-          <p className="mt-4 text-[12px] text-muted">
+          <p className="mt-4 text-[12px] text-muted-foreground">
             Drag the block on the calendar to move it, or drag its bottom edge
             to change the length. Homework rules live on the Teaching page.
           </p>

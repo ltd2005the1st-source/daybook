@@ -48,13 +48,13 @@ function CalendarHelp() {
       <button
         type="button"
         aria-label="How the calendar works"
-        className="press inline-flex h-5 w-5 items-center justify-center rounded-full border border-line text-[11px] font-semibold text-muted hover:text-ink focus-visible:text-ink"
+        className="press inline-flex h-5 w-5 items-center justify-center rounded-full border border-border text-[11px] font-semibold text-muted-foreground hover:text-foreground focus-visible:text-foreground"
       >
         ?
       </button>
       <span
         role="tooltip"
-        className="pointer-events-none absolute left-1/2 top-full z-30 mt-2 w-[min(300px,calc(100vw-2rem))] -translate-x-1/2 translate-y-1 rounded-xl glass-thick p-3 text-[12.5px] leading-relaxed text-ink-2 opacity-0 shadow-pop transition-[opacity,transform] duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+        className="pointer-events-none absolute left-1/2 top-full z-30 mt-2 w-[min(300px,calc(100vw-2rem))] -translate-x-1/2 translate-y-1 rounded-xl border bg-popover text-popover-foreground shadow-lg/5 p-3 text-[12.5px] leading-relaxed text-foreground/80 opacity-0 shadow-pop transition-[opacity,transform] duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
       >
         Drag an event to move it, or drag its bottom edge to change the length. Right-click (long-press on a phone) to change the colour. Drag across empty
         space to add an event. Slim bars are tasks and homework checks; drag them to another time. Point at an event and press ⌘C, then ⌘V where you want a
@@ -620,8 +620,8 @@ export default function CalendarPage() {
             transition={{ duration: sec(0.3), ease: EASE }}
             className="overflow-hidden"
           >
-            <div className="mb-3 flex items-center gap-2 rounded-xl border border-accent/40 bg-accent-soft px-3 py-2 text-[13px]">
-              <ClipboardPaste size={15} className="text-accent" />
+            <div className="mb-3 flex items-center gap-2 rounded-xl border border-info/40 bg-info/12 px-3 py-2 text-[13px]">
+              <ClipboardPaste size={15} className="text-info-foreground" />
               <span className="min-w-0 flex-1">
                 Pasting <b>{clip.e.title}</b>. {view === "week" ? (mobile ? "Tap a time." : "Click a time.") : "Pick a day."}
               </span>
@@ -650,10 +650,10 @@ export default function CalendarPage() {
                 const sel = d === anchor;
                 const n = agendaOn(store, d).length;
                 return (
-                  <button key={d} onClick={() => setAnchor(d)} className={cx("flex flex-col items-center rounded-xl py-1.5", sel ? "bg-ink text-bg" : "hover:bg-hover")}>
-                    <span className={cx("text-[10.5px]", sel ? "opacity-80" : "text-muted")}>{WD_SHORT[parseDate(d).getDay()]}</span>
-                    <span className={cx("num text-[15px] font-semibold", d === t && !sel && "text-accent")}>{parseDate(d).getDate()}</span>
-                    <span className={cx("mt-0.5 h-1 w-1 rounded-full", n ? (sel ? "bg-bg" : "bg-muted") : "bg-transparent")} />
+                  <button key={d} onClick={() => setAnchor(d)} className={cx("flex flex-col items-center rounded-xl py-1.5", sel ? "bg-foreground text-background" : "hover:bg-accent")}>
+                    <span className={cx("text-[10.5px]", sel ? "opacity-80" : "text-muted-foreground")}>{WD_SHORT[parseDate(d).getDay()]}</span>
+                    <span className={cx("num text-[15px] font-semibold", d === t && !sel && "text-info-foreground")}>{parseDate(d).getDate()}</span>
+                    <span className={cx("mt-0.5 h-1 w-1 rounded-full", n ? (sel ? "bg-background" : "bg-muted") : "bg-transparent")} />
                   </button>
                 );
               })}
@@ -663,12 +663,12 @@ export default function CalendarPage() {
           <div className="card overflow-hidden">
             {/* Day headers */}
             {!mobile && (
-              <div className="grid border-b border-line" style={{ gridTemplateColumns: `52px repeat(${days.length}, 1fr)` }}>
-                <div className="num self-end px-1 pb-1 text-[10px] text-muted">GMT+7</div>
+              <div className="grid border-b border-border" style={{ gridTemplateColumns: `52px repeat(${days.length}, 1fr)` }}>
+                <div className="num self-end px-1 pb-1 text-[10px] text-muted-foreground">GMT+7</div>
                 {days.map((d) => (
-                  <button key={d} onClick={() => setAnchor(d)} className="flex flex-col items-center py-2 hover:bg-hover">
+                  <button key={d} onClick={() => setAnchor(d)} className="flex flex-col items-center py-2 hover:bg-accent">
                     <span className="label !text-[10.5px]">{WD_SHORT[parseDate(d).getDay()]}</span>
-                    <span className={cx("num mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-[18px]", d === t ? "bg-pen text-white font-semibold" : "text-ink")}>
+                    <span className={cx("num mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-[18px]", d === t ? "bg-destructive text-white font-semibold" : "text-foreground")}>
                       {parseDate(d).getDate()}
                     </span>
                   </button>
@@ -683,7 +683,7 @@ export default function CalendarPage() {
                 {/* Hours */}
                 <div className="relative" style={{ height: (END_H - START_H) * HOUR }}>
                   {Array.from({ length: END_H - START_H }, (_, i) => (
-                    <div key={i} className="num absolute right-2 -translate-y-1/2 text-[10.5px] text-muted" style={{ top: i * HOUR }}>
+                    <div key={i} className="num absolute right-2 -translate-y-1/2 text-[10.5px] text-muted-foreground" style={{ top: i * HOUR }}>
                       {i === 0 ? "" : `${String(START_H + i).padStart(2, "0")}:00`}
                     </div>
                   ))}
@@ -703,10 +703,10 @@ export default function CalendarPage() {
                         if (el) cols.current.set(d, el);
                         else cols.current.delete(d);
                       }}
-                      className={cx("relative border-l border-line", pasting && "cursor-copy")}
+                      className={cx("relative border-l border-border", pasting && "cursor-copy")}
                       style={{
                         height: (END_H - START_H) * HOUR,
-                        backgroundImage: `repeating-linear-gradient(to bottom, var(--line) 0, var(--line) 1px, transparent 1px, transparent ${HOUR}px)`,
+                        backgroundImage: `repeating-linear-gradient(to bottom, var(--border) 0, var(--border) 1px, transparent 1px, transparent ${HOUR}px)`,
                       }}
                       onPointerDown={(e) => begin(e, null, "create", d)}
                       onClick={(e) => {
@@ -743,8 +743,8 @@ export default function CalendarPage() {
                       {ghost && <Ghost drag={ghost} />}
                       {d === t && nowMin >= START_H * 60 && (
                         <div className="pointer-events-none absolute inset-x-0 z-[4] flex items-center" style={{ top: ((nowMin - START_H * 60) / 60) * HOUR }}>
-                          <span className="-ml-1 h-2 w-2 rounded-full bg-pen" />
-                          <span className="h-[1.5px] flex-1 bg-pen" />
+                          <span className="-ml-1 h-2 w-2 rounded-full bg-destructive" />
+                          <span className="h-[1.5px] flex-1 bg-destructive" />
                         </div>
                       )}
                     </div>
@@ -768,10 +768,10 @@ export default function CalendarPage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: sec(0.3), ease: EASE }}
-              className="relative w-full max-w-[340px] rounded-xl glass-thick p-4"
+              className="relative w-full max-w-[340px] rounded-xl border bg-popover text-popover-foreground shadow-lg/5 p-4"
             >
               <div className="display mb-1 text-[17px] font-semibold">{scopeText(pending.o).head}</div>
-              <p className="mb-3 text-[13px] text-ink-2">
+              <p className="mb-3 text-[13px] text-foreground/80">
                 {pending.o.title} → {fmtDay(pending.to.date, { weekday: true })},{" "}
                 <span className="num">{isBar(pending.o) ? pending.to.start : `${pending.to.start}–${endLabel(pending.to.end)}`}</span>
               </p>
@@ -798,7 +798,7 @@ export default function CalendarPage() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: sec(0.12) }}
-            className="absolute w-[236px] rounded-xl glass-thick p-3"
+            className="absolute w-[236px] rounded-xl border bg-popover text-popover-foreground shadow-lg/5 p-3"
             style={{ left: Math.min(colorMenu.x, window.innerWidth - 248), top: Math.min(colorMenu.y, window.innerHeight - 190) }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -944,7 +944,7 @@ function Bar({
         o.done && "opacity-45",
         dragging && "!opacity-30",
       )}
-      style={{ top, height: BAR, ...(check ? blockStyle(o) : { background: "var(--ink)", color: "var(--bg)" }) }}
+      style={{ top, height: BAR, ...(check ? blockStyle(o) : { background: "var(--foreground)", color: "var(--background)" }) }}
     >
       <span className={cx("truncate font-semibold", o.done && "line-through")}>{o.title}</span>
       <span className="num ml-auto shrink-0 opacity-75">{o.start}</span>
@@ -959,7 +959,7 @@ function Ghost({ drag }: { drag: Drag }) {
     return (
       <div
         className="pointer-events-none absolute inset-x-[3px] z-[5] flex items-center overflow-hidden rounded-[6px] px-1.5 text-[11px] leading-none shadow-pop ring-2 ring-white/70"
-        style={{ top: top + 1, height: BAR, ...(o.kind === "check" ? blockStyle(o) : { background: "var(--ink)", color: "var(--bg)" }) }}
+        style={{ top: top + 1, height: BAR, ...(o.kind === "check" ? blockStyle(o) : { background: "var(--foreground)", color: "var(--background)" }) }}
       >
         <span className="truncate font-semibold">{o.title}</span>
         <span className="num ml-auto pl-1">{fromMinutes(drag.start)}</span>
@@ -971,7 +971,7 @@ function Ghost({ drag }: { drag: Drag }) {
   return (
     <div
       className="pointer-events-none absolute inset-x-[2px] z-[5] flex flex-col overflow-hidden rounded-[6px] px-1.5 py-1 text-[11.5px] leading-tight shadow-pop ring-2 ring-white/70"
-      style={{ top, height, ...(o ? blockStyle(o) : { background: "var(--accent)", color: "white", opacity: 0.9 }) }}
+      style={{ top, height, ...(o ? blockStyle(o) : { background: "var(--info)", color: "white", opacity: 0.9 }) }}
     >
       <div className="font-semibold truncate">{drag.copy && <span aria-hidden>+ </span>}{o ? o.title : "New event"}</div>
       <div className="num opacity-90">{label}</div>
@@ -990,7 +990,7 @@ function MonthView({ month, onDay, onOcc }: { month: string; onDay: (d: string) 
   const weeks = cells[35].startsWith(month) ? 6 : 5;
   return (
     <motion.div key={month} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: sec(0.25), ease: EASE }} className="card overflow-hidden">
-      <div className="grid grid-cols-7 border-b border-line">
+      <div className="grid grid-cols-7 border-b border-border">
         {cells.slice(0, 7).map((d) => (
           <div key={d} className="label py-2 text-center !text-[10.5px]">
             {WD_SHORT[parseDate(d).getDay()]}
@@ -1010,17 +1010,17 @@ function MonthView({ month, onDay, onOcc }: { month: string; onDay: (d: string) 
               onClick={() => onDay(d)}
               onKeyDown={(e) => e.key === "Enter" && onDay(d)}
               className={cx(
-                "min-h-[72px] md:min-h-[112px] min-w-0 cursor-pointer border-line p-1 transition-colors hover:bg-hover",
+                "min-h-[72px] md:min-h-[112px] min-w-0 cursor-pointer border-border p-1 transition-colors hover:bg-accent",
                 i % 7 !== 0 && "border-l",
                 i >= 7 && "border-t",
-                !inMonth && "bg-sunken/60",
+                !inMonth && "bg-muted/60",
               )}
             >
               <div className="mb-0.5 flex justify-center">
                 <span
                   className={cx(
                     "num flex h-6 w-6 items-center justify-center rounded-full text-[12.5px]",
-                    d === t ? "bg-pen font-semibold text-white" : inMonth ? "text-ink" : "text-muted",
+                    d === t ? "bg-destructive font-semibold text-white" : inMonth ? "text-foreground" : "text-muted-foreground",
                   )}
                 >
                   {parseDate(d).getDate()}
@@ -1040,9 +1040,9 @@ function MonthView({ month, onDay, onOcc }: { month: string; onDay: (d: string) 
                       "cal-lift flex h-[5px] min-w-0 items-center gap-1 overflow-hidden rounded-full text-left text-[11px] leading-tight md:h-auto md:rounded-[4px] md:px-1 md:py-[1px]",
                       (o.done || o.status === "cancelled" || o.status === "missed_owe") && "opacity-45 line-through",
                     )}
-                    style={isBar(o) && desktopNow() ? undefined : { background: isBar(o) && o.kind === "task" ? "var(--ink)" : o.color, color: textOn(o.color) }}
+                    style={isBar(o) && desktopNow() ? undefined : { background: isBar(o) && o.kind === "task" ? "var(--foreground)" : o.color, color: textOn(o.color) }}
                   >
-                    {isBar(o) && <span className="hidden h-1.5 w-1.5 shrink-0 rounded-full md:block" style={{ background: o.kind === "check" ? o.color : "var(--ink)" }} />}
+                    {isBar(o) && <span className="hidden h-1.5 w-1.5 shrink-0 rounded-full md:block" style={{ background: o.kind === "check" ? o.color : "var(--foreground)" }} />}
                     <span className="hidden truncate md:inline">
                       <span className="num hidden md:inline">{o.start ? `${o.start} ` : ""}</span>
                       {o.title}
@@ -1050,7 +1050,7 @@ function MonthView({ month, onDay, onOcc }: { month: string; onDay: (d: string) 
                   </button>
                 ))}
                 {items.length > max && (
-                  <span className="px-1 text-[10.5px] text-muted">
+                  <span className="px-1 text-[10.5px] text-muted-foreground">
                     +{items.length - max}
                     <span className="hidden md:inline"> more</span>
                   </span>
@@ -1080,7 +1080,7 @@ function YearView({ year, onDay }: { year: number; onDay: (d: string) => void })
             </button>
             <div className="grid grid-cols-7 gap-y-0.5 text-center">
               {["M", "T", "W", "T", "F", "S", "S"].map((w, i) => (
-                <span key={i} className="text-[10px] text-muted">
+                <span key={i} className="text-[10px] text-muted-foreground">
                   {w}
                 </span>
               ))}
@@ -1095,13 +1095,13 @@ function YearView({ year, onDay }: { year: number; onDay: (d: string) => void })
                     onClick={() => onDay(d)}
                     aria-label={fmtDay(d, { weekday: true })}
                     className={cx(
-                      "num relative mx-auto flex h-7 w-7 items-center justify-center rounded-full text-[11.5px] transition-colors hover:bg-hover",
-                      d === t && "bg-pen font-semibold text-white hover:bg-pen",
+                      "num relative mx-auto flex h-7 w-7 items-center justify-center rounded-full text-[11.5px] transition-colors hover:bg-accent",
+                      d === t && "bg-destructive font-semibold text-white hover:bg-destructive",
                     )}
                   >
                     {parseDate(d).getDate()}
                     {n > 0 && d !== t && (
-                      <span className="absolute bottom-[3px] h-[3px] w-[3px] rounded-full bg-accent" style={{ opacity: Math.min(1, 0.35 + n * 0.15) }} />
+                      <span className="absolute bottom-[3px] h-[3px] w-[3px] rounded-full bg-info" style={{ opacity: Math.min(1, 0.35 + n * 0.15) }} />
                     )}
                   </button>
                 );

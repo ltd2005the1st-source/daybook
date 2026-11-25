@@ -78,7 +78,7 @@ export function QuickAdd({ compact }: { compact?: boolean }) {
             onChange={(e) => setAmount(e.target.value)}
             aria-label="Amount"
           />
-          {parsed && amount && <span className="num pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted">{vnd(parsed, { compact: true })}</span>}
+          {parsed && amount && <span className="num pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">{vnd(parsed, { compact: true })}</span>}
         </div>
         <input className="field !py-2" placeholder={kind === "expense" ? "What was it? e.g. Grab home" : "From? e.g. 2nd contract"} value={title} onChange={(e) => setTitle(e.target.value)} aria-label="Description" />
         <button className="btn btn-primary justify-center !py-2">
@@ -93,13 +93,13 @@ export function QuickAdd({ compact }: { compact?: boolean }) {
             onClick={() => setCat(c)}
             className={cx(
               "rounded-xl border px-2.5 py-0.5 text-[12.5px] transition-colors",
-              cat === c ? "border-ink bg-ink text-bg" : "border-line text-ink-2 hover:bg-hover",
+              cat === c ? "border-foreground bg-foreground text-background" : "border-border text-foreground/80 hover:bg-accent",
             )}
           >
             {c}
           </button>
         ))}
-        <label className="ml-auto flex items-center gap-1.5 text-[12.5px] text-ink-2">
+        <label className="ml-auto flex items-center gap-1.5 text-[12.5px] text-foreground/80">
           <Tick size={15} checked={recurring} onChange={() => setRecurring(!recurring)} /> Monthly
         </label>
       </div>
