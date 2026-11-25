@@ -25,7 +25,7 @@ function Wheel({ d, fresh, hold, delay }: { d: number; fresh: boolean; hold: boo
   }, [hold]);
   useEffect(() => {
     if (hold || !intro) return;
-    const h = window.setTimeout(() => setIntro(false), ms(1500) + delay);
+    const h = window.setTimeout(() => setIntro(false), ms(1700) + delay);
     return () => clearTimeout(h);
   }, [hold, intro, delay]);
   useEffect(() => {
@@ -72,7 +72,7 @@ export function RollingText({ text, className }: { text: string; className?: str
         {chars.map((c, i) => {
           const key = n - i; // position from the right
           return /\d/.test(c) ? (
-            <Wheel key={`d${key}`} d={+c} fresh={mounted} hold={!seen} delay={ms(Math.min(digit++, 8) * 70)} />
+            <Wheel key={`d${key}`} d={+c} fresh={mounted} hold={!seen} delay={ms(Math.min(digit++, 8) * 45)} />
           ) : (
             <span key={`c${key}${c}`}>{c}</span>
           );

@@ -583,6 +583,10 @@ select:focus-visible {
   html.rv-on [data-rv="out"][data-rvk="left"] {
     translate: -22px 0;
   }
+  html.rv-on [data-rv="out"][data-rvk="drop"] {
+    translate: 0 -22px;
+    scale: 0.94;
+  }
   html.rv-on [data-rv="out"][data-rvk="pop"] {
     scale: 0.88;
   }
@@ -597,14 +601,14 @@ select:focus-visible {
   }
   html.rv-on [data-rv="in"] {
     transition:
-      opacity calc(0.9s / var(--speed)) var(--rv-ease),
-      translate calc(1.1s / var(--speed)) var(--rv-ease),
-      scale calc(1.1s / var(--speed)) var(--rv-ease);
+      opacity calc(1.2s / var(--speed)) var(--rv-ease),
+      translate calc(1.5s / var(--speed)) var(--rv-ease),
+      scale calc(1.5s / var(--speed)) var(--rv-ease);
     transition-delay: calc(var(--rv-d, 0) * 1ms / var(--speed));
   }
   html.rv-on [data-rv="in"][data-rvk="line"] {
     transform-origin: left center;
-    transition-duration: calc(1.3s / var(--speed));
+    transition-duration: calc(1.5s / var(--speed));
   }
 }
 
@@ -632,10 +636,10 @@ select:focus-visible {
 }
 .intro,
 .intro-down {
-  animation-duration: calc(0.8s / var(--speed));
+  animation-duration: calc(1.4s / var(--speed));
   animation-timing-function: var(--rv-ease);
   animation-fill-mode: backwards;
-  animation-delay: calc((var(--i, 0) * 50ms + 60ms) / var(--speed));
+  animation-delay: calc((var(--i, 0) * 30ms + 40ms) / var(--speed));
 }
 .intro {
   animation-name: intro-in;
@@ -1001,7 +1005,7 @@ body.cal-dragging.cal-copying * {
   transition: none !important;
 }
 .roll-intro {
-  transition-duration: calc(1.4s / var(--speed));
+  transition-duration: calc(1.5s / var(--speed));
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 .roll-wheel > span {
