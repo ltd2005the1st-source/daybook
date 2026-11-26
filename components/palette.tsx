@@ -49,7 +49,7 @@ export function Palette({ open, onClose, onAsk }: { open: boolean; onClose: () =
           ? [
               {
                 id: "ask",
-                label: `Ask Gemini: “${q}”`,
+                label: `Personal Assistant: “${q}”`,
                 icon: Sparkles,
                 run: () => {
                   onAsk(q);
@@ -108,7 +108,7 @@ export function Palette({ open, onClose, onAsk }: { open: boolean; onClose: () =
                 }
                 if (e.key === "Enter") items[i]?.run();
               }}
-              placeholder="Go somewhere, add a task, or ask Gemini"
+              placeholder="Go somewhere, add a task, or ask your assistant"
               className="w-full border-b border-line bg-transparent px-4 py-3.5 text-[16px] outline-none focus-visible:outline-none placeholder:text-muted"
             />
             <ul className="max-h-[50vh] overflow-y-auto overscroll-contain p-1.5">

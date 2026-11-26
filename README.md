@@ -108,7 +108,7 @@ firebase apphosting:secrets:set CRON_SECRET
 
 Use the same values as on Netlify (never change `PIN_PEPPER`). Reminders are triggered by Supabase `pg_cron` (see [`supabase/cron.sql`](supabase/cron.sql)), not by the host, so no Cloud Scheduler is needed: re-run that SQL with the new URL once the Firebase site is live. Also add the new URL under Supabase Authentication → URL Configuration.
 
-## Ask Gemini (personal assistant)
+## Personal Assistant (Gemini)
 
 Press ⌘J (or the sparkle button on phones, or type a question in ⌘K) to log things in plain words ("spent 45k on coffee", "taught Bách today", "slept 0:30, woke 7:15") or ask about your data. It runs the current Gemini Flash model through `/api/assistant` with function calling; the changes it makes run in your browser, so they sync like any other edit. The conversation stays on that device. It is off on the public tester account.
 

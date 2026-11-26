@@ -10,7 +10,7 @@ import { cx } from "@/lib/format";
 import { sec } from "@/lib/motion";
 
 /**
- * "Ask Gemini": a Gemini assistant that reads and logs your Daybook data. Gemini runs on the server
+ * "Personal Assistant": a Gemini assistant that reads and logs your Daybook data. Gemini runs on the server
  * (/api/assistant); the tools it asks for run here in the browser against the same store as the rest
  * of the app, so every change syncs and shows up instantly. The conversation is kept on this device.
  */
@@ -250,7 +250,7 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
           <motion.aside
             role="dialog"
             aria-modal="true"
-            aria-label="Ask Gemini"
+            aria-label="Personal Assistant"
             initial={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
             animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
             exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
@@ -264,8 +264,8 @@ export function Assistant({ open, onClose, seed, onSeedUsed }: { open: boolean; 
                   <Sparkles size={16} strokeWidth={2} />
                 </span>
                 <div>
-                  <h3 className="display text-[18px] font-semibold leading-tight">Ask Gemini</h3>
-                  <div className="text-[11.5px] text-muted">Gemini · reads and logs your daybook</div>
+                  <h3 className="display text-[18px] font-semibold leading-tight">Personal Assistant</h3>
+                  <div className="text-[11.5px] text-muted">24/7 helper for your dashboard management.</div>
                 </div>
               </div>
               <div className="flex items-center gap-1">
