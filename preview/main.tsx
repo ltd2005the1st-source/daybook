@@ -2,6 +2,7 @@
 import { createRoot } from "react-dom/client";
 import { DataProvider } from "@/components/data";
 import { Shell } from "@/components/shell";
+import { SmoothCursor } from "@/components/smooth-cursor";
 import { usePathname } from "next/navigation";
 import { Dashboard } from "@/components/dashboard";
 import ReceiptsPage from "@/app/(app)/teaching/receipts/page";
@@ -33,5 +34,6 @@ createRoot(document.getElementById("root")!).render(
     <Shell>
       <Routes />
     </Shell>
+    <SmoothCursor />
   </DataProvider>,
 );
