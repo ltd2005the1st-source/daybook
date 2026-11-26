@@ -1108,31 +1108,6 @@ html[data-app="android"] [data-paged] > .page-parked {
   box-shadow: 0 1px 4px rgba(20, 30, 60, 0.3);
   transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), background 0.22s ease;
 }
-.smooth-corners {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 2147483000;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.16s ease;
-}
-.smooth-corners[data-on="1"] {
-  opacity: 1;
-}
-.sc-c {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 9px;
-  height: 9px;
-  border: 0 solid var(--accent);
-  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.sc-c0 { border-width: 2px 0 0 2px; border-top-left-radius: 3px; }
-.sc-c1 { border-width: 2px 2px 0 0; border-top-right-radius: 3px; }
-.sc-c2 { border-width: 0 0 2px 2px; border-bottom-left-radius: 3px; }
-.sc-c3 { border-width: 0 2px 2px 0; border-bottom-right-radius: 3px; }
 .smooth-cursor[data-hot="1"] span {
   transform: scale(2);
   background: color-mix(in srgb, var(--accent) 35%, transparent);
@@ -1153,7 +1128,6 @@ html.cursor-on body * {
   cursor: none !important;
 }
 @media print, (prefers-reduced-motion: reduce) {
-  .smooth-corners,
   .smooth-cursor {
     display: none;
   }
