@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
+import { SmoothCursor } from "@/components/smooth-cursor";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin", "vietnamese"],
@@ -36,7 +37,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <SmoothCursor />
+      </body>
     </html>
   );
 }
