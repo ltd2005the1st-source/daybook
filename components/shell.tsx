@@ -8,12 +8,14 @@ import {
   Moon,
   NotebookPen,
   PanelRightOpen,
+  Sparkles,
   Sun,
   X,
 } from "lucide-react";
 import { useData, useToasts } from "./data";
 import { AppGrid, AppLinks, AppsEditor } from "./apps";
 import { Palette } from "./palette";
+import { Assistant, useAssistantShortcut } from "./assistant";
 import { Notebook } from "./notebook";
 import { Sheet } from "./ui";
 import { Login } from "./login";
@@ -64,6 +66,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const slotAt = lastIdx.current;
   useSmoothWheel();
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
+  const [askSeed, setAskSeed] = useState<string | null>(null);
+  const toggleAsk = useCallback(() => setAskOpen((v) => !v), []);
+  useAssistantShortcut(toggleAsk);
   const [notesOpen, setNotesOpen] = useState(false);
   const [appsOpen, setAppsOpen] = useState(false);
   const [editApps, setEditApps] = useState(false);
@@ -174,6 +180,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <AppLinks onEdit={() => setEditApps(true)} />
         </div>
         <div className="intro mt-auto flex flex-col gap-px" style={{ ["--i" as string]: NAV.length + 3 }}>
+          <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+            <Sparkles size={16} strokeWidth={1.8} />
+            <span className="flex-1 text-left">Ask Gemini</span>
+            <kbd className="num text-[10.5px] text-muted">⌘J</kbd>
+          </button>
           <button onClick={() => setNotesOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <NotebookPen size={16} strokeWidth={1.8} /> My Notebook
           </button>
@@ -211,6 +222,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </button>
           <button aria-label="My Notebook" onClick={() => setNotesOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
             <NotebookPen size={17} />
+          </button>
+          <button aria-label="Ask Gemini" onClick={() => setAskOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-accent hover:bg-hover">
+            <Sparkles size={17} />
           </button>
           <button aria-label="Toggle theme" onClick={toggle} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
             {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
@@ -285,6 +299,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <Palette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
+        onAsk={(q) => {
+          setAskSeed(q);
+          setAskOpen(true);
+        }}
       />
       <Sheet open={appsOpen} onClose={() => setAppsOpen(false)} title="Apps" width={420}>
         <AppGrid
@@ -297,6 +315,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </Sheet>
       <AppsEditor open={editApps} onClose={() => setEditApps(false)} />
       <Notebook open={notesOpen} onClose={() => setNotesOpen(false)} />
+      <Assistant open={askOpen} onClose={() => setAskOpen(false)} seed={askSeed} onSeedUsed={() => setAskSeed(null)} />
       <MusicDock />
 
       {/* Toasts */}

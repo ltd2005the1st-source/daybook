@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { CheckSquare, CornerDownLeft } from "lucide-react";
+import { CheckSquare, CornerDownLeft, Sparkles } from "lucide-react";
 import { useData } from "./data";
 import { NAV, sectionOf } from "./nav";
 import { scrollToSection } from "./scroll-spy";
@@ -13,7 +13,7 @@ import { sec } from "@/lib/motion";
 
 type Item = { id: string; label: string; hint?: string; icon: React.ComponentType<{ size?: number }>; run: () => void };
 
-export function Palette({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function Palette({ open, onClose, onAsk }: { open: boolean; onClose: () => void; onAsk?: (q: string) => void }) {
   const router = useRouter();
   const { insert, store, toast } = useData();
   const [q, setQ] = useState("");
@@ -45,6 +45,19 @@ export function Palette({ open, onClose }: { open: boolean; onClose: () => void 
   const items: Item[] = q
     ? [
         ...filtered,
+        ...(onAsk
+          ? [
+              {
+                id: "ask",
+                label: `Ask Gemini: “${q}”`,
+                icon: Sparkles,
+                run: () => {
+                  onAsk(q);
+                  onClose();
+                },
+              },
+            ]
+          : []),
         {
           id: "task",
           label: `Add task: “${q}”`,
@@ -95,7 +108,7 @@ export function Palette({ open, onClose }: { open: boolean; onClose: () => void 
                 }
                 if (e.key === "Enter") items[i]?.run();
               }}
-              placeholder="Go somewhere, add a task"
+              placeholder="Go somewhere, add a task, or ask Gemini"
               className="w-full border-b border-line bg-transparent px-4 py-3.5 text-[16px] outline-none focus-visible:outline-none placeholder:text-muted"
             />
             <ul className="max-h-[50vh] overflow-y-auto overscroll-contain p-1.5">
