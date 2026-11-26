@@ -119,7 +119,7 @@ export default function MoneyPage() {
                   <button
                     key={t.id}
                     onClick={() => setEdit(t)}
-                    className="row group flex w-full items-center gap-3 py-2 text-left hover:bg-hover"
+                    className="row group flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-hover"
                   >
                     <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: t.kind === "income" ? "var(--good)" : CAT_COLORS[t.category] ?? CAT_COLORS.Other }} />
                     <span className="min-w-0 flex-1 truncate text-[14px]">
