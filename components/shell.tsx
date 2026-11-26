@@ -138,7 +138,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <button
           onClick={() => setPaletteOpen(true)}
           style={{ ["--i" as string]: 1 }}
-          className="intro press mb-3 flex items-center justify-between rounded-[6px] glass-pill px-3 py-1.5 text-[13px] text-muted hover:text-ink"
+          className="intro press mb-3 flex items-center justify-between rounded-full glass-pill px-3 py-1.5 text-[13px] text-muted hover:text-ink"
         >
           <span>Jump or add…</span>
           <kbd className="num rounded-full border border-line px-1.5 text-[10.5px] leading-[16px]">⌘K</kbd>
@@ -154,14 +154,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 aria-current={active ? "true" : undefined}
                 style={{ ["--i" as string]: i + 2 }}
                 className={cx(
-                  "intro press nav-item relative flex items-center gap-2.5 rounded-[6px] px-2.5 py-[7px] text-[14px]",
+                  "intro press nav-item relative flex items-center gap-2.5 rounded-full px-3.5 py-[7px] text-[14px]",
                   active ? "text-ink font-medium" : "text-ink-2 hover:bg-hover hover:text-ink",
                 )}
               >
                 {active && (
                   <motion.span
                     layoutId="nav-active"
-                    className="absolute inset-0 rounded-[6px] glass-pill"
+                    className="absolute inset-0 rounded-full glass-pill"
                     transition={{ duration: sec(0.3), ease: [0.65, 0, 0.35, 1] }}
                   />
                 )}

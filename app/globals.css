@@ -3,116 +3,122 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* ---------------------------------------------------------------
-   Daybook tokens: liquid glass.
-   A soft wallpaper (the icon's ink blue and yellow dot, washed out) sits behind everything.
-   Floating chrome (sidebar, bars, tab bar, sheets, menus, toasts) is clear glass that blurs
-   and lifts what passes beneath it; the reading surface is a calmer, more opaque pane so text
-   always clears AA. Ink-blue accent, the red marking pen for things that need checking.
-   Each student carries their own color, lifted from your Google Calendar.
+   Daybook tokens: Android 17 / Material 3 Expressive.
+   One seed (the icon's ink blue, #3a5ba9) generates every colour role. Depth comes from tonal
+   surfaces, not shadows or blur: the page is surface-container, the reading pane is surface,
+   cards and fields are a primary-tinted overlay (so they work on any base). Shapes are big and
+   round (pill buttons, 20px cards, 28px panes) and morph on press. Motion is a spatial spring
+   with a little overshoot; colour and opacity use the plain emphasized ease.
+   Each student still carries their own colour, lifted from your Google Calendar.
+   (Class names such as .glass and .glass-pill are kept so no component changes: they are tonal now.)
 ---------------------------------------------------------------- */
 :root {
   /* Safe-area insets. The Android app overwrites these from native insets (inline style on <html>). */
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
-  --bg: #e6ebf3;
-  /* Translucent surfaces. --surface is a raised piece of glass inside a pane (cards, fields, pills). */
-  --surface: rgba(255, 255, 255, 0.6);
-  --sunken: rgba(30, 45, 80, 0.045);
+
+  /* Colour roles (light). */
+  --md-primary: #3a5ba9;
+  --md-on-primary: #ffffff;
+  --md-primary-container: #d9e2ff;
+  --md-on-primary-container: #001945;
+  --md-secondary-container: #dae2f9;
+  --md-on-secondary-container: #131b2c;
+  --md-surface: #faf8ff;
+  --md-surface-low: #f3f3fa;
+  --md-surface-container: #edeef5;
+  --md-surface-high: #e8e9f0;
+  --md-surface-highest: #e2e2e9;
+  --md-outline: #74777f;
+  --md-outline-variant: #c4c6d0;
+
+  --bg: var(--md-surface-container);
+  /* Tonal overlay: a raised piece inside any surface (cards, fields, pills). */
+  --surface: rgba(58, 91, 169, 0.075);
+  --sunken: rgba(58, 91, 169, 0.05);
   /* Opaque paper, for things that must print or stay solid (receipts). */
   --paper: #ffffff;
-  --hover: rgba(30, 45, 80, 0.065);
-  --ink: #181c25;
-  --ink-2: #3e4555;
-  --muted: #525a6b;
-  --line: rgba(30, 45, 80, 0.1);
-  --line-strong: rgba(30, 45, 80, 0.17);
-  --accent: #2a47a6;
-  --accent-soft: rgba(47, 79, 181, 0.12);
+  --hover: rgba(58, 91, 169, 0.09);
+  --ink: #1a1b21;
+  --ink-2: #44474f;
+  --muted: #565a66;
+  --line: rgba(68, 71, 79, 0.16);
+  --line-strong: rgba(68, 71, 79, 0.3);
+  --accent: #3a5ba9;
+  --accent-soft: rgba(58, 91, 169, 0.14);
   --pen: #a5311a;
   --pen-soft: rgba(181, 55, 31, 0.11);
   --good: #1f5e3e;
   --good-soft: rgba(39, 107, 74, 0.12);
 
-  /* Wallpaper behind the glass. Broad, still washes; nothing moves. */
-  --wall:
-    radial-gradient(ellipse 80% 70% at 0% 0%, rgba(47, 79, 181, 0.55), transparent 72%),
-    radial-gradient(ellipse 60% 55% at 100% 0%, rgba(52, 150, 196, 0.38), transparent 72%),
-    radial-gradient(ellipse 70% 65% at 100% 100%, rgba(244, 176, 36, 0.5), transparent 74%),
-    radial-gradient(ellipse 60% 55% at 0% 100%, rgba(96, 128, 220, 0.32), transparent 72%),
-    linear-gradient(165deg, #d6deed, #e8ecf3 55%, #efe9dc);
+  /* No wallpaper: the tonal page colour is the backdrop. */
+  --wall: linear-gradient(var(--bg), var(--bg));
 
-  /* Glass. pane = the big reading surface; glass = floating chrome; thick = sheets and menus. */
-  --pane: rgba(255, 255, 255, 0.62);
-  --glass: rgba(255, 255, 255, 0.52);
-  --glass-thick: rgba(248, 250, 253, 0.78);
-  /* The phone tab bar sits over the white pane, so its glass carries a little cool tint to stand apart. */
-  --glass-bar: rgba(232, 237, 247, 0.86);
-  --glass-pill: rgba(255, 255, 255, 0.82);
-  --glass-blur: blur(22px) saturate(185%);
-  --glass-blur-thick: blur(34px) saturate(190%);
-  /* The rim: a bright inner edge catching the light on top, a faint darker one underneath. */
-  --rim: rgba(255, 255, 255, 0.75);
-  --rim-low: rgba(30, 45, 80, 0.07);
-  --spec: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 42%);
-  --glass-edge: 0 0 0 0.5px rgba(30, 45, 80, 0.1);
+  /* Surfaces (names kept from the glass era). pane = reading surface; glass = sidebar and dock;
+     thick = sheets and menus; pill = the selected thing in a group (secondary container). */
+  --pane: var(--md-surface);
+  --glass: var(--md-surface-container);
+  --glass-thick: var(--md-surface-low);
+  --glass-bar: var(--md-surface-high);
+  --glass-pill: var(--md-secondary-container);
+  --glass-blur: none;
+  --glass-blur-thick: none;
+  --rim: transparent;
+  --rim-low: transparent;
+  --spec: linear-gradient(transparent, transparent);
+  --glass-edge: 0 0 0 0 transparent;
 
-  /* Depth: a hairline contact shadow plus a soft ambient one, tinted toward the wallpaper's blue. */
-  --shadow: 0 0 0 0.5px rgba(30, 45, 80, 0.06), 0 1px 2px rgba(30, 45, 80, 0.06), 0 8px 20px -12px rgba(30, 45, 80, 0.2);
-  --shadow-pop: 0 0 0 0.5px rgba(30, 45, 80, 0.08), 0 6px 16px -4px rgba(30, 45, 80, 0.12), 0 36px 72px -24px rgba(30, 45, 80, 0.38);
-  /* Translucent material for floating chrome (bars, toasts). Content scrolls underneath. */
-  --material: rgba(240, 244, 250, 0.62);
-  --material-thick: rgba(244, 247, 251, 0.7);
-  --material-edge: rgba(255, 255, 255, 0.8);
-  --hairline: rgba(30, 45, 80, 0.1);
-  --scrim: rgba(20, 30, 55, 0.2);
+  /* Elevation: tonal first; shadows only for things that really float. */
+  --shadow: 0 0 0 0 transparent;
+  --shadow-pop: 0 1px 3px rgba(26, 27, 33, 0.2), 0 4px 10px 2px rgba(26, 27, 33, 0.12);
+  --material: color-mix(in oklab, var(--md-surface) 92%, transparent);
+  --material-thick: color-mix(in oklab, var(--md-surface) 94%, transparent);
+  --material-edge: transparent;
+  --hairline: var(--md-outline-variant);
+  --scrim: rgba(26, 27, 33, 0.32);
   --ring: color-mix(in oklab, var(--accent) 28%, transparent);
-  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Motion: effects (colour, opacity) use the emphasized ease; spatial (size, position, shape) springs. */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --spring: cubic-bezier(0.34, 1.35, 0.64, 1);
   /* How fast everything moves; 1 = original pace. Same value as SPEED in lib/motion.ts. */
   --speed: 1.5;
-  --btn-drop: var(--ink);
+  --btn-drop: transparent;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --bg: #0c0f15;
-  --surface: rgba(255, 255, 255, 0.06);
-  --sunken: rgba(0, 0, 0, 0.16);
-  --btn-drop: #000;
+  --md-primary: #b0c6ff;
+  --md-on-primary: #002d6e;
+  --md-primary-container: #1a4393;
+  --md-on-primary-container: #d9e2ff;
+  --md-secondary-container: #2f3646;
+  --md-on-secondary-container: #dae2f9;
+  --md-surface: #121318;
+  --md-surface-low: #1a1b20;
+  --md-surface-container: #1e1f25;
+  --md-surface-high: #292a2f;
+  --md-surface-highest: #34343a;
+  --md-outline: #8e9099;
+  --md-outline-variant: #44474f;
+
+  --bg: #0d0e13;
+  --surface: rgba(176, 198, 255, 0.08);
+  --sunken: rgba(0, 0, 0, 0.18);
   --paper: #1d2129;
-  --hover: rgba(255, 255, 255, 0.07);
-  --ink: #eceef3;
-  --ink-2: #bcc2cf;
-  --muted: #9aa1b0;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.15);
-  --accent: #9cb0f5;
-  --accent-soft: rgba(156, 176, 245, 0.14);
+  --hover: rgba(176, 198, 255, 0.1);
+  --ink: #e3e2e9;
+  --ink-2: #c4c6d0;
+  --muted: #9aa0ae;
+  --line: rgba(196, 198, 208, 0.14);
+  --line-strong: rgba(196, 198, 208, 0.28);
+  --accent: #b0c6ff;
+  --accent-soft: rgba(176, 198, 255, 0.16);
   --pen: #f2876f;
   --pen-soft: rgba(242, 135, 111, 0.13);
   --good: #72cc9d;
   --good-soft: rgba(114, 204, 157, 0.13);
-  --wall:
-    radial-gradient(ellipse 80% 70% at 0% 0%, rgba(80, 110, 230, 0.5), transparent 72%),
-    radial-gradient(ellipse 60% 55% at 100% 0%, rgba(40, 130, 170, 0.3), transparent 72%),
-    radial-gradient(ellipse 70% 65% at 100% 100%, rgba(210, 145, 30, 0.3), transparent 74%),
-    radial-gradient(ellipse 60% 55% at 0% 100%, rgba(70, 90, 190, 0.25), transparent 72%),
-    linear-gradient(165deg, #121828, #0e121c 60%, #14110c);
-  --pane: rgba(20, 23, 31, 0.6);
-  --glass: rgba(40, 45, 58, 0.42);
-  --glass-thick: rgba(30, 34, 43, 0.8);
-  --glass-bar: rgba(44, 49, 63, 0.84);
-  --glass-pill: rgba(255, 255, 255, 0.13);
-  --rim: rgba(255, 255, 255, 0.12);
-  --rim-low: rgba(0, 0, 0, 0.3);
-  --spec: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 40%);
-  --glass-edge: 0 0 0 0.5px rgba(0, 0, 0, 0.5);
-  --shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 20px -12px rgba(0, 0, 0, 0.6);
-  --shadow-pop: 0 0 0 0.5px rgba(0, 0, 0, 0.5), 0 6px 16px -4px rgba(0, 0, 0, 0.4), 0 36px 72px -24px rgba(0, 0, 0, 0.8);
-  --material: rgba(22, 25, 32, 0.6);
-  --material-thick: rgba(24, 27, 34, 0.72);
-  --material-edge: rgba(255, 255, 255, 0.1);
-  --hairline: rgba(255, 255, 255, 0.09);
-  --scrim: rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 1px 3px rgba(0, 0, 0, 0.5), 0 4px 12px 2px rgba(0, 0, 0, 0.4);
+  --scrim: rgba(0, 0, 0, 0.5);
   color-scheme: dark;
 }
 
@@ -227,9 +233,9 @@ select:focus-visible {
 .field {
   width: 100%;
   background: color-mix(in oklab, var(--surface) 70%, transparent);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 7px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  padding: 8px 13px;
   color: var(--ink);
   box-shadow: inset 0 1px 1px var(--rim-low);
   transition: border-color calc(0.15s / var(--speed)) var(--ease), background calc(0.15s / var(--speed)) var(--ease), box-shadow calc(0.2s / var(--speed)) var(--ease);
@@ -240,9 +246,10 @@ select:focus-visible {
 .field:focus {
   outline: none;
   /* Neutral focus: the border firms up and the well brightens. No blue ring. */
-  border-color: color-mix(in oklab, var(--ink-2) 40%, var(--line-strong));
-  background: var(--glass-pill);
-  box-shadow: inset 0 1px 1px var(--rim-low);
+  /* M3: the focused field takes a 2px primary outline. */
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--surface);
 }
 .field-title {
   font-size: 18px;
@@ -257,73 +264,76 @@ select:focus-visible {
   color: var(--muted);
 }
 
-/* Buttons share the app's one corner radius (12px, same as the Came in card). */
+/* Buttons: full pills. On press the shape morphs from pill to a 12px rounded square on a spatial
+   spring (M3 Expressive); a state layer (the label colour at 8% hover, 10% pressed) sits on top. */
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  border-radius: 12px;
-  padding: 6px 13px;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 8px 18px;
   font-weight: 500;
-  font-size: 13.5px;
-  letter-spacing: 0.005em;
-  /* Release eases back; the press itself is instant (below). */
-  /* Hover feel copied from the IELTS app's Start test / Shuffle: lift and drop shadow ease out on
-     cubic-bezier(.22,1,.36,1), colours fade on ease-out. 0.375s at 1x lands on its 0.25s at the speed dial. */
-  transition: background calc(0.375s / var(--speed)) ease-out, transform calc(0.375s / var(--speed)) cubic-bezier(0.22, 1, 0.36, 1), color calc(0.375s / var(--speed)) ease-out, border-color calc(0.375s / var(--speed)) ease-out, box-shadow calc(0.375s / var(--speed)) cubic-bezier(0.22, 1, 0.36, 1);
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  transition: border-radius calc(0.4s / var(--speed)) var(--spring), transform calc(0.4s / var(--speed)) var(--spring), background-color calc(0.2s / var(--speed)) var(--ease), color calc(0.2s / var(--speed)) var(--ease), border-color calc(0.2s / var(--speed)) var(--ease), box-shadow calc(0.2s / var(--speed)) var(--ease);
   white-space: nowrap;
   touch-action: manipulation;
+  overflow: hidden;
 }
-/* Feedback on press, not on release: shrink a little the moment it's touched. */
-.btn:active,
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(0.2s / var(--speed)) var(--ease);
+}
+.btn:not(:disabled):hover::after {
+  opacity: 0.08;
+}
+.btn:not(:disabled):active::after {
+  opacity: 0.1;
+}
+/* Press: shape morph plus a small sink, instantly. */
+.btn:active {
+  border-radius: 12px;
+  transform: scale(0.97);
+  transition-duration: calc(0.08s / var(--speed));
+}
+.press,
 .press:active {
-  transform: scale(0.96);
-  transition-duration: calc(0.06s / var(--speed));
-}
-.press {
-  transition: transform calc(0.22s / var(--speed)) var(--ease), background-color calc(0.15s / var(--speed)) var(--ease), border-color calc(0.15s / var(--speed)) var(--ease), color calc(0.15s / var(--speed)) var(--ease);
   touch-action: manipulation;
 }
-/* Flat ink-blue fill, white label (7.2:1). No shine, no shading. */
+.press {
+  transition: transform calc(0.35s / var(--speed)) var(--spring), background-color calc(0.2s / var(--speed)) var(--ease), border-color calc(0.2s / var(--speed)) var(--ease), color calc(0.2s / var(--speed)) var(--ease);
+}
+.press:active {
+  transform: scale(0.94);
+  transition-duration: calc(0.08s / var(--speed));
+}
+/* Filled: primary role. */
 .btn-primary {
-  background: #2f4fb5;
-  color: #fff;
-  box-shadow: 0 0 0 0 var(--btn-drop);
+  background: var(--md-primary);
+  color: var(--md-on-primary);
 }
-:root[data-theme="dark"] .btn-primary {
-  background: #3d5bc4;
-}
-.btn-primary:hover {
-  background-color: #2a46a3;
-  filter: brightness(1.06);
-}
+/* Tonal (secondary container) is the quieter fill; ghost is a text button. */
 .btn-ghost {
-  color: var(--ink-2);
+  color: var(--accent);
 }
-.btn-ghost:hover {
-  background: var(--hover);
-  color: var(--ink);
-}
-/* Secondary: flat surface with a rim. */
+/* Outlined: 1px outline role, primary label. */
 .btn-line {
-  background: var(--surface);
-  border: 1px solid var(--rim);
-  color: var(--ink);
-  box-shadow: 0 0 0 0 var(--btn-drop);
-}
-/* On hover the outlined button fills a blue-grey and its label goes white (5.6:1). The hard drop shadow
-   keeps its own colour (--btn-drop), untouched. */
-.btn-line:hover {
-  background: #5b6b8c;
-  border-color: #5b6b8c;
-  color: #fff;
+  background: transparent;
+  border: 1px solid var(--md-outline);
+  color: var(--accent);
 }
 
 /* Cards: a raised piece of glass inside the pane, with a lit top edge. */
 .card {
-  background: var(--spec), var(--surface);
-  border: 1px solid var(--rim);
-  border-radius: 12px;
+  background: var(--surface);
+  border-radius: 20px;
 }
 /* Layered so a shadow utility on a card (e.g. shadow-pop) still wins. */
 @layer components {
@@ -341,34 +351,28 @@ select:focus-visible {
    .glass-pill   the selected thing in a group (sidebar row, segmented control)
 ---------------------------------------------------------------- */
 .pane {
-  background: var(--spec), var(--pane);
-  box-shadow: inset 0 1px 0 var(--rim), inset 0 0 0 1px color-mix(in oklab, var(--rim) 50%, transparent), var(--glass-edge), var(--shadow);
+  background: var(--pane);
 }
 .glass {
-  background: var(--spec), var(--glass);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  box-shadow: inset 0 1px 0 var(--rim), inset 0 0 0 1px color-mix(in oklab, var(--rim) 55%, transparent), var(--glass-edge), var(--shadow);
+  background: var(--glass);
 }
 .glass-thick {
-  background: var(--spec), var(--glass-thick);
-  -webkit-backdrop-filter: var(--glass-blur-thick);
-  backdrop-filter: var(--glass-blur-thick);
-  box-shadow: inset 0 1px 0 var(--rim), inset 0 0 0 1px color-mix(in oklab, var(--rim) 55%, transparent), var(--glass-edge), var(--shadow-pop);
+  background: var(--glass-thick);
+  box-shadow: var(--shadow-pop);
 }
+/* The selected thing in a group: secondary-container pill. Its label uses the role's own "on" colour. */
 .glass-pill {
-  background: var(--spec), var(--glass-pill);
-  box-shadow: inset 0 1px 0 var(--rim), var(--glass-edge), 0 1px 2px var(--rim-low), 0 4px 10px -6px rgba(30, 45, 80, 0.25);
+  background: var(--glass-pill);
 }
 /* The reading pane: floats beside the sidebar on desktop, inset under the top bar on phones. */
 .app-pane {
-  border-radius: 12px 12px 0 0;
+  border-radius: 28px 28px 0 0;
   margin: 6px 8px 0;
   min-height: calc(100dvh - var(--topbar, 56px) - 6px);
 }
 @media (min-width: 768px) {
   .app-pane {
-    border-radius: 12px;
+    border-radius: 28px;
     margin: 0;
     min-height: calc(100dvh - 24px);
   }
@@ -389,25 +393,10 @@ select:focus-visible {
   }
 }
 
-/* Sticky headers inside the pane blur whatever scrolls beneath them. */
-.sticky[class*="bg-surface"],
-.sticky[class*="bg-bg"],
-.sticky[class*="bg-sunken"] {
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  backdrop-filter: blur(18px) saturate(180%);
-}
-
 /* Translucent chrome: blurs and lifts what scrolls beneath it. A bright edge catches the light. */
-.material {
-  background: var(--spec), var(--material);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-}
+.material,
 .material-thick {
-  background: var(--spec), var(--material-thick);
-  -webkit-backdrop-filter: var(--glass-blur-thick);
-  backdrop-filter: var(--glass-blur-thick);
-  box-shadow: inset 0 1px 0 var(--material-edge);
+  background: var(--material);
 }
 /* Scroll edge: a hairline only once content is actually passing underneath. */
 .edge-bottom {
@@ -415,7 +404,9 @@ select:focus-visible {
   transition: box-shadow calc(0.25s / var(--speed)) var(--ease);
 }
 .edge-bottom[data-scrolled] {
-  box-shadow: inset 0 -0.5px 0 var(--material-edge), 0 0.5px 0 var(--hairline), 0 10px 20px -16px rgba(20, 30, 60, 0.35);
+  /* M3: the bar picks up a tonal surface once content scrolls beneath it. */
+  background: var(--md-surface-container);
+  box-shadow: none;
 }
 .edge-top {
   box-shadow: 0 -0.5px 0 var(--hairline), inset 0 0.5px 0 var(--material-edge);
@@ -794,13 +785,6 @@ body.cal-dragging.cal-copying * {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  /* Buttons: primary lifts with a deeper shadow; outlined firms up its edge; icons grow slightly. */
-  /* The IELTS app's action buttons: lift 3.6px and grow a hard 4px drop shadow. Pressing keeps
-     them lifted (touch screens, which can't hover, still sink on press). */
-  .btn:is(.btn-primary, .btn-line):not(:disabled):hover {
-    transform: translateY(-3.6px);
-    box-shadow: 0 4px 0 0 var(--btn-drop);
-  }
   .btn:hover:not(:active) svg.lucide,
   .nav-item:hover svg.lucide {
     transform: scale(1.1);
@@ -823,8 +807,7 @@ body.cal-dragging.cal-copying * {
 
   /* Clickable cards float up. */
   :is(a, button).card:hover:not(:active) {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-pop);
+    background: color-mix(in oklab, var(--surface), var(--accent) 6%);
   }
 
   /* Sidebar rows slide their label a hair toward the content. */
@@ -850,7 +833,6 @@ body.cal-dragging.cal-copying * {
 
 @media (prefers-reduced-motion: reduce) {
   :where(a, button, [role="button"]):active,
-  .btn:is(.btn-primary, .btn-line):hover,
   :is(a, button).card:hover,
   .nav-item:hover > span:last-child,
   .btn:hover svg.lucide,
@@ -867,7 +849,7 @@ body.cal-dragging.cal-copying * {
   .row {
     margin-inline: -10px;
     padding-inline: 10px;
-    border-radius: 12px;
+    border-radius: 16px;
   }
   .row-list {
     margin-inline: -10px;
@@ -896,23 +878,20 @@ body.cal-dragging.cal-copying * {
    glass inside from seeing (and blurring) the page behind the bar. */
 .tabbar-pill {
   /* Negative spread keeps the shadow off the top edge, where it would draw across the notch. */
-  box-shadow: 0 14px 26px -12px rgba(30, 45, 80, 0.42);
+  box-shadow: 0 10px 22px -12px rgba(26, 27, 33, 0.4);
 }
 :root[data-theme="dark"] .tabbar-pill {
-  box-shadow: 0 14px 26px -12px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.85);
 }
 /* The glass itself: one strip, two bar-widths plus the 100px notch piece, cut to shape by a
    mask that never changes (the strip slides, the mask rides along with it). */
 .tabbar-strip {
   width: calc(200cqw + 100px);
   transform: translate3d(calc((var(--i) + 0.5) * 100cqw / var(--n) - 100cqw - 50px), 0, 0);
-  transition: transform var(--glide) var(--ease);
+  transition: transform var(--glide) var(--spring);
   /* Fairly opaque glass: Chrome can drop the backdrop blur on a masked layer once it has slid,
      so the tint alone must keep what passes beneath quiet. No will-change, which makes that worse. */
-  background: var(--spec), var(--glass-bar);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  box-shadow: inset 0 1px 0 var(--rim), inset 0 -1px 0 var(--rim-low);
+  background: var(--md-surface-high);
   --notch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='64' viewBox='0 0 100 64'%3E%3Cpath d='M0 0H8.19A8 8 0 0 1 16.15 7.24A34 34 0 0 0 83.85 7.24A8 8 0 0 1 91.81 0H100V64H0Z'/%3E%3C/svg%3E");
   -webkit-mask-image: linear-gradient(#000, #000), var(--notch), linear-gradient(#000, #000);
   mask-image: linear-gradient(#000, #000), var(--notch), linear-gradient(#000, #000);
@@ -929,9 +908,7 @@ body.cal-dragging.cal-copying * {
   width: 100px;
   transform: translate3d(calc((var(--i) + 0.5) * 100cqw / var(--n) - 50px), 0, 0);
   transition: transform var(--glide) var(--ease), opacity calc(0.25s / var(--speed)) var(--ease);
-  background: var(--spec), var(--glass-bar);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
+  background: var(--md-surface-high);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='64' viewBox='0 0 100 64'%3E%3Cpath d='M8.19 0A8 8 0 0 1 16.15 7.24A34 34 0 0 0 83.85 7.24A8 8 0 0 1 91.81 0Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100px 100%;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='64' viewBox='0 0 100 64'%3E%3Cpath d='M8.19 0A8 8 0 0 1 16.15 7.24A34 34 0 0 0 83.85 7.24A8 8 0 0 1 91.81 0Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100px 100%;
   opacity: 0;
@@ -942,14 +919,14 @@ body.cal-dragging.cal-copying * {
 .tabbar-carrier {
   width: calc(100cqw / var(--n));
   transform: translate3d(calc(var(--i) * 100cqw / var(--n)), 0, 0);
-  transition: transform var(--glide) var(--ease);
+  transition: transform var(--glide) var(--spring);
   will-change: transform;
 }
 /* The open tab: a flat accent disc (no shine), with a soft shadow under it. */
 .tabbar-circle {
-  background: #2f4fb5;
-  color: #fff;
-  box-shadow: 0 8px 18px -6px rgba(47, 79, 181, 0.65);
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  box-shadow: 0 6px 12px -4px rgba(26, 27, 33, 0.35);
   transition: opacity calc(0.25s / var(--speed)) var(--ease), transform calc(0.3s / var(--speed)) var(--ease);
 }
 .tabbar-dot {
@@ -972,8 +949,7 @@ body.cal-dragging.cal-copying * {
   }
 }
 :root[data-theme="dark"] .tabbar-circle {
-  background: #3d5bc4;
-  box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 6px 12px -4px rgba(0, 0, 0, 0.7);
 }
 @media (prefers-contrast: more) {
   .tabbar-pill {
@@ -1032,8 +1008,7 @@ html[data-app="android"] .app-pane:has([data-paged]) {
 }
 html[data-app="android"] [data-paged] > section {
   background: var(--pane);
-  box-shadow: inset 0 1px 0 var(--rim), inset 0 0 0 1px color-mix(in oklab, var(--rim) 50%, transparent), var(--glass-edge), var(--shadow);
-  border-radius: 12px 12px 0 0;
+  border-radius: 28px 28px 0 0;
   margin: 6px 8px 0;
   /* Every page is the same fixed box and scrolls inside it, so the boxes always line up side by side. */
   height: calc(100dvh - var(--topbar, 56px) - 6px);

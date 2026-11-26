@@ -236,7 +236,7 @@ export function Segmented<T extends string>({
   const pillId = useId();
   // Concentric corners: the track is 12px with 3px of padding, so the buttons and the pill are 12 - 3 = 9px.
   return (
-    <div className={cx("inline-flex rounded-xl bg-hover p-[3px]", className)}>
+    <div className={cx("inline-flex rounded-full bg-hover p-[3px]", className)}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -244,12 +244,12 @@ export function Segmented<T extends string>({
           data-sound="tab"
           onClick={() => onChange(o.value)}
           className={cx(
-            "press relative rounded-[9px] px-3 py-1 text-[13px]",
+            "press relative rounded-full px-3 py-1 text-[13px]",
             value === o.value ? "text-ink font-medium" : "text-muted hover:text-ink",
           )}
         >
           {value === o.value && (
-            <motion.span layoutId={`seg-${pillId}`} className="absolute inset-0 rounded-[9px] glass-pill" transition={{ duration: sec(0.32), ease: [0.65, 0, 0.35, 1] }} />
+            <motion.span layoutId={`seg-${pillId}`} className="absolute inset-0 rounded-full glass-pill" transition={{ duration: sec(0.32), ease: [0.65, 0, 0.35, 1] }} />
           )}
           <span className="relative">{o.label}</span>
         </button>
