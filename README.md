@@ -90,3 +90,20 @@ when its icon, name, colours or package settings change.
   Play, the "App signing key" from Play Console → Test and release → App integrity.
 - To change version: bump `versionCode` / `versionName` in `android/app/build.gradle`
   and `appVersionCode` / `appVersionName` in `android/twa-manifest.json`.
+
+## Hosting on Firebase App Hosting (alternative to Netlify)
+
+Supabase stays the database and auth, so only the hosting moves. [`apphosting.yaml`](apphosting.yaml) lists the environment variables. Every one is a Secret Manager secret, set once with:
+
+```
+firebase apphosting:secrets:set NEXT_PUBLIC_SUPABASE_URL
+firebase apphosting:secrets:set NEXT_PUBLIC_SUPABASE_ANON_KEY
+firebase apphosting:secrets:set NEXT_PUBLIC_VAPID_PUBLIC_KEY
+firebase apphosting:secrets:set SUPABASE_SERVICE_ROLE_KEY
+firebase apphosting:secrets:set PIN_PEPPER
+firebase apphosting:secrets:set VAPID_PRIVATE_KEY
+firebase apphosting:secrets:set VAPID_SUBJECT
+firebase apphosting:secrets:set CRON_SECRET
+```
+
+Use the same values as on Netlify (never change `PIN_PEPPER`). Reminders are triggered by Supabase `pg_cron` (see [`supabase/cron.sql`](supabase/cron.sql)), not by the host, so no Cloud Scheduler is needed: re-run that SQL with the new URL once the Firebase site is live. Also add the new URL under Supabase Authentication → URL Configuration.

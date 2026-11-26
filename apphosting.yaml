@@ -1,0 +1,38 @@
+# Firebase App Hosting config. Netlify keeps working from netlify.toml in parallel.
+# Secrets live in Secret Manager: create each with
+#   firebase apphosting:secrets:set <NAME>
+# then grant the backend access (the command offers to do it).
+runConfig:
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0
+  maxInstances: 2
+  concurrency: 80
+
+env:
+  # Needed at BUILD time because Next inlines NEXT_PUBLIC_* into the browser bundle.
+  - variable: NEXT_PUBLIC_SUPABASE_URL
+    secret: NEXT_PUBLIC_SUPABASE_URL
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SUPABASE_ANON_KEY
+    secret: NEXT_PUBLIC_SUPABASE_ANON_KEY
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    secret: NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    availability: [BUILD, RUNTIME]
+  # Server-only secrets.
+  - variable: SUPABASE_SERVICE_ROLE_KEY
+    secret: SUPABASE_SERVICE_ROLE_KEY
+    availability: [RUNTIME]
+  - variable: PIN_PEPPER
+    secret: PIN_PEPPER
+    availability: [RUNTIME]
+  - variable: VAPID_PRIVATE_KEY
+    secret: VAPID_PRIVATE_KEY
+    availability: [RUNTIME]
+  - variable: VAPID_SUBJECT
+    secret: VAPID_SUBJECT
+    availability: [RUNTIME]
+  - variable: CRON_SECRET
+    secret: CRON_SECRET
+    availability: [RUNTIME]
