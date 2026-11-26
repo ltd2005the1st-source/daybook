@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore, type SVGProps } from "react";
 import { Reorder, useDragControls } from "motion/react";
-import { ExternalLink, GripVertical, Pencil, Plus, Trash2, CalendarDays, FileText, Sheet as SheetIcon, MapPin, Languages } from "lucide-react";
+import { ChevronRight, ExternalLink, GripVertical, Pencil, Plus, Trash2, CalendarDays, FileText, Sheet as SheetIcon, MapPin, Languages } from "lucide-react";
 import { useData } from "./data";
 import { ConfirmButton, Sheet } from "./ui";
 import { native } from "@/lib/native";
@@ -321,14 +321,39 @@ function useOpenAll(list: AppLink[]) {
   return can && list.length > 1 ? openAll : null;
 }
 
+const OPEN_KEY = "daybook.apps.open";
+
 /** Sidebar list: same rows as the section menu, each opening its app in a new tab. */
 export function AppLinks({ onEdit }: { onEdit: () => void }) {
   const list = useApps();
   const openAll = useOpenAll(list);
+  // Collapsed on first visit; after that the last choice is remembered on this device.
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setOpen(localStorage.getItem(OPEN_KEY) === "1");
+    } catch {}
+  }, []);
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    try {
+      localStorage.setItem(OPEN_KEY, next ? "1" : "0");
+    } catch {}
+  };
   return (
     <div className="group/apps mt-4">
       <div className="flex items-center gap-1 px-2.5 pb-1 text-[11.5px] font-medium text-muted">
-        <span className="flex-1">Apps</span>
+        <button
+          onClick={toggle}
+          aria-expanded={open}
+          aria-controls="apps-list"
+          title={open ? "Collapse apps" : "Expand apps"}
+          className="press -ml-1.5 flex flex-1 items-center gap-1 rounded-xl px-1.5 py-0.5 text-left hover:bg-hover hover:text-ink"
+        >
+          <ChevronRight size={13} strokeWidth={2} className="shrink-0 transition-transform duration-[250ms] ease-[var(--ease)]" style={{ transform: open ? "rotate(90deg)" : "none" }} />
+          <span>Apps</span>
+        </button>
         {openAll && (
           <button onClick={openAll} title="Open every app in its own tab" className="press rounded-xl px-1.5 py-0.5 hover:bg-hover hover:text-ink">
             Open all
@@ -343,28 +368,32 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
           <Pencil size={12} strokeWidth={2} />
         </button>
       </div>
-      <div className="flex flex-col gap-px">
-        {list.map((a) => {
-          const Ico = iconFor(a.href, a.label);
-          return (
-            <a
-              key={a.id}
-              href={a.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink"
-            >
-              <Ico size={16} />
-              <span className="truncate">{a.label}</span>
-            </a>
-          );
-        })}
-        {list.length === 0 && (
-          <button onClick={onEdit} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-muted hover:bg-hover hover:text-ink">
-            <Plus size={16} strokeWidth={1.8} />
-            <span>Add an app</span>
-          </button>
-        )}
+      <div id="apps-list" className="grid transition-[grid-template-rows,opacity] duration-[300ms] ease-[var(--ease)]" style={{ gridTemplateRows: open ? "1fr" : "0fr", opacity: open ? 1 : 0 }} inert={!open}>
+        <div className="min-h-0 overflow-hidden">
+          <div className="flex flex-col gap-px">
+            {list.map((a) => {
+              const Ico = iconFor(a.href, a.label);
+              return (
+                <a
+                  key={a.id}
+                  href={a.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink"
+                >
+                  <Ico size={16} />
+                  <span className="truncate">{a.label}</span>
+                </a>
+              );
+            })}
+            {list.length === 0 && (
+              <button onClick={onEdit} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-muted hover:bg-hover hover:text-ink">
+                <Plus size={16} strokeWidth={1.8} />
+                <span>Add an app</span>
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
