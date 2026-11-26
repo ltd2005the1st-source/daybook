@@ -114,12 +114,12 @@ export default function MoneyPage() {
             {groups.length === 0 && <p className="text-[13.5px] text-muted">Nothing logged in {fmtMonth(month)} yet.</p>}
             {groups.map(([date, items]) => (
               <div key={date} className="mb-3">
-                <div className="sticky top-[52px] md:top-0 z-[1] bg-bg/90 backdrop-blur py-1 text-[12px] font-semibold text-muted">{relDay(date)}</div>
+                <div className="sticky top-[52px] md:top-0 z-[1] bg-bg/90 backdrop-blur px-3 py-1 text-[12px] font-semibold text-muted">{relDay(date)}</div>
                 {items.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => setEdit(t)}
-                    className="row group flex w-full items-center gap-3 py-2 text-left hover:bg-hover"
+                    className="row group flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-hover"
                   >
                     <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: t.kind === "income" ? "var(--good)" : CAT_COLORS[t.category] ?? CAT_COLORS.Other }} />
                     <span className="min-w-0 flex-1 truncate text-[14px]">
