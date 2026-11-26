@@ -8,8 +8,16 @@ export const runtime = "nodejs";
 // Netlify stops a function after 10 seconds, so each Gemini step is kept short.
 export const maxDuration = 10;
 
-// "gemini-flash-latest" always points at the newest Flash model. Override with GEMINI_MODEL.
-const MODEL = process.env.GEMINI_MODEL || "gemini-flash-latest";
+// "gemini-flash-latest" always points at the newest Flash model. Override the first choice with
+// GEMINI_MODEL. When a model is overloaded (503/429/500) the next one in the list is tried.
+const MODELS = [
+  process.env.GEMINI_MODEL || "gemini-flash-latest",
+  "gemini-flash-lite-latest",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+].filter((m, i, a) => a.indexOf(m) === i);
+const BUDGET_MS = 9_000; // Netlify cuts the function at 10 s
+const RETRYABLE = new Set([429, 500, 502, 503, 504]);
 const URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
 type Part = {
@@ -88,26 +96,41 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bad conversation." }, { status: 400 });
   }
 
-  let res: Response;
-  try {
-    res = await fetch(`${URL_BASE}/${MODEL}:generateContent`, {
-      method: "POST",
-      // The key goes in a header, never in the URL or the browser.
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      signal: AbortSignal.timeout(9_000),
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: `${SYSTEM}\n\n${nowLine(now)}` }] },
-        contents: toContents(messages),
-        tools: [{ functionDeclarations: DECLARATIONS }],
-        toolConfig: { functionCallingConfig: { mode: "AUTO" } },
-        generationConfig: { maxOutputTokens: 2000, temperature: 0.4 },
-      }),
-    });
-  } catch (err) {
-    if ((err as Error).name === "TimeoutError" || (err as Error).name === "AbortError") {
-      return NextResponse.json({ error: "Gemini took too long to answer. Try a shorter question." }, { status: 504 });
+  const payload = JSON.stringify({
+    systemInstruction: { parts: [{ text: `${SYSTEM}\n\n${nowLine(now)}` }] },
+    contents: toContents(messages),
+    tools: [{ functionDeclarations: DECLARATIONS }],
+    toolConfig: { functionCallingConfig: { mode: "AUTO" } },
+    generationConfig: { maxOutputTokens: 2000, temperature: 0.4 },
+  });
+  const deadline = Date.now() + BUDGET_MS;
+  let res: Response | null = null;
+  let timedOut = false;
+  for (let i = 0; i < MODELS.length; i++) {
+    const left = deadline - Date.now();
+    if (left < 1_200) break;
+    // Leave time for the remaining models: the first attempt gets at most 5 s.
+    const limit = Math.min(left, i === 0 ? 5_000 : 4_000);
+    try {
+      res = await fetch(`${URL_BASE}/${MODELS[i]}:generateContent`, {
+        method: "POST",
+        // The key goes in a header, never in the URL or the browser.
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        signal: AbortSignal.timeout(limit),
+        body: payload,
+      });
+    } catch (err) {
+      res = null;
+      timedOut = (err as Error).name === "TimeoutError" || (err as Error).name === "AbortError";
+      continue;
     }
-    return NextResponse.json({ error: "Could not reach Gemini." }, { status: 502 });
+    if (res.ok || !RETRYABLE.has(res.status)) break;
+  }
+  if (!res) {
+    return NextResponse.json(
+      { error: timedOut ? "Gemini took too long to answer. Try a shorter question." : "Could not reach Gemini." },
+      { status: timedOut ? 504 : 502 },
+    );
   }
 
   if (!res.ok) {
