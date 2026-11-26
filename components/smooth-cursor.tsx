@@ -8,7 +8,7 @@ import { useEffect, useRef } from "react";
  * fields and during calendar drags the native cursor takes over. Touch: a soft dot follows the finger.
  * Off entirely for reduced motion (the native cursor stays).
  */
-const TAU = 0.07; // seconds; 1 - e^(-0.25 / 0.07) ≈ 97% of the way after 250 ms
+const TAU = 0.035; // seconds; halved from 0.07 for a snappier feel, so it settles in about 0.12 s
 const TEXT = 'input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=button]):not([type=submit]), textarea, [contenteditable=""], [contenteditable="true"]';
 const CLICKABLE = 'a, button, [role="button"], [role="tab"], [role="menuitem"], summary, select, label, input[type=checkbox], input[type=radio], input[type=range], [data-clickable]';
 
