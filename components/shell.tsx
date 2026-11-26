@@ -180,10 +180,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <AppLinks onEdit={() => setEditApps(true)} />
         </div>
         <div className="intro mt-auto flex flex-col gap-px" style={{ ["--i" as string]: NAV.length + 3 }}>
-          <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
+          <button onClick={() => setAskOpen(true)} title="Personal Assistant (⌘J)" className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <Sparkles size={16} strokeWidth={1.8} />
-            <span className="flex-1 text-left">Personal Assistant</span>
-            <kbd className="num text-[10.5px] text-muted">⌘J</kbd>
+            <span className="flex-1 whitespace-nowrap text-left">Personal Assistant</span>
           </button>
           <button onClick={() => setNotesOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <NotebookPen size={16} strokeWidth={1.8} /> My Notebook
