@@ -182,7 +182,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="intro mt-auto flex flex-col gap-px" style={{ ["--i" as string]: NAV.length + 3 }}>
           <button onClick={() => setAskOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
             <Sparkles size={16} strokeWidth={1.8} />
-            <span className="flex-1 text-left">Ask Gemini</span>
+            <span className="flex-1 text-left">Personal Assistant</span>
             <kbd className="num text-[10.5px] text-muted">⌘J</kbd>
           </button>
           <button onClick={() => setNotesOpen(true)} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink">
@@ -223,7 +223,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <button aria-label="My Notebook" onClick={() => setNotesOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
             <NotebookPen size={17} />
           </button>
-          <button aria-label="Ask Gemini" onClick={() => setAskOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-accent hover:bg-hover">
+          <button aria-label="Personal Assistant" onClick={() => setAskOpen(true)} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-accent hover:bg-hover">
             <Sparkles size={17} />
           </button>
           <button aria-label="Toggle theme" onClick={toggle} className="press inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-ink">
