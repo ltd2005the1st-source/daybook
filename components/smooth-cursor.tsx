@@ -12,7 +12,7 @@ import { useEffect, useRef } from "react";
  */
 const TAU = 0.07; // seconds; 1 - e^(-0.25 / 0.07) ≈ 97% of the way after 250 ms
 const TEXT = 'input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=button]):not([type=submit]), textarea, [contenteditable=""], [contenteditable="true"]';
-const CLICKABLE = 'a, button, [role="button"], [role="tab"], [role="menuitem"], summary, select, label, input[type=checkbox], input[type=radio], input[type=range], [data-clickable]';
+const CLICKABLE = 'a, button, [role="button"], [role="tab"], [role="menuitem"], summary, select, label, input[type=checkbox], input[type=radio], input[type=range], [data-clickable], .row';
 
 export function SmoothCursor() {
   const el = useRef<HTMLDivElement>(null);
@@ -115,7 +115,8 @@ export function SmoothCursor() {
       let magnet: Element | null = null;
       if (hit) {
         const rc = hit.getBoundingClientRect();
-        if (rc.width <= 560 && rc.height <= 140 && rc.width >= 12 && rc.height >= 12) magnet = hit;
+        const wide = hit.classList.contains("row") ? 1400 : 560;
+        if (rc.width <= wide && rc.height <= 140 && rc.width >= 12 && rc.height >= 12) magnet = hit;
       }
       lock(magnet);
       node.dataset.hot = hit && !magnet ? "1" : "0";
