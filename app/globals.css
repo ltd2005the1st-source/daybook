@@ -1083,3 +1083,52 @@ html.paging [data-paged] * {
 html[data-app="android"] [data-paged] > .page-parked {
   margin-top: 0;
 }
+
+/* Smooth trailing cursor (components/smooth-cursor.tsx) */
+.smooth-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.smooth-cursor[data-show="1"] {
+  opacity: 1;
+}
+.smooth-cursor span {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 80%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--paper, #fff) 80%, transparent);
+  box-shadow: 0 1px 6px rgba(20, 30, 60, 0.28);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), background 0.22s ease;
+}
+.smooth-cursor[data-hot="1"] span {
+  transform: scale(2.3);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.smooth-cursor[data-down="1"] span {
+  transform: scale(0.8);
+}
+.smooth-cursor[data-touch="1"] span {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: none;
+}
+html.cursor-on,
+html.cursor-on body * {
+  cursor: none !important;
+}
+@media print, (prefers-reduced-motion: reduce) {
+  .smooth-cursor {
+    display: none;
+  }
+}
