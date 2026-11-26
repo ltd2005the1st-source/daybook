@@ -56,7 +56,7 @@ export function TaskSheet({ task, onClose }: { task: Task | null; onClose: () =>
           </div>
           <div className="mb-4 flex flex-wrap gap-4 text-[13.5px]">
             <label className="flex items-center gap-2">
-              <Tick checked={task.priority} color="var(--pen)" onChange={() => update("tasks", task.id, { priority: !task.priority })} /> Flagged
+              <Tick checked={task.priority} color="var(--destructive)" onChange={() => update("tasks", task.id, { priority: !task.priority })} /> Flagged
             </label>
             <label className="flex items-center gap-2">
               <Tick checked={task.horizon === "long"} onChange={() => update("tasks", task.id, { horizon: task.horizon === "long" ? "now" : "long" })} /> Long-term goal
@@ -66,19 +66,19 @@ export function TaskSheet({ task, onClose }: { task: Task | null; onClose: () =>
           <div className="label mb-2">Milestones</div>
           {items.length > 0 && (
             <div className="mb-3">
-              <MilestoneBar items={items} color="var(--accent)" />
+              <MilestoneBar items={items} color="var(--info)" />
             </div>
           )}
           <ul className="mb-2">
             {items.map((m) => (
               <li key={m.id} className="group flex items-center gap-2.5 py-1.5">
-                <Tick checked={m.done} size={16} color="var(--accent)" onChange={() => update("milestones", m.id, { done: !m.done })} />
+                <Tick checked={m.done} size={16} color="var(--info)" onChange={() => update("milestones", m.id, { done: !m.done })} />
                 <input
-                  className={cx("flex-1 bg-transparent text-[14px] outline-none", m.done && "text-muted line-through")}
+                  className={cx("flex-1 bg-transparent text-[14px] outline-none", m.done && "text-muted-foreground line-through")}
                   defaultValue={m.title}
                   onBlur={(e) => e.target.value.trim() && update("milestones", m.id, { title: e.target.value.trim() })}
                 />
-                <button aria-label="Remove milestone" className="opacity-0 group-hover:opacity-100 text-muted hover:text-pen" onClick={() => remove("milestones", m.id, { silent: true })}>
+                <button aria-label="Remove milestone" className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive-foreground" onClick={() => remove("milestones", m.id, { silent: true })}>
                   <Trash2 size={14} />
                 </button>
               </li>
@@ -102,7 +102,7 @@ export function TaskSheet({ task, onClose }: { task: Task | null; onClose: () =>
           </Field>
           <div className="flex justify-between">
             <button
-              className="btn btn-ghost text-pen"
+              className="btn btn-ghost text-destructive-foreground"
               onClick={() => {
                 remove("tasks", task.id);
                 onClose();

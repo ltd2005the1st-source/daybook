@@ -99,8 +99,8 @@ export function FoodSection({ month }: { month: string }) {
     <section className="card mb-8 p-3 md:p-4">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="display text-[18px] font-semibold">Food &amp; drinks</h2>
-        <span className="text-[12.5px] text-muted">
-          This month <Money value={monthTotal} className="num font-semibold text-ink" />
+        <span className="text-[12.5px] text-muted-foreground">
+          This month <Money value={monthTotal} className="num font-semibold text-foreground" />
         </span>
       </div>
 
@@ -123,7 +123,7 @@ export function FoodSection({ month }: { month: string }) {
         {periods.map((days, i) => (
           <div
             key={i}
-            className={cx("rounded-xl border px-2.5 pb-2 pt-2.5 transition-colors duration-300", i === current ? "border-accent/50 bg-accent-soft" : "border-line")}
+            className={cx("rounded-xl border px-2.5 pb-2 pt-2.5 transition-colors duration-300", i === current ? "border-info/50 bg-info/12" : "border-border")}
           >
             <div className="label !text-[10.5px]">{periodLabel(days)}</div>
             <div className="num mt-0.5 text-[15px] md:text-[19px] font-semibold leading-tight"><Money value={totals[i]} compact /></div>
@@ -141,7 +141,7 @@ export function FoodSection({ month }: { month: string }) {
                     className="group relative flex h-full flex-1 items-end"
                   >
                     <motion.span
-                      className={cx("block w-full rounded-[2px]", d === t ? "bg-pen" : "bg-[#5B6FB5] group-hover:brightness-110")}
+                      className={cx("block w-full rounded-[2px]", d === t ? "bg-destructive" : "bg-[#5B6FB5] group-hover:brightness-110")}
                       initial={false}
                       animate={{ height: v ? `${Math.max(8, (v / maxDay) * 100)}%` : "2px" }}
                       transition={{ duration: sec(0.4), ease: EASE }}
@@ -154,7 +154,7 @@ export function FoodSection({ month }: { month: string }) {
           </div>
         ))}
       </div>
-      <p className="mt-2 text-[12px] text-muted">Each amount adds to that day. Tap a day’s bar to change or clear it. Counted under Necessity.</p>
+      <p className="mt-2 text-[12px] text-muted-foreground">Each amount adds to that day. Tap a day’s bar to change or clear it. Counted under Necessity.</p>
 
       <DaySheet date={editDay} amount={editDay ? byDay.get(editDay) ?? 0 : 0} onClose={() => setEditDay(null)} />
     </section>
@@ -192,12 +192,12 @@ function DaySheet({ date, amount, onClose }: { date: string | null; amount: numb
               onChange={(e) => setText(e.target.value)}
             />
           </Field>
-          {notes.length > 0 && <p className="mb-3 text-[12.5px] text-muted">Note: {notes.join(", ")}</p>}
+          {notes.length > 0 && <p className="mb-3 text-[12.5px] text-muted-foreground">Note: {notes.join(", ")}</p>}
           <div className="flex items-center justify-between gap-2">
             {amount > 0 ? (
               <button
                 type="button"
-                className="btn btn-ghost text-pen"
+                className="btn btn-ghost text-destructive-foreground"
                 onClick={() => {
                   const r = log(date, 0, "set");
                   toast(`Cleared food & drinks for ${fmtDay(date)}`, r.undo);

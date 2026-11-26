@@ -151,12 +151,12 @@ export function CheckRow({ c, onOpen, compact, hideNote }: { c: CheckTask; onOpe
     <motion.div
       {...TASK_ENTER}
       exit={TASK_EXIT}
-      className="row group cursor-pointer overflow-hidden hover:bg-hover"
+      className="row group cursor-pointer overflow-hidden hover:bg-accent"
       onClick={onOpen}
     >
       <div className={cx("flex items-start gap-3", compact ? "py-1.5" : "py-2.5")}>
         <div className="pt-[1px]" onClick={(e) => e.stopPropagation()}>
-          <Tick checked={done.checked} round label="Complete" color="var(--accent)" onChange={done.toggle} />
+          <Tick checked={done.checked} round label="Complete" color="var(--info)" onChange={done.toggle} />
         </div>
         <div className="min-w-0 flex-1">
           <div className={cx("leading-snug", compact ? "text-[14px]" : "text-[14.5px]")}>
@@ -165,13 +165,13 @@ export function CheckRow({ c, onOpen, compact, hideNote }: { c: CheckTask; onOpe
               {task.title}
             </Strike>
           </div>
-          {note && <div className="mt-0.5 line-clamp-6 whitespace-pre-line break-words text-[12.5px] leading-snug text-ink-2">{note}</div>}
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-muted">
+          {note && <div className="mt-0.5 line-clamp-6 whitespace-pre-line break-words text-[12.5px] leading-snug text-foreground/80">{note}</div>}
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-muted-foreground">
             <span>
               {nightLabel(c.date)} · <span className="num">{c.time}</span>
             </span>
             <span>class {classLabel(all.map((x) => x.classDate))}</span>
-            {c.homework.length > 0 && <span className="text-pen">{c.homework.length} homework open</span>}
+            {c.homework.length > 0 && <span className="text-destructive-foreground">{c.homework.length} homework open</span>}
           </div>
         </div>
       </div>
@@ -220,13 +220,13 @@ export function CheckSheet({ at, onClose }: { at: { studentId: string; date: str
     >
       {c && (
         <div key={key}>
-          <p className="mb-4 text-[13.5px] text-ink-2">
+          <p className="mb-4 text-[13.5px] text-foreground/80">
             {nightLabel(c.date)}, <span className="num">{c.time}</span> · for the class {relDay(c.classDate).toLowerCase()} (
             {fmtDay(c.classDate, { weekday: true })})
           </p>
 
           <label className="mb-4 flex items-center gap-2.5 text-[14px]">
-            <Tick round checked={c.done} color="var(--accent)" label="Done" onChange={() => setDone(c, !c.done)} />
+            <Tick round checked={c.done} color="var(--info)" label="Done" onChange={() => setDone(c, !c.done)} />
             {c.done ? "Done" : "Mark as done"}
           </label>
 
@@ -243,7 +243,7 @@ export function CheckSheet({ at, onClose }: { at: { studentId: string; date: str
             <span>Sync across all of {c.student.name}’s checks</span>
             <Switch on={sync} onChange={setSync} label="Sync across all checks" />
           </label>
-          <p className="mb-4 text-[12px] text-muted">
+          <p className="mb-4 text-[12px] text-muted-foreground">
             {sync
               ? `What you type here shows on every check for ${c.student.name}.`
               : `Only the check on ${fmtDay(c.date, { weekday: true })} changes. The others keep their text.`}{" "}
@@ -293,10 +293,10 @@ export function HomeworkEditor({ studentId, name }: { studentId: string; name: s
           {items.map((h) => (
             <motion.div key={h.id} {...TASK_ENTER} exit={TASK_EXIT} className="overflow-hidden">
               <div className="group flex items-center gap-2.5 py-1">
-                <Tick checked={false} color="var(--pen)" label="Checked" onChange={() => update("homework", h.id, { status: "checked", checked_on: today() })} />
+                <Tick checked={false} color="var(--destructive)" label="Checked" onChange={() => update("homework", h.id, { status: "checked", checked_on: today() })} />
                 <input
                   aria-label="Homework"
-                  className="min-w-0 flex-1 rounded-xl border border-transparent bg-transparent px-1.5 py-1 text-[14px] outline-none transition-colors duration-200 hover:border-line focus:border-ink-2"
+                  className="min-w-0 flex-1 rounded-xl border border-transparent bg-transparent px-1.5 py-1 text-[14px] outline-none transition-colors duration-200 hover:border-border focus:border-foreground/70"
                   defaultValue={h.title}
                   onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
                   onBlur={(e) => {
@@ -308,7 +308,7 @@ export function HomeworkEditor({ studentId, name }: { studentId: string; name: s
                 <button
                   type="button"
                   aria-label={`Remove ${h.title}`}
-                  className="rounded-xl p-1 text-muted opacity-60 transition-opacity duration-200 hover:text-pen group-hover:opacity-100"
+                  className="rounded-xl p-1 text-muted-foreground opacity-60 transition-opacity duration-200 hover:text-destructive-foreground group-hover:opacity-100"
                   onClick={() => remove("homework", h.id)}
                 >
                   <X size={15} />
@@ -325,7 +325,7 @@ export function HomeworkEditor({ studentId, name }: { studentId: string; name: s
           add();
         }}
       >
-        <Plus size={16} className="ml-[3px] shrink-0 text-muted" />
+        <Plus size={16} className="ml-[3px] shrink-0 text-muted-foreground" />
         <input
           className="field flex-1 !py-1.5 text-[14px]"
           placeholder={items.length ? "Add more homework" : `Add homework for ${name}`}
@@ -346,7 +346,7 @@ export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boo
       aria-checked={on}
       aria-label={label}
       onClick={() => onChange(!on)}
-      className={cx("relative h-[22px] w-[38px] shrink-0 rounded-full transition-colors duration-300", on ? "bg-accent" : "bg-line-strong")}
+      className={cx("relative h-[22px] w-[38px] shrink-0 rounded-full transition-colors duration-300", on ? "bg-info" : "bg-input")}
     >
       <motion.span
         className="absolute left-[3px] top-[3px] h-4 w-4 rounded-full bg-white shadow-sm"

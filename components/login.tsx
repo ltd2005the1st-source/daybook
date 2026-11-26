@@ -71,8 +71,8 @@ export function PinInput({
             <div
               key={i}
               className={cx(
-                "flex h-14 items-center justify-center rounded-xl border bg-surface transition-colors duration-200",
-                current ? "border-ink-2" : "border-line-strong",
+                "flex h-14 items-center justify-center rounded-xl border bg-card transition-colors duration-200",
+                current ? "border-foreground/70" : "border-input",
               )}
             >
               {filled && (
@@ -81,7 +81,7 @@ export function PinInput({
                   initial={{ y: 6, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: sec(0.18), ease: [0.65, 0, 0.35, 1] }}
-                  className="num text-[24px] font-semibold text-ink"
+                  className="num text-[24px] font-semibold text-foreground"
                 >
                   {value[i]}
                 </motion.span>
@@ -179,7 +179,7 @@ export function Login() {
       >
         <img src="/icon.svg" alt="" className="h-9 w-9 rounded-lg mb-4" />
         <h1 className="display text-[26px] font-semibold leading-tight text-balance">{title}</h1>
-        <p className="text-ink-2 mt-1 mb-5 text-[13.5px]">{sub}</p>
+        <p className="text-foreground/80 mt-1 mb-5 text-[13.5px]">{sub}</p>
 
         {screen === "loading" ? (
           <p className="label">One moment…</p>
@@ -191,7 +191,7 @@ export function Login() {
                 <input className="field mb-3" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 <label className="label block mb-1">Old password</label>
                 <input className="field mb-4" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                <div className="mb-4 border-t border-line" />
+                <div className="mb-4 border-t border-border" />
               </>
             )}
             <label className="label block mb-1">Username</label>
@@ -221,7 +221,7 @@ export function Login() {
               </>
             )}
             {msg && (
-              <p role="alert" className="mb-3 text-[13px] text-pen">
+              <p role="alert" className="mb-3 text-[13px] text-destructive-foreground">
                 {msg}
               </p>
             )}

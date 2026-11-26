@@ -24,7 +24,7 @@ export default function ReceiptsPage() {
 
   return (
     <Page wide>
-      <Link href="/teaching" className="mb-3 inline-flex items-center gap-1 text-[13px] text-muted hover:text-ink">
+      <Link href="/teaching" className="mb-3 inline-flex items-center gap-1 text-[13px] text-muted-foreground hover:text-foreground">
         <ArrowLeft size={14} /> Register
       </Link>
       <PageHeader eyebrow="Teaching" title="Monthly receipts">
@@ -40,7 +40,7 @@ export default function ReceiptsPage() {
       </PageHeader>
 
       <Section title={`Ready to bill for ${fmtMonth(month)}`}>
-        <div className="card divide-y divide-line">
+        <div className="card divide-y divide-border">
           {students.map((s) => {
             const taught = taughtIn(store, s.id, month).map((l) => l.date);
             const planned = plannedRemaining(store, s.id, month, t > `${month}-31` ? "9999" : t < `${month}-01` ? `${month}-01` : t);
@@ -57,7 +57,7 @@ export default function ReceiptsPage() {
                   <Dot color={s.color} size={10} className="mt-1.5" />
                   <div className="min-w-0">
                     <div className="font-semibold">{s.name}</div>
-                    <div className="text-[12.5px] text-muted">
+                    <div className="text-[12.5px] text-muted-foreground">
                       {taught.length} taught × {vnd(s.rate)}
                       {planned.length > 0 && (
                         <label className="ml-2 inline-flex items-center gap-1.5 align-middle">
@@ -109,28 +109,28 @@ export default function ReceiptsPage() {
 
       <Section title="Issued receipts">
         {[...receipts, ...older].length === 0 ? (
-          <p className="text-[13.5px] text-muted">None yet for {fmtMonth(month)}.</p>
+          <p className="text-[13.5px] text-muted-foreground">None yet for {fmtMonth(month)}.</p>
         ) : (
           <div className="flex flex-col">
             {[...receipts, ...older].map((r) => {
               const s = store.students.find((x) => x.id === r.student_id);
               return (
-                <div key={r.id} className="flex items-center gap-3 border-b border-line py-2.5">
-                  <Dot color={s?.color ?? "var(--muted)"} />
+                <div key={r.id} className="flex items-center gap-3 border-b border-border py-2.5">
+                  <Dot color={s?.color ?? "var(--muted-foreground)"} />
                   <Link href={`/teaching/receipts/${r.id}`} className="min-w-0 flex-1 hover:underline underline-offset-2">
-                    {s?.name ?? "Removed student"} <span className="text-muted">· {fmtMonth(r.month)}</span>
+                    {s?.name ?? "Removed student"} <span className="text-muted-foreground">· {fmtMonth(r.month)}</span>
                   </Link>
                   <span className="num text-[13.5px]">{vnd(r.amount)}</span>
                   <button
                     onClick={() => update("receipts", r.id, r.status === "paid" ? { status: "issued", paid_on: null } : { status: "paid", paid_on: today() })}
                     className={cx(
                       "rounded-xl px-2.5 py-0.5 text-[12px] font-semibold",
-                      r.status === "paid" ? "bg-good-soft text-good" : "bg-pen-soft text-pen",
+                      r.status === "paid" ? "bg-success/12 text-success-foreground" : "bg-destructive/10 text-destructive-foreground",
                     )}
                   >
                     {r.status === "paid" ? `Paid ${r.paid_on ? fmtDay(r.paid_on) : ""}` : "Unpaid"}
                   </button>
-                  <button className="text-[12px] text-muted hover:text-pen" onClick={() => remove("receipts", r.id)}>
+                  <button className="text-[12px] text-muted-foreground hover:text-destructive-foreground" onClick={() => remove("receipts", r.id)}>
                     Delete
                   </button>
                 </div>

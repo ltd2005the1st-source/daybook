@@ -26,15 +26,15 @@ function DueTask({ task, today: t }: { task: Task; today: string }) {
   return (
     <motion.div {...TASK_ENTER} exit={TASK_EXIT} className="overflow-hidden">
       <div className="flex items-start gap-2.5 py-1.5">
-      <Tick round checked={c.checked} color="var(--accent)" label="Complete" onChange={c.toggle} />
+      <Tick round checked={c.checked} color="var(--info)" label="Complete" onChange={c.toggle} />
       <div className="min-w-0 flex-1">
         <div className="text-[14px] leading-snug">
           <Strike on={c.checked} animate={c.completing}>{task.title}</Strike>
-          {task.due_on && task.due_on < t && <span className="ml-2 text-[12px] text-pen">since {fmtDay(task.due_on)}</span>}
+          {task.due_on && task.due_on < t && <span className="ml-2 text-[12px] text-destructive-foreground">since {fmtDay(task.due_on)}</span>}
         </div>
         {ms.length > 0 && (
           <div className="mt-1 max-w-[260px]">
-            <MilestoneBar items={ms} color="var(--accent)" />
+            <MilestoneBar items={ms} color="var(--info)" />
           </div>
         )}
       </div>
@@ -96,7 +96,7 @@ export default function TodayPage() {
       <Page>
         <div className="mx-auto mt-10 max-w-md text-center rise">
           <h1 className="display text-[32px] font-semibold">Your daybook is empty</h1>
-          <p className="mt-2 text-ink-2">
+          <p className="mt-2 text-foreground/80">
             Load the starter data from your Google Sheet, calendar and Any.do: five students with their rates, November’s sessions and expenses, debts, routines and tasks.
           </p>
           <button className="btn btn-primary mt-5 px-4 py-2" onClick={loadSeed}>
@@ -117,7 +117,7 @@ export default function TodayPage() {
           {now ? greeting(now.getHours()) : "Hello"}
           {name ? `, ${name}` : ""}.
         </h1>
-        <p className="mt-2 max-w-[640px] text-[15px] text-ink-2">
+        <p className="mt-2 max-w-[640px] text-[15px] text-foreground/80">
           {summaryLine(agenda, checks.filter((c) => !c.done).length, tasks.length, nowMin)}
         </p>
       </header>
@@ -125,9 +125,9 @@ export default function TodayPage() {
       <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         {/* Timeline */}
         <div>
-          <Section title="Today" action={<Link href="/calendar" className="text-[12.5px] text-muted hover:text-ink">Calendar →</Link>}>
+          <Section title="Today" action={<Link href="/calendar" className="text-[12.5px] text-muted-foreground hover:text-foreground">Calendar →</Link>}>
             <ol className="relative">
-              {agenda.length === 0 && <li className="text-[13.5px] text-muted">Nothing scheduled.</li>}
+              {agenda.length === 0 && <li className="text-[13.5px] text-muted-foreground">Nothing scheduled.</li>}
               {agenda.map((o, i) => {
                 const s = o.start ? minutes(o.start) : 0;
                 const e = o.end ? minutes(o.end) : s;
@@ -142,24 +142,24 @@ export default function TodayPage() {
                     className="relative grid grid-cols-[52px_14px_1fr] items-start gap-2 py-1.5"
                   >
                     {/* Time, dot and name share one 22px line (4px down, matching the name's padding) so they sit level. The dot sits 5px left so the highlighted row (which bleeds 10px left) never touches it. */}
-                    <span className={cx("num pt-1 text-[13px] leading-[22px]", live ? "font-semibold text-pen" : "text-muted")}>{o.start ?? "all day"}</span>
+                    <span className={cx("num pt-1 text-[13px] leading-[22px]", live ? "font-semibold text-destructive-foreground" : "text-muted-foreground")}>{o.start ?? "all day"}</span>
                     <span className="relative mt-1 flex h-[22px] -translate-x-[5px] items-center justify-center">
                       <span className={cx("h-2.5 w-2.5 rounded-full", o.kind === "check" && "ring-2 ring-offset-0")} style={{ background: o.kind === "check" ? "var(--paper)" : o.color, ["--tw-ring-color" as string]: o.color }} />
                       {live && <span className="absolute h-4 w-4 animate-ping rounded-full opacity-30" style={{ background: o.color }} />}
                     </span>
-                    <div className={cx("row min-w-0 py-1", live && "bg-hover")}>
+                    <div className={cx("row min-w-0 py-1", live && "bg-accent")}>
                       <div className="flex items-center gap-2">
-                        <span className={cx("text-[14.5px] font-medium leading-[22px]", (o.status === "cancelled" || o.status === "missed_owe" || o.done) && "line-through text-muted")}>
+                        <span className={cx("text-[14.5px] font-medium leading-[22px]", (o.status === "cancelled" || o.status === "missed_owe" || o.done) && "line-through text-muted-foreground")}>
                           {o.title}
                         </span>
-                        {live && <span className="rounded bg-pen px-1.5 text-[10.5px] font-bold uppercase tracking-wide text-white">Now</span>}
+                        {live && <span className="rounded bg-destructive px-1.5 text-[10.5px] font-bold uppercase tracking-wide text-white">Now</span>}
                       </div>
-                      <div className="text-[12px] text-muted">
+                      <div className="text-[12px] text-muted-foreground">
                         <span className="num">{o.kind !== "check" && o.kind !== "task" && o.start && o.end ? `${o.start}–${o.end}` : ""}</span>
                         {o.kind === "check" && o.studentId && <HwCount studentId={o.studentId} />}
                       </div>
                       {o.kind === "lesson" && o.studentId && (o.status === "planned" || o.status === "taught") && (
-                        <label className="mt-1 inline-flex items-center gap-2 text-[12.5px] text-ink-2">
+                        <label className="mt-1 inline-flex items-center gap-2 text-[12.5px] text-foreground/80">
                           <Tick size={15} checked={o.status === "taught"} color={o.color} onChange={() => mark(o.studentId!, t, o.status === "taught" ? null : "taught")} />
                           {o.status === "taught" ? "Taught" : "Mark as taught"}
                         </label>
@@ -170,7 +170,7 @@ export default function TodayPage() {
               })}
             </ol>
             {tomorrow.length > 0 && (
-              <p className="mt-3 border-t border-line pt-2 text-[12.5px] text-muted">
+              <p className="mt-3 border-t border-border pt-2 text-[12.5px] text-muted-foreground">
                 Tomorrow: {tomorrow.map((o) => `${o.title.replace("Teach ", "")} ${o.start}`).join(" · ")}
               </p>
             )}
@@ -178,8 +178,8 @@ export default function TodayPage() {
         </div>
 
         <div>
-          <Section title="Due today" action={<Link href="/tasks" className="text-[12.5px] text-muted hover:text-ink">All tasks →</Link>}>
-            {tasks.length + checkTasks.length === 0 && <p className="text-[13.5px] text-muted">Nothing due. Nice.</p>}
+          <Section title="Due today" action={<Link href="/tasks" className="text-[12.5px] text-muted-foreground hover:text-foreground">All tasks →</Link>}>
+            {tasks.length + checkTasks.length === 0 && <p className="text-[13.5px] text-muted-foreground">Nothing due. Nice.</p>}
             <div className="row-list flex flex-col overflow-x-clip">
               <AnimatePresence initial={false}>
                 {tasks.slice(0, 8).map((x) => (
@@ -189,7 +189,7 @@ export default function TodayPage() {
                   <CheckRow key={c.key} c={c} hideNote={sameNote.has(c.key)} compact onOpen={() => setOpenCheck({ studentId: c.student.id, date: c.date })} />
                 ))}
               </AnimatePresence>
-              {tasks.length > 8 && <Link href="/tasks" className="text-[12.5px] text-muted">+{tasks.length - 8} more</Link>}
+              {tasks.length > 8 && <Link href="/tasks" className="text-[12.5px] text-muted-foreground">+{tasks.length - 8} more</Link>}
             </div>
           </Section>
 
@@ -200,16 +200,16 @@ export default function TodayPage() {
                   <div className="label mb-1">Makeups left</div>
                   <ul className="flex max-w-[300px] flex-col">
                     {owed.map(({ s, n }) => (
-                      <li key={s.id} className="flex items-center gap-2 py-1 text-[13.5px] text-ink-2">
+                      <li key={s.id} className="flex items-center gap-2 py-1 text-[13.5px] text-foreground/80">
                         <Dot color={s.color} />
                         <span className="min-w-0 flex-1 truncate">{s.name}</span>
-                        <span className="num font-semibold text-pen"><CountUp value={n} /></span>
+                        <span className="num font-semibold text-destructive-foreground"><CountUp value={n} /></span>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
-              <Link href="/teaching" className="mt-1 inline-flex items-center gap-1 text-[12.5px] text-muted hover:text-ink">
+              <Link href="/teaching" className="mt-1 inline-flex items-center gap-1 text-[12.5px] text-muted-foreground hover:text-foreground">
                 Open the register <ArrowRight size={13} />
               </Link>
             </Section>
@@ -217,12 +217,12 @@ export default function TodayPage() {
 
           <Section title="Body">
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/habits" className="rounded-xl border border-line p-3 hover:bg-hover">
+              <Link href="/habits" className="rounded-xl border border-border p-3 hover:bg-accent">
                 <div className="label">Sleep</div>
                 <div className="mt-1 text-[14px]">{sleptLogged ? "Logged ✓" : "Log last night"}</div>
-                <div className="text-[12px] text-muted">Bed by {sleep?.target_bedtime ?? "–"}</div>
+                <div className="text-[12px] text-muted-foreground">Bed by {sleep?.target_bedtime ?? "–"}</div>
               </Link>
-              <Link href="/habits" className="rounded-xl border border-line p-3 hover:bg-hover">
+              <Link href="/habits" className="rounded-xl border border-border p-3 hover:bg-accent">
                 <div className="label">Exercise</div>
                 <div className="num mt-1 text-[14px]">
                   {exDays}/{exercise?.weekly_target ?? 4} this week
@@ -236,10 +236,10 @@ export default function TodayPage() {
             </div>
           </Section>
 
-          <Section title={`Money · ${MONTHS[d.getMonth()]}`} action={<Link href="/money" className="text-[12.5px] text-muted hover:text-ink">Ledger →</Link>}>
-            <p className="mb-3 text-[13.5px] text-ink-2">
-              In <Money value={earned} className="num font-semibold text-ink" /> · out <Money value={spent} className="num font-semibold text-ink" /> · kept{" "}
-              <Money value={earned - spent} className={cx("num font-semibold", earned - spent >= 0 ? "text-good" : "text-pen")} />
+          <Section title={`Money · ${MONTHS[d.getMonth()]}`} action={<Link href="/money" className="text-[12.5px] text-muted-foreground hover:text-foreground">Ledger →</Link>}>
+            <p className="mb-3 text-[13.5px] text-foreground/80">
+              In <Money value={earned} className="num font-semibold text-foreground" /> · out <Money value={spent} className="num font-semibold text-foreground" /> · kept{" "}
+              <Money value={earned - spent} className={cx("num font-semibold", earned - spent >= 0 ? "text-success-foreground" : "text-destructive-foreground")} />
             </p>
             <QuickAdd compact />
           </Section>
@@ -253,7 +253,7 @@ export default function TodayPage() {
 function HwCount({ studentId }: { studentId: string }) {
   const { store } = useData();
   const n = store.homework.filter((h) => h.student_id === studentId && h.status === "open").length;
-  return <span className={cx(n > 0 && "text-pen")}>{n ? `${n} to check` : "nothing logged"}</span>;
+  return <span className={cx(n > 0 && "text-destructive-foreground")}>{n ? `${n} to check` : "nothing logged"}</span>;
 }
 
 function summaryLine(agenda: Occurrence[], checks: number, tasks: number, nowMin: number): string {

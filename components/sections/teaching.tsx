@@ -84,19 +84,19 @@ export default function TeachingPage() {
         </button>
       </PageHeader>
 
-      <p className="mb-5 text-[15px] text-ink-2 leading-relaxed">
-        <span className="num font-semibold text-ink">{taught}</span> sessions taught in {fmtMonth(month).split(" ")[0]} for{" "}
-        <Money value={earned} className="num font-semibold text-ink" />.{" "}
+      <p className="mb-5 text-[15px] text-foreground/80 leading-relaxed">
+        <span className="num font-semibold text-foreground">{taught}</span> sessions taught in {fmtMonth(month).split(" ")[0]} for{" "}
+        <Money value={earned} className="num font-semibold text-foreground" />.{" "}
         {owed > 0 ? (
           <>
-            You have noted <span className="num font-semibold text-pen">{owed}</span> makeup {owed === 1 ? "session" : "sessions"} left
+            You have noted <span className="num font-semibold text-destructive-foreground">{owed}</span> makeup {owed === 1 ? "session" : "sessions"} left
           </>
         ) : (
           "No makeups left"
         )}
         {toCollect > 0 && (
           <>
-            {" "}and have <Money value={toCollect} className="num font-semibold text-ink" /> to collect
+            {" "}and have <Money value={toCollect} className="num font-semibold text-foreground" /> to collect
           </>
         )}
         .
@@ -115,8 +115,8 @@ export default function TeachingPage() {
             <RegisterNotes />
           </Section>
 
-          <Section title="Homework checks" action={<span className="text-[12px] text-muted">Next 4 days</span>}>
-            {checks.length === 0 && <p className="text-[13.5px] text-muted">No checks in the next four days.</p>}
+          <Section title="Homework checks" action={<span className="text-[12px] text-muted-foreground">Next 4 days</span>}>
+            {checks.length === 0 && <p className="text-[13.5px] text-muted-foreground">No checks in the next four days.</p>}
             <div className="row-list flex flex-col overflow-x-clip">
               <AnimatePresence initial={false}>
                 {checks.map((c) => (
@@ -124,22 +124,22 @@ export default function TeachingPage() {
                 ))}
               </AnimatePresence>
             </div>
-            <p className="mt-1 text-[12px] text-muted">One before each class, at 22:30 the night before unless you move it on the Calendar. Tap one to change what to check.</p>
+            <p className="mt-1 text-[12px] text-muted-foreground">One before each class, at 22:30 the night before unless you move it on the Calendar. Tap one to change what to check.</p>
           </Section>
 
           <Section title="Homework to check">
-            {openHw.length === 0 && <p className="text-[13.5px] text-muted">Nothing waiting. Log homework from a student’s page.</p>}
+            {openHw.length === 0 && <p className="text-[13.5px] text-muted-foreground">Nothing waiting. Log homework from a student’s page.</p>}
             <div className="flex flex-col gap-4">
               {openHw.map(({ s, items, next }) => (
                 <div key={s.id}>
                   <button onClick={() => setPicked(s.id)} className="mb-1 flex w-full items-center gap-2 text-left">
                     <Dot color={s.color} />
                     <span className="text-[13.5px] font-semibold">{s.name}</span>
-                    {next && <span className="ml-auto text-[12px] text-muted">class {relDay(next.date).toLowerCase()}</span>}
+                    {next && <span className="ml-auto text-[12px] text-muted-foreground">class {relDay(next.date).toLowerCase()}</span>}
                   </button>
                   {items.map((h) => (
                     <div key={h.id} className="flex items-start gap-2.5 py-1 pl-0.5">
-                      <Tick checked={false} color="var(--pen)" size={16} label="Mark checked" onChange={() => update("homework", h.id, { status: "checked", checked_on: today() })} />
+                      <Tick checked={false} color="var(--destructive)" size={16} label="Mark checked" onChange={() => update("homework", h.id, { status: "checked", checked_on: today() })} />
                       <span className="text-[13.5px] leading-snug">{h.title}</span>
                     </div>
                   ))}
@@ -154,7 +154,7 @@ export default function TeachingPage() {
                 const nl = nextOf.get(s.id);
                 const o = makeupsOwed(store, s);
                 return (
-                  <div key={s.id} role="button" tabIndex={0} onClick={() => setPicked(s.id)} onKeyDown={(e) => e.key === "Enter" && setPicked(s.id)} className="row flex cursor-pointer items-center gap-3 py-2 text-left hover:bg-hover">
+                  <div key={s.id} role="button" tabIndex={0} onClick={() => setPicked(s.id)} onKeyDown={(e) => e.key === "Enter" && setPicked(s.id)} className="row flex cursor-pointer items-center gap-3 py-2 text-left hover:bg-accent">
                     <Dot color={s.color} size={10} />
                     <div className="min-w-0 flex-1">
                       <div className="text-[14px] font-medium">
@@ -162,18 +162,18 @@ export default function TeachingPage() {
                         {s.kind === "class" && (
                           <>
                             <br />
-                            <span className="text-[12px] font-normal text-muted">{s.members.join(", ")}</span>
+                            <span className="text-[12px] font-normal text-muted-foreground">{s.members.join(", ")}</span>
                           </>
                         )}
                       </div>
-                      <div className="text-[12px] text-muted">
+                      <div className="text-[12px] text-muted-foreground">
                         {nl ? `Next ${relDay(nl.date).toLowerCase()} ${nl.start}` : "No upcoming class"}
 
                       </div>
                     </div>
                     <span className="flex flex-col items-end gap-1">
-                      <span className="num text-[12.5px] text-ink-2">{vnd(s.rate, { compact: true })}</span>
-                      <span className="flex items-center gap-1 text-[11px] text-muted">
+                      <span className="num text-[12.5px] text-foreground/80">{vnd(s.rate, { compact: true })}</span>
+                      <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                         <span className="mr-1.5">makeups</span> <MakeupStepper s={s} compact />
                       </span>
                     </span>
@@ -181,7 +181,7 @@ export default function TeachingPage() {
                 );
               })}
               {store.students.some((s) => !s.active) && (
-                <div className="mt-2 text-[12px] text-muted">
+                <div className="mt-2 text-[12px] text-muted-foreground">
                   Inactive:{" "}
                   {store.students
                     .filter((s) => !s.active)

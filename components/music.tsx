@@ -194,13 +194,13 @@ export function MusicDock() {
           exit={{ y: "100%" }}
           transition={{ duration: sec(0.34), ease: EASE }}
           style={{ bottom: navH }}
-          className="no-print fixed inset-x-0 z-40 glass"
+          className="no-print fixed inset-x-0 z-40 border bg-card"
           aria-label="Music player"
         >
           {/* Timeline: a thin line along the top edge; click to jump. */}
           <div className="group absolute inset-x-0 -top-[3px] h-[7px] cursor-pointer" onClick={seekTo} aria-hidden>
-            <div className="absolute inset-x-0 top-[3px] h-[2px] bg-line transition-[height,top] duration-200 group-hover:top-[2px] group-hover:h-[4px]">
-              <div className="h-full bg-accent transition-[width] duration-500 ease-linear" style={{ width: `${progress * 100}%` }} />
+            <div className="absolute inset-x-0 top-[3px] h-[2px] bg-border transition-[height,top] duration-200 group-hover:top-[2px] group-hover:h-[4px]">
+              <div className="h-full bg-info transition-[width] duration-500 ease-linear" style={{ width: `${progress * 100}%` }} />
             </div>
           </div>
 
@@ -208,7 +208,7 @@ export function MusicDock() {
             {current.image ? (
               <img src={current.image} alt="" className="h-10 w-10 shrink-0 rounded-xl object-cover shadow-card" />
             ) : (
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-hover">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent">
                 <Bars playing={!pb.paused} />
               </span>
             )}
@@ -217,7 +217,7 @@ export function MusicDock() {
                 <span className="truncate text-[13.5px] font-semibold leading-tight">{current.title}</span>
                 {!pb.paused && <Bars className="hidden md:flex" />}
               </div>
-              <div className="num truncate text-[11.5px] leading-tight text-muted">
+              <div className="num truncate text-[11.5px] leading-tight text-muted-foreground">
                 {KIND_LABEL[current.kind]}
                 {pb.duration ? ` · ${fmtTime(pb.position)} / ${fmtTime(pb.duration)}` : ""}
               </div>
@@ -227,7 +227,7 @@ export function MusicDock() {
                 aria-label={pb.paused ? "Play" : "Pause"}
                 disabled={!ctrl.current}
                 onClick={() => ctrl.current?.togglePlay()}
-                className="press inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-bg disabled:opacity-40"
+                className="press inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground text-background disabled:opacity-40"
               >
                 {pb.paused ? <Play size={16} fill="currentColor" className="ml-[2px]" /> : <Pause size={16} fill="currentColor" />}
               </button>
@@ -235,14 +235,14 @@ export function MusicDock() {
             <button
               aria-label={expanded ? "Collapse player" : "Expand player"}
               aria-expanded={expanded}
-              className="press inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-hover hover:text-ink"
+              className="press inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
               onClick={() => setFolded(!folded)}
             >
               <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: sec(0.34), ease: EASE }} className="inline-flex">
                 <ChevronUp size={18} />
               </motion.span>
             </button>
-            <button aria-label="Close player" className="press inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-hover hover:text-ink" onClick={stop}>
+            <button aria-label="Close player" className="press inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground" onClick={stop}>
               <X size={17} />
             </button>
           </div>
@@ -284,7 +284,7 @@ export function Bars({ playing = true, className }: { playing?: boolean; classNa
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className={cx("w-[3px] rounded-full bg-accent", playing ? "music-bar" : "h-[5px]")}
+          className={cx("w-[3px] rounded-full bg-info", playing ? "music-bar" : "h-[5px]")}
           style={{ animationDelay: `${sec(i * 0.18)}s` }}
         />
       ))}

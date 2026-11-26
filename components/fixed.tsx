@@ -33,20 +33,20 @@ export function FixedCard({ month, className }: { month: string; className?: str
         </button>
       }
     >
-      {items.length === 0 && <p className="text-[13.5px] text-muted">Subscriptions and bills you pay every month. Add one and it counts in every month from then on.</p>}
+      {items.length === 0 && <p className="text-[13.5px] text-muted-foreground">Subscriptions and bills you pay every month. Add one and it counts in every month from then on.</p>}
       <div>
         {items.map((f) => {
           const upcoming = !f.real && f.date > t;
           return (
-            <div key={f.key} className="border-b border-line py-px">
-              <button onClick={() => setOpen(f)} className="row flex w-full items-center gap-2.5 py-[7px] text-left text-[13.5px] hover:bg-hover">
+            <div key={f.key} className="border-b border-border py-px">
+              <button onClick={() => setOpen(f)} className="row flex w-full items-center gap-2.5 py-[7px] text-left text-[13.5px] hover:bg-accent">
                 <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: CAT_COLORS[f.category] ?? CAT_COLORS.Other }} />
                 <span className="min-w-0 flex-1 truncate">
                   {f.title}{" "}
-                  <span className="text-muted">· {ordinal(Number(f.date.slice(8)))}
+                  <span className="text-muted-foreground">· {ordinal(Number(f.date.slice(8)))}
                   </span>
                 </span>
-                <span className={cx("num", upcoming && "text-ink-2")}>{vnd(f.amount)}</span>
+                <span className={cx("num", upcoming && "text-foreground/80")}>{vnd(f.amount)}</span>
               </button>
             </div>
           );
@@ -159,14 +159,14 @@ function FixedSheet({ item, month, onClose }: { item: FixedItem | "new" | null; 
                 onClick={() => setCat(c)}
                 className={cx(
                   "rounded-xl border px-2.5 py-0.5 text-[12.5px] transition-colors",
-                  cat === c ? "border-ink bg-ink text-bg" : "border-line text-ink-2 hover:bg-hover",
+                  cat === c ? "border-foreground bg-foreground text-background" : "border-border text-foreground/80 hover:bg-accent",
                 )}
               >
                 {c}
               </button>
             ))}
           </div>
-          <p className="mb-4 flex items-start gap-1.5 text-[12.5px] text-muted">
+          <p className="mb-4 flex items-start gap-1.5 text-[12.5px] text-muted-foreground">
             <Repeat size={13} className="mt-0.5 shrink-0" />
             {f ? `Changes apply from ${fmtMonth(month)} on. Earlier months keep what they were.` : `Counted in Went out every month from ${fmtMonth(month)}.`}
           </p>
@@ -175,7 +175,7 @@ function FixedSheet({ item, month, onClose }: { item: FixedItem | "new" | null; 
               <button type="button" className="btn btn-line text-[13px]" onClick={stop}>
                 Stop after {fmtMonth(month).split(" ")[0]}
               </button>
-              <button type="button" className="btn btn-ghost text-[13px] text-pen" onClick={removeAll}>
+              <button type="button" className="btn btn-ghost text-[13px] text-destructive-foreground" onClick={removeAll}>
                 <Trash2 size={14} /> Remove from every month
               </button>
             </div>

@@ -91,20 +91,20 @@ function Sleep({ h }: { h: Habit }) {
   const ticks = ["22:00", "00:00", "02:00", "04:00", "06:00", "08:00", "10:00"];
 
   return (
-    <Section title={<span className="flex items-center gap-2">Sleep <span className="font-normal text-muted">· aim for {tb} to {tw}</span></span>}>
+    <Section title={<span className="flex items-center gap-2">Sleep <span className="font-normal text-muted-foreground">· aim for {tb} to {tw}</span></span>}>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[minmax(0,1fr)_260px]">
         {/* Night chart: one column per night, the bar is the time asleep */}
         <div className="card p-3">
           <div className="relative h-[230px]">
             {/* target band */}
             <div
-              className="absolute inset-x-8 rounded bg-accent-soft"
+              className="absolute inset-x-8 rounded bg-info/12"
               style={{ top: `${(toAxis(tb) / AXIS_LEN) * 100}%`, height: `${((toAxis(tw) - toAxis(tb)) / AXIS_LEN) * 100}%` }}
             />
             {ticks.map((tk) => (
               <div key={tk} className="absolute left-0 right-0 flex items-center gap-2" style={{ top: `${(toAxis(tk) / AXIS_LEN) * 100}%` }}>
-                <span className="num w-8 -translate-y-1/2 text-[10px] text-muted">{tk}</span>
-                <span className="h-px flex-1 -translate-y-1/2 bg-line" />
+                <span className="num w-8 -translate-y-1/2 text-[10px] text-muted-foreground">{tk}</span>
+                <span className="h-px flex-1 -translate-y-1/2 bg-border" />
               </div>
             ))}
             <div className="absolute inset-y-0 left-8 right-0">
@@ -121,7 +121,7 @@ function Sleep({ h }: { h: Habit }) {
                         prop="height"
                         title={`${fmtDay(d)}: ${l!.slept_at} → ${l!.woke_at}`}
                         className="absolute left-1/2 w-[58%] -translate-x-1/2 rounded-full"
-                        style={{ background: good ? h.color : "var(--pen)", top: `${(top / AXIS_LEN) * 100}%` }}
+                        style={{ background: good ? h.color : "var(--destructive)", top: `${(top / AXIS_LEN) * 100}%` }}
                         to={`${(Math.max(8, bottom - top) / AXIS_LEN) * 100}%`}
                         delay={i * 0.05}
                       />
@@ -133,7 +133,7 @@ function Sleep({ h }: { h: Habit }) {
           </div>
           <div className="ml-8 grid" style={{ gridTemplateColumns: "repeat(14, 1fr)" }}>
             {nights.map((d) => (
-              <span key={d} className={cx("text-center text-[10px]", d === t ? "font-semibold text-ink" : "text-muted")}>
+              <span key={d} className={cx("text-center text-[10px]", d === t ? "font-semibold text-foreground" : "text-muted-foreground")}>
                 {WD_SHORT[parseDate(d).getDay()][0]}
                 <br />
                 {parseDate(d).getDate()}
@@ -160,8 +160,8 @@ function Sleep({ h }: { h: Habit }) {
             </div>
             {lastNight ? (
               <div className="flex items-center justify-between text-[13px]">
-                <span className="text-ink-2">{hm(duration(lastNight.slept_at!, lastNight.woke_at!))} asleep</span>
-                <button className="text-muted hover:text-pen" onClick={() => remove("habit_logs", lastNight.id)}>
+                <span className="text-foreground/80">{hm(duration(lastNight.slept_at!, lastNight.woke_at!))} asleep</span>
+                <button className="text-muted-foreground hover:text-destructive-foreground" onClick={() => remove("habit_logs", lastNight.id)}>
                   Remove
                 </button>
               </div>
@@ -175,7 +175,7 @@ function Sleep({ h }: { h: Habit }) {
             )}
           </div>
           <details className="mt-3 text-[13px]">
-            <summary className="cursor-pointer text-muted">Change target</summary>
+            <summary className="cursor-pointer text-muted-foreground">Change target</summary>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <Field label="Bedtime">
                 <input type="time" className="field num" value={tb} onChange={(e) => update("habits", h.id, { target_bedtime: e.target.value })} />
@@ -184,7 +184,7 @@ function Sleep({ h }: { h: Habit }) {
                 <input type="time" className="field num" value={tw} onChange={(e) => update("habits", h.id, { target_wake: e.target.value })} />
               </Field>
             </div>
-            <p className="text-[12px] text-muted">
+            <p className="text-[12px] text-muted-foreground">
               That is {hm(duration(tb, tw))} in bed. You get a wind-down reminder 30 minutes before {tb} ({fromMinutes(minutes(tb) - 30)}).
             </p>
           </details>
@@ -196,9 +196,9 @@ function Sleep({ h }: { h: Habit }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div data-reveal="pop" className="rounded-xl bg-hover px-2 py-2">
+    <div data-reveal="pop" className="rounded-xl bg-accent px-2 py-2">
       <div className="num text-[16px] font-semibold">{value}</div>
-      <div className="text-[11px] text-muted">{label}</div>
+      <div className="text-[11px] text-muted-foreground">{label}</div>
     </div>
   );
 }
@@ -219,7 +219,7 @@ function WeekGrid({ h, logs, weeks = 12 }: { h: Habit; logs: HabitLog[]; weeks?:
                 key={d}
                 title={`${fmtDay(day, { weekday: true })}${hit.length ? ` · ${hit.map((l) => l.activity ?? "done").join(", ")}` : ""}`}
                 className={cx("h-[14px] w-[14px] rounded-[3px]", day > t && "opacity-30")}
-                style={{ background: hit.length ? `color-mix(in oklab, ${h.color} ${Math.min(100, 45 + mins)}%, var(--surface))` : "var(--hover)" }}
+                style={{ background: hit.length ? `color-mix(in oklab, ${h.color} ${Math.min(100, 45 + mins)}%, var(--card))` : "var(--hover)" }}
               />
             );
           })}
@@ -254,15 +254,15 @@ function Exercise({ h }: { h: Habit }) {
   const [mins, setMins] = useState("30");
   const [date, setDate] = useState(today());
   return (
-    <Section title={<span>Exercise <span className="font-normal text-muted">· {target} days a week</span></span>}>
+    <Section title={<span>Exercise <span className="font-normal text-muted-foreground">· {target} days a week</span></span>}>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[minmax(0,1fr)_260px]">
         <div>
           <div className="mb-3 flex items-end gap-3">
             <div className="display text-[44px] font-semibold leading-none">
               <CountUp value={thisWeek} />
-              <span className="text-[22px] text-muted">/{target}</span>
+              <span className="text-[22px] text-muted-foreground">/{target}</span>
             </div>
-            <div className="pb-1 text-[13px] text-ink-2">
+            <div className="pb-1 text-[13px] text-foreground/80">
               this week
               <br />
               {streak > 0 ? `${streak}-week streak` : "Hit the target to start a streak"}
@@ -281,11 +281,11 @@ function Exercise({ h }: { h: Habit }) {
           <WeekGrid h={h} logs={logs} />
           <ul className="mt-4">
             {logs.slice(0, 6).map((l) => (
-              <li key={l.id} className="group flex items-center gap-3 border-b border-line py-1.5 text-[13.5px]">
-                <span className="w-24 text-muted">{fmtDay(l.date, { weekday: true })}</span>
+              <li key={l.id} className="group flex items-center gap-3 border-b border-border py-1.5 text-[13.5px]">
+                <span className="w-24 text-muted-foreground">{fmtDay(l.date, { weekday: true })}</span>
                 <span className="flex-1">{l.activity}</span>
-                <span className="num text-ink-2">{l.minutes}m</span>
-                <button aria-label="Delete" className="opacity-0 group-hover:opacity-100 text-muted hover:text-pen" onClick={() => remove("habit_logs", l.id)}>
+                <span className="num text-foreground/80">{l.minutes}m</span>
+                <button aria-label="Delete" className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive-foreground" onClick={() => remove("habit_logs", l.id)}>
                   <Trash2 size={14} />
                 </button>
               </li>
@@ -306,7 +306,7 @@ function Exercise({ h }: { h: Habit }) {
                 type="button"
                 key={a}
                 onClick={() => setActivity(a)}
-                className={cx("rounded-xl border px-2.5 py-0.5 text-[12.5px]", activity === a ? "border-ink bg-ink text-bg" : "border-line text-ink-2 hover:bg-hover")}
+                className={cx("rounded-xl border px-2.5 py-0.5 text-[12.5px]", activity === a ? "border-foreground bg-foreground text-background" : "border-border text-foreground/80 hover:bg-accent")}
               >
                 {a}
               </button>
@@ -321,7 +321,7 @@ function Exercise({ h }: { h: Habit }) {
             </Field>
           </div>
           <button className="btn btn-primary w-full justify-center">Log {activity.toLowerCase()}</button>
-          <label className="mt-3 flex items-center justify-between text-[12.5px] text-muted">
+          <label className="mt-3 flex items-center justify-between text-[12.5px] text-muted-foreground">
             Weekly target
             <input type="number" min={1} max={7} className="field num !w-16 !py-0.5" value={target} onChange={(e) => update("habits", h.id, { weekly_target: +e.target.value })} />
           </label>
@@ -341,7 +341,7 @@ function Custom({ h }: { h: Habit }) {
     <Section
       title={h.name}
       action={
-        <button className="text-[12px] text-muted hover:text-pen" onClick={() => remove("habits", h.id)}>
+        <button className="text-[12px] text-muted-foreground hover:text-destructive-foreground" onClick={() => remove("habits", h.id)}>
           Remove habit
         </button>
       }
@@ -360,7 +360,7 @@ function Custom({ h }: { h: Habit }) {
           />
           Done today
         </label>
-        <span className="text-[13px] text-ink-2">
+        <span className="text-[13px] text-foreground/80">
           <CountUp value={thisWeek} />/{h.weekly_target ?? 7} this week{streak > 0 && <> · <CountUp value={streak} />-week streak</>}
         </span>
         <WeekGrid h={h} logs={logs} weeks={8} />

@@ -33,7 +33,7 @@ export function FlairChip({ name, color, className }: { name: string; color: str
   return (
     <span
       className={cx("inline-flex max-w-full items-center gap-1.5 rounded-full px-2 py-px text-[11.5px] font-medium leading-[18px]", className)}
-      style={{ background: `color-mix(in oklab, ${color} 16%, transparent)`, color: `color-mix(in oklab, ${color} 62%, var(--ink))` }}
+      style={{ background: `color-mix(in oklab, ${color} 16%, transparent)`, color: `color-mix(in oklab, ${color} 62%, var(--foreground))` }}
     >
       <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: color }} />
       <span className="truncate">{name}</span>
@@ -140,31 +140,31 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
             exit={{ opacity: 0, y: 28, scale: 0.98, filter: "blur(6px)" }}
             transition={{ duration: sec(0.34), ease: EASE }}
             style={{ transformOrigin: "50% 100%" }}
-            className="relative flex h-[92dvh] w-full overflow-hidden rounded-t-xl glass-thick md:h-full md:max-h-[760px] md:max-w-[1080px] md:rounded-xl"
+            className="relative flex h-[92dvh] w-full overflow-hidden rounded-t-xl border bg-popover text-popover-foreground shadow-lg/5 md:h-full md:max-h-[760px] md:max-w-[1080px] md:rounded-xl"
           >
             {/* Side list. Concentric corners: 12px window, 6px padding, so rows are 6px. */}
             <aside
               className={cx(
-                "flex min-w-0 flex-col md:w-[300px] md:shrink-0 md:border-r md:border-line",
+                "flex min-w-0 flex-col md:w-[300px] md:shrink-0 md:border-r md:border-border",
                 phoneView === "list" ? "flex w-full" : "hidden md:flex",
               )}
             >
               <div className="flex items-center justify-between gap-2 px-4 pt-4 pb-2">
                 <h3 className="display flex items-center gap-2 text-[20px] font-semibold">
-                  <NotebookPen size={19} strokeWidth={1.9} className="text-accent" /> My Notebook
+                  <NotebookPen size={19} strokeWidth={1.9} className="text-info-foreground" /> My Notebook
                 </h3>
                 <div className="flex items-center gap-1">
                   <button aria-label="New note" title="New note" onClick={add} className="press btn-primary inline-flex h-8 w-8 items-center justify-center rounded-full p-0">
                     <Plus size={17} strokeWidth={2.2} />
                   </button>
-                  <button aria-label="Close" onClick={close} className="press glass-pill inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-2 hover:text-ink md:hidden">
+                  <button aria-label="Close" onClick={close} className="press bg-accent inline-flex h-8 w-8 items-center justify-center rounded-full text-foreground/80 hover:text-foreground md:hidden">
                     <X size={17} />
                   </button>
                 </div>
               </div>
               <div className="px-3 pb-2">
                 <label className="relative block">
-                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search notes" className="field text-[13.5px]" style={{ paddingLeft: 32 }} />
                 </label>
                 {flairs.length > 0 && (
@@ -176,7 +176,7 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
                           key={f.name}
                           onClick={() => setFilter(on ? null : fold(f.name))}
                           aria-pressed={on}
-                          className={cx("press rounded-full transition-opacity", filter && !on && "opacity-45 hover:opacity-80", on && "ring-1 ring-[var(--line-strong)]")}
+                          className={cx("press rounded-full transition-opacity", filter && !on && "opacity-45 hover:opacity-80", on && "ring-1 ring-[var(--input)]")}
                         >
                           <FlairChip name={f.name} color={f.color} />
                         </button>
@@ -187,9 +187,9 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-1.5 pb-[max(var(--sab),8px)]">
                 {nb.mode === "loading" ? (
-                  <p className="px-3 py-6 text-[13px] text-muted">Loading notes…</p>
+                  <p className="px-3 py-6 text-[13px] text-muted-foreground">Loading notes…</p>
                 ) : shown.length === 0 ? (
-                  <div className="px-3 py-8 text-center text-[13px] text-muted">
+                  <div className="px-3 py-8 text-center text-[13px] text-muted-foreground">
                     {nb.notes.length ? "No notes match." : "No notes yet."}
                     {!nb.notes.length && (
                       <button onClick={add} className="press btn btn-line mx-auto mt-3 flex items-center gap-1.5">
@@ -207,13 +207,13 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
                           <button
                             onClick={() => pick(n.id)}
                             aria-current={on ? "true" : undefined}
-                            className={cx("press relative w-full rounded-[6px] px-3 py-2 text-left", on ? "glass-pill" : "hover:bg-hover")}
+                            className={cx("press relative w-full rounded-[6px] px-3 py-2 text-left", on ? "bg-accent" : "hover:bg-accent")}
                           >
                             <div className="flex items-baseline gap-2">
-                              <span className={cx("min-w-0 flex-1 truncate text-[14px]", n.title.trim() ? "font-medium text-ink" : "text-muted")}>{n.title.trim() || "Untitled"}</span>
-                              <span className="num shrink-0 text-[11.5px] text-muted">{when(n.updated_at)}</span>
+                              <span className={cx("min-w-0 flex-1 truncate text-[14px]", n.title.trim() ? "font-medium text-foreground" : "text-muted-foreground")}>{n.title.trim() || "Untitled"}</span>
+                              <span className="num shrink-0 text-[11.5px] text-muted-foreground">{when(n.updated_at)}</span>
                             </div>
-                            {preview && <p className="mt-0.5 truncate text-[12.5px] text-ink-2">{preview}</p>}
+                            {preview && <p className="mt-0.5 truncate text-[12.5px] text-foreground/80">{preview}</p>}
                             {n.flair && n.flair_color && <FlairChip name={n.flair} color={n.flair_color} className="mt-1.5" />}
                           </button>
                         </li>
@@ -223,14 +223,14 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
                 )}
               </div>
               {ONLINE && nb.mode === "device" && (
-                <p className="border-t border-line px-4 py-2 text-[11.5px] leading-snug text-muted">Saved on this device until the notebook is set up online.</p>
+                <p className="border-t border-border px-4 py-2 text-[11.5px] leading-snug text-muted-foreground">Saved on this device until the notebook is set up online.</p>
               )}
             </aside>
 
             {/* Editor */}
             <section className={cx("relative min-w-0 flex-1 flex-col", phoneView === "note" ? "flex" : "hidden md:flex")}>
               <div className="flex items-center gap-2 px-4 pt-4 pb-2 md:px-6">
-                <button aria-label="All notes" onClick={() => { leave(selected); setPhoneView("list"); }} className="press glass-pill inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-2 hover:text-ink md:hidden">
+                <button aria-label="All notes" onClick={() => { leave(selected); setPhoneView("list"); }} className="press bg-accent inline-flex h-8 w-8 items-center justify-center rounded-full text-foreground/80 hover:text-foreground md:hidden">
                   <ArrowLeft size={17} />
                 </button>
                 {note && (
@@ -239,7 +239,7 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
                       {note.flair && note.flair_color ? (
                         <FlairChip name={note.flair} color={note.flair_color} className="py-[3px] text-[12.5px]" />
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-line-strong px-2.5 py-[2px] text-[12.5px] text-muted hover:text-ink">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-input px-2.5 py-[2px] text-[12.5px] text-muted-foreground hover:text-foreground">
                           <Tag size={12} /> Add flair
                         </span>
                       )}
@@ -261,16 +261,16 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
                 )}
                 <div className="flex-1" />
                 {note && (
-                  <span className="num hidden text-[11.5px] text-muted sm:inline" title={`Created ${longWhen(note.created_at)}`}>
+                  <span className="num hidden text-[11.5px] text-muted-foreground sm:inline" title={`Created ${longWhen(note.created_at)}`}>
                     {nb.saving ? "Saving…" : `Edited ${longWhen(note.updated_at)}`}
                   </span>
                 )}
                 {note && (
-                  <button aria-label="Delete note" title="Delete note" onClick={() => remove(note)} className="press inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-2 hover:bg-hover hover:text-pen">
+                  <button aria-label="Delete note" title="Delete note" onClick={() => remove(note)} className="press inline-flex h-8 w-8 items-center justify-center rounded-full text-foreground/80 hover:bg-accent hover:text-destructive-foreground">
                     <Trash2 size={16} />
                   </button>
                 )}
-                <button aria-label="Close" onClick={close} className="press glass-pill hidden h-8 w-8 items-center justify-center rounded-full text-ink-2 hover:text-ink md:inline-flex">
+                <button aria-label="Close" onClick={close} className="press bg-accent hidden h-8 w-8 items-center justify-center rounded-full text-foreground/80 hover:text-foreground md:inline-flex">
                   <X size={17} />
                 </button>
               </div>
@@ -288,7 +288,7 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
                     }}
                     placeholder="Untitled"
                     aria-label="Note title"
-                    className="display w-full bg-transparent py-1 text-[26px] font-semibold leading-tight text-ink outline-none placeholder:text-muted/70"
+                    className="display w-full bg-transparent py-1 text-[26px] font-semibold leading-tight text-foreground outline-none placeholder:text-muted-foreground-foreground/70"
                   />
                   <textarea
                     ref={bodyRef}
@@ -296,11 +296,11 @@ export function Notebook({ open, onClose }: { open: boolean; onClose: () => void
                     onChange={(e) => editNote(note.id, { body: e.target.value })}
                     placeholder="Start writing…"
                     aria-label="Note"
-                    className="mt-2 min-h-0 w-full flex-1 resize-none overflow-y-auto overscroll-contain bg-transparent text-[15px] leading-relaxed text-ink outline-none placeholder:text-muted/70"
+                    className="mt-2 min-h-0 w-full flex-1 resize-none overflow-y-auto overscroll-contain bg-transparent text-[15px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground-foreground/70"
                   />
                 </div>
               ) : (
-                <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-[13.5px] text-muted">
+                <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-[13.5px] text-muted-foreground">
                   <NotebookPen size={28} strokeWidth={1.5} />
                   {nb.mode === "loading" ? "Loading…" : "Pick a note on the left, or start a new one."}
                   {nb.mode !== "loading" && (
@@ -345,7 +345,7 @@ function FlairMenu({ flairs, current, onPick, onClose }: { flairs: Flair[]; curr
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: sec(0.22), ease: EASE }}
-      className="glass-thick absolute left-0 top-[calc(100%+8px)] z-20 w-[268px] rounded-xl p-3"
+      className="border bg-popover text-popover-foreground shadow-lg/5 absolute left-0 top-[calc(100%+8px)] z-20 w-[268px] rounded-xl p-3"
     >
       {flairs.length > 0 && (
         <>
@@ -354,7 +354,7 @@ function FlairMenu({ flairs, current, onPick, onClose }: { flairs: Flair[]; curr
             {flairs.map((f) => (
               <button key={f.name} onClick={() => onPick(f)} className="press inline-flex items-center gap-1 rounded-full">
                 <FlairChip name={f.name} color={f.color} />
-                {current && fold(current) === fold(f.name) && <Check size={13} className="text-accent" />}
+                {current && fold(current) === fold(f.name) && <Check size={13} className="text-info-foreground" />}
               </button>
             ))}
           </div>
@@ -378,14 +378,14 @@ function FlairMenu({ flairs, current, onPick, onClose }: { flairs: Flair[]; curr
             aria-label={c.name}
             aria-pressed={c.hex === color}
             onClick={() => setColor(c.hex)}
-            className={cx("h-5 w-5 rounded-full transition-transform hover:scale-110", c.hex === color && "ring-2 ring-ink ring-offset-2 ring-offset-[var(--paper)]")}
+            className={cx("h-5 w-5 rounded-full transition-transform hover:scale-110", c.hex === color && "ring-2 ring-ring ring-offset-2 ring-offset-[var(--paper)]")}
             style={{ background: c.hex }}
           />
         ))}
       </div>
       <div className="mt-3 flex items-center justify-between gap-2">
         {current ? (
-          <button onClick={() => onPick(null)} className="press text-[12.5px] text-muted hover:text-pen">
+          <button onClick={() => onPick(null)} className="press text-[12.5px] text-muted-foreground hover:text-destructive-foreground">
             Remove flair
           </button>
         ) : (

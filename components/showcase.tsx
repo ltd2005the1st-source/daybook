@@ -25,7 +25,7 @@ export function Showcase() {
   return (
     <div className="mb-3">
       <span className="label mb-1 block">Showcase account</span>
-      <p className="mb-2 text-[13px] text-muted">
+      <p className="mb-2 text-[13px] text-muted-foreground">
         Anyone can sign in as <b>tester</b> with PIN <b>0000</b> to see a copy of your dashboard. Changes there never touch your data.
       </p>
       <button type="button" className="btn btn-line" disabled={busy} onClick={refresh}>

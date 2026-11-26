@@ -14,7 +14,7 @@ export default function ReceiptView({ params }: { params: Promise<{ id: string }
   if (!r) {
     return (
       <Page>
-        <p className="text-muted">This receipt no longer exists.</p>
+        <p className="text-muted-foreground">This receipt no longer exists.</p>
       </Page>
     );
   }
@@ -32,7 +32,7 @@ export default function ReceiptView({ params }: { params: Promise<{ id: string }
   return (
     <Page>
       <div className="no-print mb-5 flex flex-wrap items-center justify-between gap-2">
-        <Link href="/teaching/receipts" className="inline-flex items-center gap-1 text-[13px] text-muted hover:text-ink">
+        <Link href="/teaching/receipts" className="inline-flex items-center gap-1 text-[13px] text-muted-foreground hover:text-foreground">
           <ArrowLeft size={14} /> Receipts
         </Link>
         <div className="flex gap-2">
@@ -58,8 +58,8 @@ export default function ReceiptView({ params }: { params: Promise<{ id: string }
       </div>
 
       {/* The slip */}
-      <article className="mx-auto max-w-[520px] bg-paper text-ink shadow-pop rise relative" style={{ borderRadius: 4 }}>
-        <div className="h-2 rounded-t" style={{ background: s?.color ?? "var(--ink)" }} />
+      <article className="mx-auto max-w-[520px] bg-card text-foreground shadow-pop rise relative" style={{ borderRadius: 4 }}>
+        <div className="h-2 rounded-t" style={{ background: s?.color ?? "var(--foreground)" }} />
         <div className="px-8 pt-7 pb-6">
           <div className="flex items-start justify-between">
             <div>
@@ -67,12 +67,12 @@ export default function ReceiptView({ params }: { params: Promise<{ id: string }
               <h1 className="display mt-1 text-[30px] font-semibold leading-none">{fmtMonth(r.month)}</h1>
             </div>
             <div className="text-right">
-              <div className="num text-[12px] text-muted">{number}</div>
+              <div className="num text-[12px] text-muted-foreground">{number}</div>
               <div
                 className="mt-2 inline-block -rotate-6 rounded border-2 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wider"
                 style={{
-                  borderColor: r.status === "paid" ? "var(--good)" : "var(--pen)",
-                  color: r.status === "paid" ? "var(--good)" : "var(--pen)",
+                  borderColor: r.status === "paid" ? "var(--success)" : "var(--destructive)",
+                  color: r.status === "paid" ? "var(--success)" : "var(--destructive)",
                 }}
               >
                 {r.status === "paid" ? "Paid" : "Due"}
@@ -80,10 +80,10 @@ export default function ReceiptView({ params }: { params: Promise<{ id: string }
             </div>
           </div>
 
-          <div className="mt-6 border-t border-line pt-4">
+          <div className="mt-6 border-t border-border pt-4">
             <div className="label mb-1">Billed to</div>
             <div className="text-[17px] font-semibold">{s?.name}</div>
-            {s?.kind === "class" && <div className="text-[13px] text-ink-2">{s.members.join(" · ")}</div>}
+            {s?.kind === "class" && <div className="text-[13px] text-foreground/80">{s.members.join(" · ")}</div>}
           </div>
 
           <div className="mt-5 ruled" style={{ backgroundPositionY: 6 }}>
@@ -99,14 +99,14 @@ export default function ReceiptView({ params }: { params: Promise<{ id: string }
 
           <table className="mt-5 w-full text-[14px]">
             <tbody>
-              <tr className="border-b border-line">
+              <tr className="border-b border-border">
                 <td className="py-2">
                   {r.sessions} sessions × <span className="num">{vnd(r.rate)}</span>
                 </td>
                 <td className="num py-2 text-right">{vnd(r.sessions * r.rate)}</td>
               </tr>
               {r.adjustments !== 0 && (
-                <tr className="border-b border-line">
+                <tr className="border-b border-border">
                   <td className="py-2">Adjustment</td>
                   <td className="num py-2 text-right">{vnd(r.adjustments, { sign: true })}</td>
                 </tr>
@@ -117,7 +117,7 @@ export default function ReceiptView({ params }: { params: Promise<{ id: string }
               </tr>
             </tbody>
           </table>
-          {r.paid_on && <p className="mt-3 text-[12.5px] text-good">Received {fmtDay(r.paid_on, { year: true })}. Thank you!</p>}
+          {r.paid_on && <p className="mt-3 text-[12.5px] text-success-foreground">Received {fmtDay(r.paid_on, { year: true })}. Thank you!</p>}
         </div>
         {/* perforated edge */}
         <div

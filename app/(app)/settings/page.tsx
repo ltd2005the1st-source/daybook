@@ -227,7 +227,7 @@ export default function SettingsPage() {
         {online && session && (
           <Field label={`Signed in as ${(session.user.app_metadata?.username as string | undefined) ?? session.user.email}`}>
             {session.user.app_metadata?.showcase ? (
-              <p className="text-[13px] text-muted">This is the public showcase account. Its PIN stays 0000.</p>
+              <p className="text-[13px] text-muted-foreground">This is the public showcase account. Its PIN stays 0000.</p>
             ) : (
               <ChangePin />
             )}
@@ -244,27 +244,27 @@ export default function SettingsPage() {
         {inApp ? (
           appAllowed ? (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[13.5px] text-good">On. The Daybook app schedules them on this phone.</span>
+              <span className="text-[13.5px] text-success-foreground">On. The Daybook app schedules them on this phone.</span>
               <button className="btn btn-line" onClick={() => native()?.testNotification()}>
                 <Bell size={15} /> Send a test
               </button>
             </div>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[13.5px] text-pen">Notifications are off for Daybook on this phone.</span>
+              <span className="text-[13.5px] text-destructive-foreground">Notifications are off for Daybook on this phone.</span>
               <button className="btn btn-primary" onClick={() => native()?.requestNotifications()}>
                 <Bell size={15} /> Allow notifications
               </button>
             </div>
           )
         ) : !online ? (
-          <p className="text-[13.5px] text-ink-2">Phone reminders need the online version (Supabase). You are in local mode, so reminders show only inside the app.</p>
+          <p className="text-[13.5px] text-foreground/80">Phone reminders need the online version (Supabase). You are in local mode, so reminders show only inside the app.</p>
         ) : push === "unsupported" ? (
-          <p className="text-[13.5px] text-ink-2">
+          <p className="text-[13.5px] text-foreground/80">
             This browser can’t receive push reminders. On iPhone, open Daybook in Safari, tap Share → Add to Home Screen, then open it from the home screen and come back here.
           </p>
         ) : push === "denied" ? (
-          <p className="text-[13.5px] text-pen">
+          <p className="text-[13.5px] text-destructive-foreground">
             Notifications are blocked. In the Android app: phone Settings → Apps → Daybook → Notifications → allow. In a browser: the site’s settings →
             Notifications → Allow. Then close and reopen Daybook.
           </p>
@@ -272,7 +272,7 @@ export default function SettingsPage() {
           <div className="flex flex-wrap items-center gap-2">
             {push === "on" ? (
               <>
-                <span className="text-[13.5px] text-good">On for this device.</span>
+                <span className="text-[13.5px] text-success-foreground">On for this device.</span>
                 <button className="btn btn-line" disabled={busy} onClick={sendTest}>
                   <Bell size={15} /> {busy ? "Sending…" : "Send a test"}
                 </button>
@@ -288,28 +288,28 @@ export default function SettingsPage() {
           </div>
         )}
         {pushNote && (
-          <p role="status" className={cx("mt-2 rounded-xl px-2.5 py-1.5 text-[13px]", pushNote.ok ? "bg-hover text-ink-2" : "bg-pen-soft text-pen")}>
+          <p role="status" className={cx("mt-2 rounded-xl px-2.5 py-1.5 text-[13px]", pushNote.ok ? "bg-accent text-foreground/80" : "bg-destructive/10 text-destructive-foreground")}>
             {pushNote.text}
           </p>
         )}
         {!inApp && online && push !== "unsupported" && (
-          <p className="mt-2 text-[12px] text-muted">
+          <p className="mt-2 text-[12px] text-muted-foreground">
             Nothing arriving on Android? Open your phone’s Settings → Apps → Daybook → Notifications and make sure they’re allowed (in the browser, it’s the
             site’s notification setting).
           </p>
         )}
         <div className="mt-4">
           <div className="label mb-1.5">Today’s reminders</div>
-          {upcoming.length === 0 && <p className="text-[13.5px] text-muted">None today.</p>}
+          {upcoming.length === 0 && <p className="text-[13.5px] text-muted-foreground">None today.</p>}
           <ul>
             {upcoming.map((r) => (
-              <li key={r.key} className="flex gap-3 border-b border-line py-1.5 text-[13.5px]">
-                <span className="num w-12 text-muted">{fmtAt(r.at)}</span>
+              <li key={r.key} className="flex gap-3 border-b border-border py-1.5 text-[13.5px]">
+                <span className="num w-12 text-muted-foreground">{fmtAt(r.at)}</span>
                 <span>{r.title}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[12px] text-muted">Homework reminders follow each student’s check time minus their “remind me” minutes. Change them on the Teaching page.</p>
+          <p className="mt-2 text-[12px] text-muted-foreground">Homework reminders follow each student’s check time minus their “remind me” minutes. Change them on the Teaching page.</p>
         </div>
       </Section>
 
@@ -351,7 +351,7 @@ export default function SettingsPage() {
             />
           </label>
           {!online && (
-            <ConfirmButton className="btn btn-ghost text-pen" confirmLabel="Replace all data?" onConfirm={resetLocal}>
+            <ConfirmButton className="btn btn-ghost text-destructive-foreground" confirmLabel="Replace all data?" onConfirm={resetLocal}>
               Reset to starter data
             </ConfirmButton>
           )}
@@ -361,17 +361,17 @@ export default function SettingsPage() {
             </button>
           )}
         </div>
-        <p className="mt-2 text-[12px] text-muted">
+        <p className="mt-2 text-[12px] text-muted-foreground">
           The download has everything: calendar, classes, students, tasks, money, food, habits, music, your notebook and your preferences. Restoring only adds back what’s missing; it never
           changes or deletes anything you have now.
         </p>
-        <p className="mt-1 text-[12px] text-muted">
+        <p className="mt-1 text-[12px] text-muted-foreground">
           {online ? "Synced through Supabase. Changes appear on your other devices within a second." : "Local mode: everything is saved in this browser only."}
         </p>
       </Section>
 
       <Section title="Google Calendar">
-        <p className="text-[13.5px] text-ink-2">
+        <p className="text-[13.5px] text-foreground/80">
           Daybook keeps its own calendar, built from your class schedule and routines. Two-way Google Calendar sync is planned for a later version, once you decide whether to keep Google Calendar at all.
         </p>
       </Section>

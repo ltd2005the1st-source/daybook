@@ -327,10 +327,10 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
   const openAll = useOpenAll(list);
   return (
     <div className="group/apps mt-4">
-      <div className="flex items-center gap-1 px-2.5 pb-1 text-[11.5px] font-medium text-muted">
+      <div className="flex items-center gap-1 px-2.5 pb-1 text-[11.5px] font-medium text-muted-foreground">
         <span className="flex-1">Apps</span>
         {openAll && (
-          <button onClick={openAll} title="Open every app in its own tab" className="press rounded-xl px-1.5 py-0.5 hover:bg-hover hover:text-ink">
+          <button onClick={openAll} title="Open every app in its own tab" className="press rounded-xl px-1.5 py-0.5 hover:bg-accent hover:text-foreground">
             Open all
           </button>
         )}
@@ -338,7 +338,7 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
           onClick={onEdit}
           aria-label="Edit apps"
           title="Edit apps"
-          className="press -mr-1.5 inline-flex h-[22px] w-[22px] items-center justify-center rounded-xl opacity-60 hover:bg-hover hover:text-ink hover:opacity-100 group-hover/apps:opacity-100 focus-visible:opacity-100"
+          className="press -mr-1.5 inline-flex h-[22px] w-[22px] items-center justify-center rounded-xl opacity-60 hover:bg-accent hover:text-foreground hover:opacity-100 group-hover/apps:opacity-100 focus-visible:opacity-100"
         >
           <Pencil size={12} strokeWidth={2} />
         </button>
@@ -352,7 +352,7 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
               href={a.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-ink-2 hover:bg-hover hover:text-ink"
+              className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-foreground/80 hover:bg-accent hover:text-foreground"
             >
               <Ico size={16} />
               <span className="truncate">{a.label}</span>
@@ -360,7 +360,7 @@ export function AppLinks({ onEdit }: { onEdit: () => void }) {
           );
         })}
         {list.length === 0 && (
-          <button onClick={onEdit} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-muted hover:bg-hover hover:text-ink">
+          <button onClick={onEdit} className="press nav-item flex items-center gap-2.5 rounded-[6px] px-2.5 py-[6px] text-[13.5px] text-muted-foreground hover:bg-accent hover:text-foreground">
             <Plus size={16} strokeWidth={1.8} />
             <span>Add an app</span>
           </button>
@@ -387,9 +387,9 @@ export function AppGrid({ onPick, onEdit }: { onPick?: () => void; onEdit: () =>
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={onPick}
-                className="press flex min-w-0 flex-col items-center gap-1.5 text-[12px] text-ink-2"
+                className="press flex min-w-0 flex-col items-center gap-1.5 text-[12px] text-foreground/80"
               >
-                <span className="inline-flex h-14 w-14 items-center justify-center rounded-xl border border-line bg-sunken text-ink">
+                <span className="inline-flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-muted text-foreground">
                   <Ico size={24} strokeWidth={1.7} />
                 </span>
                 <span className="max-w-full truncate">{a.label}</span>
@@ -398,7 +398,7 @@ export function AppGrid({ onPick, onEdit }: { onPick?: () => void; onEdit: () =>
           })}
         </div>
       ) : (
-        <p className="pt-2 pb-1 text-[13.5px] text-muted">No apps yet. Tap Edit to add the ones you use.</p>
+        <p className="pt-2 pb-1 text-[13.5px] text-muted-foreground">No apps yet. Tap Edit to add the ones you use.</p>
       )}
       <div className="mt-4 flex gap-2">
         {openAll && (
@@ -460,7 +460,7 @@ export function AppsEditor({ open, onClose }: { open: boolean; onClose: () => vo
 
   return (
     <Sheet open={open} onClose={finish} title="Edit apps" width={520}>
-      <p className="mb-3 text-[13px] text-muted">Drag the handle to reorder. Changes save when you close this and show up on your other devices too.</p>
+      <p className="mb-3 text-[13px] text-muted-foreground">Drag the handle to reorder. Changes save when you close this and show up on your other devices too.</p>
       <Reorder.Group axis="y" as="div" values={draft} onReorder={setDraft} className="flex flex-col gap-1.5">
         {draft.map((a) => (
           <EditRow
@@ -472,7 +472,7 @@ export function AppsEditor({ open, onClose }: { open: boolean; onClose: () => vo
           />
         ))}
       </Reorder.Group>
-      {draft.length === 0 && <p className="rounded-xl border border-dashed border-line-strong px-4 py-5 text-center text-[13.5px] text-muted">No apps. Add one below.</p>}
+      {draft.length === 0 && <p className="rounded-xl border border-dashed border-input px-4 py-5 text-center text-[13.5px] text-muted-foreground">No apps. Add one below.</p>}
       <button
         onClick={() => {
           const id = uid();
@@ -521,7 +521,7 @@ function EditRow({
       dragControls={controls}
       transition={{ ease: [0.65, 0, 0.35, 1] }}
       whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px -10px rgba(15,15,10,0.35)" }}
-      className="relative flex items-center gap-2 rounded-xl border border-line bg-surface py-2 pl-1 pr-1.5"
+      className="relative flex items-center gap-2 rounded-xl border border-border bg-card py-2 pl-1 pr-1.5"
     >
       <button
         type="button"
@@ -530,11 +530,11 @@ function EditRow({
           e.preventDefault();
           controls.start(e);
         }}
-        className="inline-flex h-9 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-xl text-muted hover:text-ink active:cursor-grabbing"
+        className="inline-flex h-9 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-xl text-muted-foreground hover:text-foreground active:cursor-grabbing"
       >
         <GripVertical size={16} strokeWidth={1.8} />
       </button>
-      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-sunken text-ink">
+      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-muted text-foreground">
         <Ico size={18} />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -557,7 +557,7 @@ function EditRow({
           autoCorrect="off"
           spellCheck={false}
           className="field text-[12.5px]"
-          style={{ padding: "4px 8px", color: bad ? "var(--pen)" : "var(--ink-2)", borderColor: bad ? "var(--pen)" : undefined }}
+          style={{ padding: "4px 8px", color: bad ? "var(--destructive)" : "var(--muted-foreground)", borderColor: bad ? "var(--destructive)" : undefined }}
         />
       </div>
       <button
@@ -565,7 +565,7 @@ function EditRow({
         onClick={onRemove}
         aria-label={`Remove ${app.label || "app"}`}
         title="Remove"
-        className="press inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted hover:bg-hover hover:text-ink"
+        className="press inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
       >
         <Trash2 size={15} strokeWidth={1.8} />
       </button>
